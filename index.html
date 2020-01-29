@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>    	
+    <meta name='viewport' content='initial-scale=1, maximum-scale=1'>
+    <title>cg-viz-light</title>
+    <link rel='shortcut icon' type='image/x-icon' href='/favicon.ico' />
+    <script type='text/javascript' src='vendors/three.min.js'></script>
+    <script type='text/javascript' src='vendors/OrbitControls.js'></script>     
+    <script type='text/javascript' src='vendors/MTLLoader.js'></script>     
+    <script type='text/javascript' src='vendors/OBJLoader.js'></script>     
+    <script type='text/javascript' src='vendors/stats.min.js'></script>      
+    <script type='text/javascript' src='vendors/chroma.min.js'></script>
+    <script type='text/javascript' src='vendors/dat.gui.min.js'></script>
+    <script type='text/javascript' src='libs/threejsWrapper.js'></script>    
+    <script type='text/javascript' src='libs/heatmap.js'></script>  
+    <script type='text/javascript' src='libs/colorbar.js'></script>  
+    <script type='text/javascript' src='libs/MathUtils.js'></script>
+    <style>
+		body {		
+			padding:0;
+			margin:0;
+            overflow: hidden;
+		}
+        #menu {
+            position: absolute;
+        }
+    </style>     
+</head>
+<body>
+   <div id="menu">
+       <input type="file" id="filepicker" name="fileList" webkitdirectory multiple />
+       <ul id="listing"></ul>
+   </div>
+   <canvas></canvas>
+   <script type='text/javascript' src='cgviz.js'></script>        
+</body>
+</html>
