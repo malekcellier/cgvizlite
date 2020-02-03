@@ -61,7 +61,7 @@ class CgVizMenu {
         menuContainer.appendChild(menu);
 
         // 2.2) the svg widget to control the show/hide cycle
-        // this is put inside a div
+        // this is put inside a div and placed on the right hand side of the menu-main
         let control = document.createElement('div');
         control.id = 'menu-control'
         // the widget is a simple > that get drawn using svg
@@ -162,7 +162,7 @@ class CgVizMenu {
        
         menuHeadContainer.appendChild(menuHeadTabs);
 
-        document.getElementById('menu').appendChild(menuHeadContainer);
+        document.getElementById('menu-main').appendChild(menuHeadContainer);
     }
 
     createLogo() {
@@ -205,7 +205,7 @@ class CgVizMenu {
          */
         let menuBody = document.createElement('div');
         menuBody.id = 'menu-body';
-        document.getElementById('menu').appendChild(menuBody);
+        document.getElementById('menu-main').appendChild(menuBody);
 
         /**
          * Scenarios menu
@@ -257,8 +257,8 @@ class CgVizMenu {
 
     createTopRightMenu() {
         /**
-         * Used for displaying controls:
-         *      - info
+         * Used for displaying direct access controls:
+         *      - info about the scene
          *      - legend
          */
         let m = document.createElement('div');
@@ -388,6 +388,13 @@ class CgVizMenu {
     }
 
     createScenarioDiv() {
+        /**
+         * Each scenario has:
+         *      - a title
+         *      - json data: pov, trace, kpis, etc..
+         * 
+         * This data is used to populate a list of widget on the menu-body
+         */
         let div = document.createElement('div');
         div.classList.add('div-scenario');
         div.innerText = 'Scenario1';
@@ -409,7 +416,7 @@ class CgVizMenu {
          *  
          */
         document.getElementById('menu-control').addEventListener('click', _ => {
-            let m = document.getElementById('menu');
+            let m = document.getElementById('menu-main');
             m.classList.toggle('collapsed');
             m.classList.toggle('visible');
             let mct = document.getElementById('menu-container');
