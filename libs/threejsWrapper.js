@@ -3,7 +3,10 @@
  * Email: malek.cellier@gmail.com
  * Creation Date: 2020-01-23
  * Context:
- *  Threejs Wrapper class, requires three.js, OrbitControls.js
+ *  Threejs Wrapper class, requires:
+ *      three.js: that's the WebGL wrapper
+ *      OrbitControls.js: that's a convenient function that allows to rotate the scene with the mouse
+ *      chroma.js: that's a library that generates colors and colormaps
  *   allows the rapid creation of a threejs based scene
  * 
  * To use this class, I suggest to inherit from it and then add your extra methods
@@ -26,9 +29,36 @@ class ThreejsWrapper {
         this.scene = null;  // scene object required by three.js
         this.camera = null;  // camera object required by three.js
         this.renderer = null;  // renderer object required by three.js
+        this.composer = null;  // optional composer object for effects in three.js
         this.data = null;  // data needed by the application
         this.gui = null;  // gui object (dat.GUI library)
-        this.params = {  // parameters for all the objects. This is also used by the dat.GUI library for live changes
+        this.params = this._getParams(); // parameters for all the objects. This is also used by the dat.GUI library for live changes
+        canvas = canvas || document.querySelector('canvas');  // tries to find existing canvas
+        if (canvas == null) {
+            // If canvas is not found, then create one
+            canvas = document.createElement('canvas');
+            document.body.appendChild(canvas);
+        }
+        canvas.style = 'position: absolute; top: 0px; left: 0px';
+        this.canvas = canvas;  // html canvas object
+        this.info = this._createRendererInfo(); // Renderer information
+        this.colors = {};  // there can be several different color scales
+    }
+
+    _getParams() {
+        /**
+         * all the parameters needed to configure the various objects and other aspects of this class
+         * are created here in order to reduce clutter in the constructor
+         * The categories:
+         *  - background
+         *  - camera
+         *  - light
+         *  - helpers
+         *  - helpers
+         *  - effects
+         *  - cube
+         */
+        let params = {  
             background: {
                 color: 0x204060
             },
@@ -61,6 +91,25 @@ class ThreejsWrapper {
                     size: 200,
                     division: 20
                 },
+                renderer_info: {
+                    show: false,
+                    data: {
+                        memory: {
+                            geometries: 0,
+                            textures: 0
+                        },
+                        render: {
+                            calls: 0,
+                            frame: 0,
+                            lines: 0,
+                            points: 0,
+                            triangles: 0
+                        }
+                    }
+                }
+            },
+            effects: {
+                composer: false
             },
             cube: {
                 width: 50,
@@ -81,17 +130,15 @@ class ThreejsWrapper {
                     z: 0,
                 }
             },            
-        };
-        canvas = canvas || document.querySelector('canvas');  // tries to find existing canvas
-        if (canvas == null) {
-            // If canvas is not found, then create one
-            canvas = document.createElement('canvas');
-            document.body.appendChild(canvas);
-        }
-        this.canvas = canvas;  // html canvas object
+        }; 
+
+
+        return params;
     }
 
     start() {
+        // This function actually initialize and starts the render loop
+        // MUST be called manually after creating the ThreejsWrapper object
         this.createScene();
         this.createRenderer();
         this.createCamera();
@@ -101,8 +148,7 @@ class ThreejsWrapper {
         this.createObjects();
         this.animate();
 
-        // BUG with the resizing => elevator bars are always there :-/
-        window.addEventListener('resize', () => this.onWindowResize(), false);
+        this.windowResize();
     }
 
     createScene() {
@@ -153,6 +199,7 @@ class ThreejsWrapper {
             console.log('no object called: ', name);
             return;
         }
+        return;
         obj.geometry.computeBoundingSphere();
         let c = obj.geometry.boundingSphere.center;
         this.params.camera.lookAt = {x: c.x, y: c.y, z: c.z};
@@ -162,6 +209,13 @@ class ThreejsWrapper {
     createRenderer() {
         this.renderer = new THREE.WebGLRenderer({canvas: this.canvas, antialias: true});
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        if (this.params.effects.composer == true) {
+            this.composer = new THREE.EffectComposer(this.renderer);
+            let ssaoPass = new THREE.SSAOPass(this.scene, this.camera, window.innerWidth, window.innerHeight);
+            ssaoPass.kernelRadius = 16;
+            ssaoPass.output = THREE.SSAOPass.OUTPUT.Beauty; // Depth SSAO
+			this.composer.addPass(ssaoPass);
+        }
     }
 
     createLights() {
@@ -230,8 +284,46 @@ class ThreejsWrapper {
         /**
          * Create default functions to populate the scene with an animated cube
          */
-        Threejs.prototype.create_default = this.createCube;
-        Threejs.prototype.animate_default = this.animateCube;
+        ThreejsWrapper.prototype.create_default = this.createCube;
+        ThreejsWrapper.prototype.animate_default = this.animateCube;
+    }
+
+    _createRendererInfo() {
+        /**
+         * Creates a div showing the renderer info        
+         */
+        let info = document.createElement('div');
+        info.id = 'info';
+        info.style = 'position: absolute; left: 10px; bottom: 10px; font-size: 12px; color: rgb(255,255,255); display: none';
+
+        let renderer_info = this.params.helpers.renderer_info.data;
+
+        let span_text;
+        let span_val;
+        let cat_keys = Object.keys(renderer_info);
+        for (let i=0; i<cat_keys.length; i++) {
+            let cat_data = renderer_info[cat_keys[i]];
+            let subcat_keys = Object.keys(cat_data);
+            for (let j=0; j<subcat_keys.length; j++) {
+                if (subcat_keys[j].includes('frame')) {
+                    continue;
+                }
+                span_text = document.createElement('span');
+                span_text.innerText = subcat_keys[j] + ': ';
+                info.appendChild(span_text);
+
+                span_val = document.createElement('span');
+                span_val.innerText = cat_data[subcat_keys[j]].toString();
+                span_val.id = cat_keys[i] + '_' + subcat_keys[j];
+                info.appendChild(span_val);
+                
+                info.appendChild(document.createElement('br'));
+            }
+        }
+
+        document.body.appendChild(info);
+
+        return info
     }
 
     createObjects() {
@@ -316,6 +408,7 @@ class ThreejsWrapper {
         g_grid.add(this.params.helpers.grid, 'show').onChange(() => this.createHelpers());
         g_grid.add(this.params.helpers.grid, 'size').min(10).max(500).step(10).onChange(() => this.createHelpers());
         g_grid.add(this.params.helpers.grid, 'division').min(5).max(100).step(5).onChange(() => this.createHelpers());
+        g_helpers.add(this.params.helpers.renderer_info, 'show').onChange(() => this.toggleRendererInfo());
     
     
         let g_cube = this.gui.addFolder('Cube');
@@ -337,9 +430,14 @@ class ThreejsWrapper {
 
     }
 
-    removeFromScene(objectName) {
+    removeFromScene(objectName, dispose) {
+        dispose = dispose || true;
         if (this.isObjectInScene(objectName)) {
-            this.scene.remove(this.scene.getObjectByName(objectName));
+            let object = this.scene.getObjectByName(objectName);
+            this.scene.remove(object);
+            if (dispose) {
+                this.dispose(object);
+            }
         }
     }
 
@@ -352,11 +450,17 @@ class ThreejsWrapper {
         }
     }
 
+    dispose(object) {
+        /**
+         * Cleaning the object from memory
+         */
+        object.geometry.dispose();
+        object.material.dispose();
+    }
+
     animate() {
         //requestAnimationFrame(this.animate);
         
-        // BUG with the resizing
-        //this.resizeCanvasToDisplaySize();
         requestAnimationFrame(() => this.animate());
 
         this.render();
@@ -366,31 +470,87 @@ class ThreejsWrapper {
     render() {
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
-    }
-
-    onWindowResize() {
-        // BUG with the resizing
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
-    
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    resizeCanvasToDisplaySize() {
-        // BUG with the resizing
-        const canvas = this.renderer.domElement;
-        // look up the size the canvas is being displayed
-        const width = this.canvas.clientWidth;
-        const height = this.canvas.clientHeight;
-      
-        // adjust displayBuffer size to match
-        if (canvas.width !== width || canvas.height !== height) {
-          // you must pass false here or three.js sadly fights the browser
-          this.renderer.setSize(width, height);
-          this.camera.aspect = width / height;
-          this.camera.updateProjectionMatrix();
-      
-          // update any render target sizes here
+        if (this.composer != null) {
+            this.composer.render();
         }
-      }
+        if (this.params.helpers.renderer_info.show) {
+            this.updateRendererInfo();
+        }
+    }
+
+    windowResize(){
+        /**
+         * Update renderer and camera when the window is resized
+        */
+        let self = this;
+        let callback = function(){
+            // notify the renderer of the size change
+            self.renderer.setSize( window.innerWidth, window.innerHeight );
+            // update the camera
+            self.camera.aspect	= window.innerWidth / window.innerHeight;
+            self.camera.updateProjectionMatrix();
+        }
+        // bind the resize event
+        window.addEventListener('resize', callback, false);
+        // return .stop() the function to stop watching window resize
+        return {
+            /**
+             * Stop watching window resize
+            */
+            stop: function(){
+                window.removeEventListener('resize', callback);
+            }
+        };
+    } 
+
+    updateRendererInfo() {
+        this.params.helpers.renderer_info.data.memory = this.renderer.info.memory;
+        this.params.helpers.renderer_info.data.render = this.renderer.info.render;
+        let renderer_info = this.params.helpers.renderer_info.data;
+
+        let span_id;
+        let span_val;
+        let cat_keys = Object.keys(renderer_info);
+        for (let i=0; i<cat_keys.length; i++) {
+            let cat_data = renderer_info[cat_keys[i]];
+            let subcat_keys = Object.keys(cat_data);
+            for (let j=0; j<subcat_keys.length; j++) {
+                if (subcat_keys[j].includes('frame')) {
+                    continue;
+                }
+                span_id = cat_keys[i] + '_' + subcat_keys[j];
+                span_val = document.getElementById(span_id);
+                span_val.innerText = cat_data[subcat_keys[j]].toString();
+            }
+        }
+
+    }
+
+    toggleRendererInfo() {
+        /**
+         * toggleRendererInfo: shows statistics about the scene
+         * see: https://threejs.org/docs/index.html#api/en/renderers/WebGLRenderer.info
+         * 
+         * An object with a series of statistical information about the graphics board memory and the rendering process. 
+         * Useful for debugging or just for the sake of curiosity. The object contains the following fields:
+         * memory:
+         *    geometries
+         *    textures
+         * render:
+         *    calls
+         *    triangles
+         *    points
+         *    lines
+         *    frame => ignored
+         * programs
+         * 
+         */
+        let info = document.getElementById('info');
+        if (this.params.helpers.renderer_info.show) {
+            info.style.display = 'block';
+        } else {
+            info.style.display = 'none';
+
+        }
+    }
 }
