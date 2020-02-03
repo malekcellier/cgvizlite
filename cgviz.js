@@ -39,6 +39,7 @@ class CgVizJs extends ThreejsWrapper {
         }; // Data structure that will hold the data from the json files
         this.colors = {'qcmTrace': chroma.scale('Spectral')};
         this.reusables = this.createReusables();
+        menu.cgviz = this;
         this.menu = menu;
     }
 
@@ -251,7 +252,7 @@ cgviz.start();
 
 
 // Add an event to the directory selector
-document.getElementById("filepicker").addEventListener("change", function(event) {
+document.getElementById("filepicker_").addEventListener("change", function(event) {
     let output = document.getElementById("listing");
     let files = event.target.files;
     if (files.length==0) {

@@ -1,12 +1,24 @@
+/*
+# Author: Malek Cellier
+# 
+# Email: malek.cellier@gmail.com
+# Created: 2020-02-02
+
+*/
+
+body {    
+    font-family: Consolas, Roboto, serif;
+    font-weight: 400;    
+    font-size: 0.875em;    
+    line-height: 1.71429;    
+}
+
 div {
     box-sizing: border-box;
-  }
-  
-  #menu-container {	
-      /*
-    border-style: solid;
-    border-color: black;  
-    */
+}
+
+#menu-container {
+    /*background-color: rgb(36, 39, 48);*/
     position: absolute;    
     width: 340px;
     height: 100%;    
@@ -15,54 +27,219 @@ div {
     padding-bottom: 30px;
     padding-left: 20px;
     z-index: 999;
-  }
-  
-  #menu {  
-    background-color: #777;
+}
+
+#menu-container.visible {
+    width: 340px;
+    padding-top: 20px;
+    padding-right: 20px;
+    padding-bottom: 30px;
+    padding-left: 20px;
+}
+
+#menu-container.collapsed {
+    width: 0px;
+    padding: 0px;
+}
+
+#menu-main {  
+    background-color: rgb(36, 39, 48);
     display: inline-block;
-    /*
-    border-style: solid;
-    border-color: red;
-    */
-    width: 280px;
+    width: 300px;
     height: 100%;
-    padding: 20px;
-   }
-   
+    /*padding: 20px;*/
+}
 
-   #menu-container.visible {
-       width: 340px;
-       padding-top: 20px;
-       padding-right: 20px;
-       padding-bottom: 30px;
-       padding-left: 20px;
-   }
-   #menu.visible {
+#menu-main.visible {
     display: inline-block;
-    }
+}
 
-    #menu-container.collapsed {
-        width: 0px;
-        padding: 0px;
-    }
-    #menu.collapsed {
+#menu-main.collapsed {
     display: none;
-   }
+}
 
-  #menu-control {
+#menu-control {
     align-items: center;
     justify-content: center;
-    background-color: rgb(106, 116, 133);
+    background-color: rgb(160, 167, 180);
     border-radius: 1px;
     color: rgb(41, 50, 60);
     display: inline-block;
     width: 20px;
     height: 20px;
-    /*border-style: solid;*/
-    /*border-color: blue;*/
     cursor: pointer;
     position: absolute;
-    /*padding: 20px;*/
-    top: 20px;    
+    top: 21px;    
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+#menu-top-right {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    right: 0px;
+    background-color: beige;
+    z-index: 10;
+}
+
+#menu-head {
+    /*height: 80px;*/
+    /*background-color: rgb(41, 50, 60);*/
+    padding: 12px 16px 0px;
+}
+
+#menu-body {
+    padding: 12px;
+}
+
+#menu-head-container {
+    /*background-color: rgb(41, 50, 60);*/
+    background-color: #29323C;
+}
+
+#menu-head-logo {
+    display: inline-block;
+    color: rgb(31, 186, 214);    
+    font-size: 16px;    
+    font-weight: 400;    
+    letter-spacing: 1.17px;
+}
+
+#menu-head-logo-svg {
+    display: inline-block;
+}
+
+#menu-head-logo-subtitle {
+    font-size: 12px;
+    color: rgb(106, 116, 133);
+    letter-spacing: 0.83px;
+    line-height: 14px;
+}
+
+#div-tabs {
+    min-height: 30px;
+}
+
+
+
+#info {
+    right: 100px;
+    display: block;
+}
+
+.div-button {
+    -moz-box-align: center;
+    align-items: center;    
+    background-color:rgb(106, 116, 133);    
+    border-radius: 2px;    
+    color:rgb(255, 255, 255);    
+    cursor: pointer;    
+    display: inline-flex;    
+    font-size: 11px;    
+    font-weight: 500;    
+    -moz-box-pack: center;    
+    justify-content: center;    
+    letter-spacing: 0.3px;    
+    line-height: 14px;    
+    /*outline: currentcolor none 0px;    */
+    padding: 9px 12px;    
+    text-align: center;    
+    transition: all 0.4s ease 0s;    
+    vertical-align: middle;    
+    width: 115px;    
+    opacity: 1;    
+    pointer-events: all;    
+}
+
+.div-button:hover {
+    opacity:0.75; 
+}
+
+#text-button {
+    margin-left: 10px;
+}
+
+.div-scenario {
+
+}
+
+ /* The Modal (background) */
+ .modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    padding: 200px;
   }
   
+  /* Modal Content/Box */
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+  }
+
+  /*
+  #div-input-btn-container {
+    flex-direction: row;
+}*/
+  
+  #div-picker {
+      display: inline-block;
+ }
+
+  #div-button-upload {
+      display: none;
+      cursor: pointer;
+      background-color: #0F9668;
+  }
+
+  /* The Close Button */
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  } 
+
+  #subcontent {
+      padding: 30px 10px;
+  }
+
+  #subcontent-head {
+      /*height: 40px;*/
+      /*background-color: grey;*/
+  }
+
+  #subcontent-body {
+      height: 250px;
+      padding: 10px;
+      /*background-color: cadetblue;*/
+  }
+
+  #filepicker {
+    /*background-color: #eee;
+    padding: 1em;*/
+    padding: 10px;
+}
+
+#div-picker {
+    background-color: #eee;
+      height: 40px;
+  }
