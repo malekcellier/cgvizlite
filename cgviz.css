@@ -3,11 +3,18 @@
 # 
 # Email: malek.cellier@gmail.com
 # Created: 2020-02-02
-
 */
 
-body {    
-    font-family: Consolas, Roboto, serif;
+@font-face {
+    font-family: ff-clan-web-pro;
+    src: url(vendors/ff-clan-web-pro.woff);
+  }
+
+body {
+    padding: 0;
+    margin: 0;
+    /*font-family: ff-clan-web-pro, "Maven Pro", Consolas, Roboto, serif;*/
+    font-family: 'Maven Pro', Consolas, Roboto, serif;
     font-weight: 400;    
     font-size: 0.875em;    
     line-height: 1.71429;    
@@ -58,10 +65,49 @@ div {
     display: none;
 }
 
+#menu-main-head-container {
+    /*background-color: rgb(41, 50, 60);*/
+    background-color: #29323C;
+}
+
+#menu-main-head {
+    /*height: 80px;*/
+    /*background-color: rgb(41, 50, 60);*/
+    padding: 12px 16px 10px;
+}
+
+#menu-main-head-logo {
+    /*font-family: Consolas;*/
+    display: inline-block;
+    color: rgb(31, 186, 214);    
+    font-size: 16px;    
+    font-weight: 400;    
+    letter-spacing: 1.17px;
+}
+
+#menu-main-head-logo-svg {
+    display: inline-block;
+}
+
+#menu-main-head-logo-subtitle {
+    /*font-family: Consolas;*/
+    font-size: 12px;
+    color: rgb(106, 116, 133);
+    letter-spacing: 0.83px;
+    line-height: 14px;
+}
+
+#menu-main-head-tabs {
+    background-color:rgb(41, 50, 60);
+    padding: 0px 16px;
+    display: flex;
+    min-height: 30px;    
+}
+
 #menu-control {
     align-items: center;
     justify-content: center;
-    background-color: rgb(160, 167, 180);
+    background-color: #29323C; /* #535C6C; /*rgb(160, 167, 180);*/
     border-radius: 1px;
     color: rgb(41, 50, 60);
     display: inline-block;
@@ -74,6 +120,30 @@ div {
     margin-right: 15px;
 }
 
+.svg-logo {
+    /*background-color: rgb(106, 116, 133);*/
+    align-items: flex-end;
+    border-bottom: 2px solid transparent;
+    color:rgb(106, 116, 133);
+    display: flex;
+    -moz-box-pack: center;
+    justify-content: center;
+    margin-right: 12px;
+    padding-bottom: 6px;
+    width: 30px;    
+    pointer-events: fill;
+}
+
+.svg-logo:hover {
+    color: rgb(240, 240, 240);
+    cursor: pointer;
+}
+
+.svg-logo.current-tab {
+    border-bottom: 2px solid rgb(255, 255, 255);
+    color:rgb(255, 255, 255);
+}
+
 #menu-top-right {
     position: absolute;
     width: 200px;
@@ -83,42 +153,20 @@ div {
     z-index: 10;
 }
 
-#menu-head {
-    /*height: 80px;*/
-    /*background-color: rgb(41, 50, 60);*/
-    padding: 12px 16px 0px;
-}
-
-#menu-body {
+#menu-main-body {
     padding: 12px;
 }
 
-#menu-head-container {
-    /*background-color: rgb(41, 50, 60);*/
-    background-color: #29323C;
+.menu-title {
+    color: rgb(240, 240, 240);
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 1.25px;
+    margin-bottom: 14px;
 }
 
-#menu-head-logo {
-    display: inline-block;
-    color: rgb(31, 186, 214);    
-    font-size: 16px;    
-    font-weight: 400;    
-    letter-spacing: 1.17px;
-}
-
-#menu-head-logo-svg {
-    display: inline-block;
-}
-
-#menu-head-logo-subtitle {
-    font-size: 12px;
-    color: rgb(106, 116, 133);
-    letter-spacing: 0.83px;
-    line-height: 14px;
-}
-
-#div-tabs {
-    min-height: 30px;
+.menu-text {
+    margin-left: 5px;
 }
 
 #info {
@@ -141,7 +189,7 @@ div {
     letter-spacing: 0.3px;    
     line-height: 14px;    
     /*outline: currentcolor none 0px;    */
-    padding: 9px 12px;    
+    /*padding: 9px 12px;    */
     text-align: center;    
     transition: all 0.4s ease 0s;    
     vertical-align: middle;    
@@ -154,16 +202,89 @@ div {
     opacity:0.75; 
 }
 
-#text-button {
-    margin-left: 10px;
+#div-button-upload {
+    padding: 9px 12px; /* overwrite .div-button*/
 }
 
-.div-scenario {
-
+.div-scenario {    
+    background-color: rgb(41, 50, 60);
+    border-left: 3px solid rgb(143, 47, 191);
+    padding: 0px 10px 0px 0px;
+    height: 48px;
+    display: flex;
+    -moz-box-pack: justify;
+    justify-content: space-between;
+    -moz-box-align: center;
+    align-items: center;
+    transition: all 0.4s ease 0s;    
 }
 
- /* The Modal (background) */
- .modal {
+.div-scenario-content {
+    font-family: Tahoma;
+    -moz-box-align: center;
+    align-items: center;
+    border-radius: 2px;
+    caret-color:rgb(211, 216, 224);
+    display: flex;
+    -moz-box-pack: justify;
+    justify-content: space-between;
+    outline: currentcolor none medium;
+    overflow: hidden;
+    padding: 4px 10px 4px 4px;
+    text-overflow: ellipsis;
+    transition: all 0.4s ease 0s;
+    white-space: nowrap;
+    width: 100%;
+    overflow-wrap: normal;
+    pointer-events: all;
+    opacity: 1;
+    color:rgb(160, 167, 180);
+    font-size: 13px;
+    letter-spacing: 0.43px;
+    line-height: 18px;
+    height: 24px;
+    font-weight: 400;
+    margin-left: -4px;
+    background-color: transparent;
+    border: 1px solid transparent;    
+}
+
+.div-scenario-cat-container {
+    display: inline-block;
+}
+
+.div-scenario-span-container {
+    border-left: 2px solid rgb(106, 116, 133);
+    line-height: 12px;
+    margin-left: -12px;
+    padding-left: 10px;
+    display: flex;
+    -moz-box-align: center;
+    align-items: center;    
+}
+
+.div-scenario-span {
+    color:rgb(160, 167, 180);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.2px;    
+}
+
+.div-scenario-icon {
+    display: flex;
+    -moz-box-align: center;
+    align-items: center;
+    color:rgb(160, 167, 180);    
+}
+
+.div-scenario-cat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
@@ -175,63 +296,75 @@ div {
     background-color: rgb(0,0,0); /* Fallback color */
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
     padding: 200px;
-  }
+}
   
-  /* Modal Content/Box */
-  .modal-content {
+.modal-content {
     background-color: #fefefe;
     margin: 15% auto; /* 15% from the top and centered */
     padding: 20px;
     border: 1px solid #888;
     width: 80%; /* Could be more or less, depending on screen size */
-  }
+}
 
-  /*
-  #div-input-btn-container {
+.modal-title {
+    color: rgb(25, 25, 25);
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 1.25px;
+}
+
+.modal-list-container {
+    overflow: auto;
+    height: 100%;
+    border: 1px dotted black;
+}
+
+/*
+#div-input-btn-container {
     flex-direction: row;
-}*/
+}
+*/
   
-  #div-picker {
-      display: inline-block;
- }
+#div-picker {
+    display: inline-block;
+}
 
-  #div-button-upload {
-      display: none;
-      cursor: pointer;
-      background-color: #0F9668;
-  }
+#div-button-upload {
+    display: none;
+    cursor: pointer;
+    background-color: #0F9668;
+}
 
-  /* The Close Button */
-  .close {
+/* The Close Button */
+.close {
     color: #aaa;
     float: right;
     font-size: 28px;
     font-weight: bold;
-  }
+}
   
-  .close:hover,
-  .close:focus {
+.close:hover, .close:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
-  } 
+} 
 
-  #subcontent {
-      padding: 30px 10px;
-  }
+#subcontent {
+    padding: 30px 10px;
+}
 
-  #subcontent-head {
-      /*height: 40px;*/
-      /*background-color: grey;*/
-  }
+#subcontent-head {
+    /*height: 40px;*/
+    /*background-color: grey;*/
+}
 
-  #subcontent-body {
-      height: 250px;
-      padding: 10px;
-      /*background-color: cadetblue;*/
-  }
+#subcontent-body {
+    height: 250px;
+    padding: 10px;
+    /*background-color: cadetblue;*/
+}
 
-  #filepicker {
+#filepicker {
     /*background-color: #eee;
     padding: 1em;*/
     padding: 10px;
@@ -239,5 +372,5 @@ div {
 
 #div-picker {
     background-color: #eee;
-      height: 40px;
-  }
+    height: 40px;
+}
