@@ -143,6 +143,17 @@ class CgVizMenu {
         // appending the divs
         mmHeadLogo.appendChild(mhls);
         mmHead.appendChild(mmHeadLogo);
+
+        //2.4 The extra action
+        /*
+        let div_actions = document.createElement('div');
+        div_actions.classList.add('menu-head-actions');
+        div_actions.id = 'menu-head-actions';
+        let svg = this.createLogoBug();
+        div_actions.appendChild(svg);
+        mmHead.append(div_actions);
+        */
+
         mmHeadContainer.appendChild(mmHead);
 
         // 3) The lower part of the head has a tab menu
@@ -150,15 +161,18 @@ class CgVizMenu {
         mmHeadTabs.id = 'menu-main-head-tabs';
         // There are 4 tabs: scenarios, filters, interactions and settings
         let svg_scenarios = this.createLogoLayers();
-        svg_scenarios.id = 'Scenario';
+        svg_scenarios.id = 'Scenarios';
         svg_scenarios.classList.add('current-tab');
         mmHeadTabs.appendChild(svg_scenarios);
+
         let svg_filters = this.createLogoFilters();
         svg_filters.id = 'Filters';
         mmHeadTabs.appendChild(svg_filters);
+
         let svg_interactions = this.createLogoInteractions();
         svg_interactions.id = 'Interactions';
         mmHeadTabs.appendChild(svg_interactions);
+
         let svg_settings = this.createLogoSettings();
         svg_settings.id = 'Settings';
         mmHeadTabs.appendChild(svg_settings);
@@ -277,6 +291,26 @@ class CgVizMenu {
         return svg;
     }
 
+    createLogoBug() {
+        let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.classList.add('svg-logo-action');
+        svg.setAttribute('id','svg-bug');
+        svg.setAttribute('viewBox', '0 0 64 64');
+        svg.setAttribute('width', '20px');
+        svg.setAttribute('height', '20px');
+        svg.setAttribute('style', 'fill: currentcolor');
+        let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+        path.setAttribute('d', 'M32 8.333C26.698 8.333 22.4 13 22.4 19h19.2c0-6-4.298-10.667-9.6-10.667z');
+        let path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+        path1.setAttribute('d', 'M53.6 32H46v-6.506c0-.074.184-.142.18-.215l5.417-5.907c.937-1.042.987-2.73.05-3.772-.937-1.041-2.432-1.041-3.369 0l-5.304 5.664c-.066-.004-.115-.264-.181-.264H21.207c-.066 0-.128.26-.193.264l-5.317-5.785c-.937-1.042-2.457-.981-3.394.06-.937 1.042-.937 2.76 0 3.802l5.516 5.923c-.003.072.181.156.181.23V32h-7.6C9.075 32 8 33.027 8 34.5S9.075 37 10.4 37h7.2c0 3 .375 4.299 1.025 6.12-.105.084-.227.253-.322.359l-6.788 7.603c-.937 1.041-.937 2.76 0 3.802.937 1.04 2.457 1.056 3.394.015l6.443-6.93C23.494 50.693 26 52.619 30 53.246V27h4v26.246c4-.626 6.506-2.545 8.648-5.27l6.343 6.938a2.29 2.29 0 0 0 3.444 0c.937-1.041.962-2.73.025-3.771L45.684 43.6c-.094-.105-.21-.396-.316-.48C46.018 41.298 46.4 40 46.4 37h7.2c1.325 0 2.4-1.027 2.4-2.5S54.925 32 53.6 32z');
+        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.appendChild(path);
+        g.appendChild(path1);
+        svg.appendChild(g);
+
+        return svg;
+    }
+
     createMenuBody() {
         /**
          * This menu is below the menu-head
@@ -299,12 +333,16 @@ class CgVizMenu {
         mmBody.id = 'menu-main-body';        
 
         // Scenarios menu
+        let div_container_scenarios = document.createElement('div');
+        div_container_scenarios.id = 'Scenarios';
+        div_container_scenarios.classList.add('container-tab-content');
         // Add title
         let div = document.createElement('div');
         div.id = 'tab-name';
         div.innerText = 'Scenarios';
         div.classList.add('menu-title');
-        mmBody.appendChild(div);        
+        //mmBody.appendChild(div);        
+        div_container_scenarios.appendChild(div);
         // Add button
         let btn = this.createAddButton();
         btn.classList.add('div-button');
@@ -316,18 +354,48 @@ class CgVizMenu {
             let modal = document.getElementById('modal');
             modal.style.display = "block";
         }
-        mmBody.appendChild(btn);
-        mmBody.appendChild(document.createElement('hr'));
+        div_container_scenarios.appendChild(btn);
+        div_container_scenarios.appendChild(document.createElement('hr'));
+        //mmBody.appendChild(btn);
+        //mmBody.appendChild(document.createElement('hr'));
         // div for the scenarios
         let div_scenarios = document.createElement('div');
         div_scenarios.id = 'div-scenarios';
-        mmBody.appendChild(div_scenarios);
-
+        div_container_scenarios.appendChild(div_scenarios);
+        
+        mmBody.appendChild(div_container_scenarios);
+        //mmBody.appendChild(div_scenarios);
+        
         // Filters menu
+        let div_container_filters = document.createElement('div');
+        div_container_filters.classList.add('container-tab-content');
+        div_container_filters.id = 'Filters';
+        div = document.createElement('div');
+        div.innerText = 'Filters';
+        div.classList.add('menu-title');
+        div_container_filters.appendChild(div);
+        mmBody.appendChild(div_container_filters);
 
         // Interactions menu
+        let div_container_interactions = document.createElement('div');
+        div_container_interactions.classList.add('container-tab-content');
+        div_container_interactions.id = 'Interactions';
+        div = document.createElement('div');
+        div.innerText = 'Interactions';
+        div.classList.add('menu-title');
+        div_container_interactions.appendChild(div);
+        mmBody.appendChild(div_container_interactions);
 
         // Settings menu
+        // TODO: handle the camera, scene etc.. basically all that is already handled by the dagui
+        let div_container_settings = document.createElement('div');
+        div_container_settings.classList.add('container-tab-content');
+        div_container_settings.id = 'Settings';
+        div = document.createElement('div');
+        div.innerText = 'Settings';
+        div.classList.add('menu-title');
+        div_container_settings.appendChild(div);
+        mmBody.appendChild(div_container_settings);
 
        document.getElementById('menu-main').appendChild(mmBody);
     }
@@ -710,23 +778,15 @@ class CgVizMenu {
                 }
                 // add the class for that index
                 evt.target.classList.add('current-tab');
-                // Update the menu body content
-                // 1. the title
-                document.getElementById('tab-name').innerText = evt.target.id;
-                // 2. the main-body content                
-                
+                // Show the select category using a classname
+                let div_containers = document.getElementsByClassName('container-tab-content');
+                for (let j=0; j<div_containers.length; j++) {
+                    div_containers[j].classList.remove('visible');
+                    if (div_containers[j].id == evt.target.id) {
+                        div_containers[j].classList.add('visible');
+                    }
+                }
             });
         }
-/*
-        let svg_logos = document.getElementsByClassName('svg-logo');
-        for (let i=0; i<svg_logos.length; i++) {
-            svg_logos[i].classList.remove('current-tab');
-        }
-        let all_vga_= document.getElementsByClassName('svg-logo');
-        TODO: 
-        - loop the svgs
-        - then add the event that removes the classname
-        - then add the right class name
-        - then change the view in the menu-main-body*/
     }
 }

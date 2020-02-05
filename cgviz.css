@@ -104,10 +104,14 @@ div {
     min-height: 30px;    
 }
 
+.menu-main-head-actions {
+    display: inline-block;
+}
+
 #menu-control {
     align-items: center;
     justify-content: center;
-    background-color: #29323C; /* #535C6C; /*rgb(160, 167, 180);*/
+    background-color: rgb(106, 116, 133); /*#29323C; /* #535C6C; /*rgb(160, 167, 180);*/
     border-radius: 1px;
     color: rgb(41, 50, 60);
     display: inline-block;
@@ -118,6 +122,11 @@ div {
     top: 21px;    
     margin-left: 15px;
     margin-right: 15px;
+    opacity: 0.6; 
+}
+
+#menu-control:hover {
+    opacity: 1; 
 }
 
 .svg-logo {
@@ -131,7 +140,7 @@ div {
     margin-right: 12px;
     padding-bottom: 6px;
     width: 30px;    
-    pointer-events: fill;
+    pointer-events: all; /*none implies that a containing div is needed to get the click*/
 }
 
 .svg-logo:hover {
@@ -158,6 +167,7 @@ div {
 }
 
 .menu-title {
+    font-family: ff-clan-web-pro;
     color: rgb(240, 240, 240);
     font-size: 20px;
     font-weight: 400;
@@ -169,6 +179,14 @@ div {
     margin-left: 5px;
 }
 
+.container-tab-content {
+    display: none;
+}
+
+.container-tab-content.visible {
+    display: block;
+}
+
 #info {
     right: 100px;
     display: block;
@@ -177,7 +195,7 @@ div {
 .div-button {
     -moz-box-align: center;
     align-items: center;    
-    background-color:rgb(106, 116, 133);    
+    background-color:rgb(19, 177, 123);/*rgb(106, 116, 133);*/    
     border-radius: 2px;    
     color:rgb(255, 255, 255);    
     cursor: pointer;    
@@ -217,6 +235,10 @@ div {
     -moz-box-align: center;
     align-items: center;
     transition: all 0.4s ease 0s;    
+}
+
+.div-scenario:hover {
+    opacity:0.5;
 }
 
 .div-scenario-content {
@@ -282,6 +304,10 @@ div {
     align-items: center;
     justify-content: space-between;
     margin-bottom: 12px;
+}
+
+.div-scenario-actions {
+    display: flex;
 }
 
 .modal {
