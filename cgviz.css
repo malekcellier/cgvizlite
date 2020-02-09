@@ -431,18 +431,30 @@ ul {
     /*border: 1px solid rgba(0, 0, 0 ,0.3);*/
     border-radius: 1px;
     overflow: hidden;
-    box-shadow: 0 0 10px #005effb3;
+    /*box-shadow: 0 0 10px #005effb3;*/
+    box-shadow: 0 0 10px rgb(19, 177, 123, 0.7);
 }
 
 .bar span {
     height: 4px;
     float: left;
-    background: #005eff;
+    /*background:#005eff;*/
+    background:rgb(19, 177, 123);
 }
 
-.bar.total span {
-    background: #e72821;
-    box-shadow: 0 0 10px #e72821b3;
+.bar-total {
+    background: #353b48;
+    display: block;
+    height: 4px;
+    border-radius: 1px;
+    overflow: hidden;    
+    box-shadow: 0 0 10px rgba(192, 108, 132, 0.7);
+}
+
+.bar-total span {
+    height: 4px;
+    float: left;    
+    background: rgba(192, 108, 132, 0.7);
 }
 .row {
     display: flex;

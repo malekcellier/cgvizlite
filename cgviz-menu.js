@@ -23,6 +23,7 @@ class CgVizMenu {
         this.setup();
         //this.setup_old();
         //this.AddToolTips(); // Has to be the last one called
+        THREE.Cache.enabled = true;
     } 
     
     setup() {
@@ -289,7 +290,9 @@ class CgVizMenu {
         let ul_total = _el('ul');
         // and add a single li item
         let li_total = createProgressBarListItem('Total', 'h4');
-        li_total.getElementsByClassName('bar')[0].classList.add('total');
+        let span = li_total.getElementsByClassName('bar')[0];
+        span.classList.add('bar-total');
+        span.classList.remove('bar');
         ul_total.appendChild(li_total); 
         container_total.appendChild(ul_total);
 
@@ -305,7 +308,8 @@ class CgVizMenu {
         if (this._directory.files.length > 0) {
             for (let i=0; i<files.length; i++) {
                 let li = createProgressBarListItem(files[i].name, 'h4');
-                ul.appendChild(li);
+                li.id = i + '_' + files[i].name.split('.').pop(); // put the extension
+                ul.appendChild(li);             
             }
         }
 
@@ -393,7 +397,88 @@ class CgVizMenu {
     }
 
     _eventUploadData() {
-        console.log('loadgin data...');
+        /**
+         * The THREE FileManager is used given the high number of files..
+         */
+        console.log('loading data...');
+        let li_total = document.getElementById('li_Total');
+        let totalProgressVal = li_total.getElementsByClassName('value')[0];
+        let totalProgressBar = li_total.getElementsByClassName('bar-total')[0].children[0];
+
+        let files = this._directory.files;
+        let extraFiles = {},
+          file;
+        for (let i = 0; i < files.length; i++) {
+          file = files[i];
+          extraFiles[file.name] = file;
+        }        
+        
+        let manager = new THREE.LoadingManager();
+        manager.setURLModifier((url, path) => {
+            if (extraFiles[url] !== undefined) {
+              return URL.createObjectURL(extraFiles[url]);
+            }
+            return url;
+          });
+
+        manager.onProgress = function ( item, loaded, total ) {
+            console.log('item: ', item);
+            let pcValue = (loaded/total*100);
+            totalProgressBar.style.width = pcValue + '%';
+            totalProgressVal.innerText = Math.round(pcValue*100)/100 + '%';
+        };
+        manager.onError = function (url) {
+            console.log( 'There was an error loading ' + url );
+        };
+        manager.onLoad = function () {
+            // No need to use a promise, this function serves as one!!!
+            alert('All files have been loaded!!')
+        };        
+
+        let ul = _get('#ul-files');
+        for (let i=0; i<ul.children.length;i++) {
+            let li = ul.childNodes[i];
+            let ext = li.id.split('_')[1];
+            let url = files[li.id.split('_')[0]];
+            if (ext === 'json') {                
+                loadJson(url, li);
+            }
+        }
+
+        function loadJson(url, li) {
+            /**
+             * Wraps the FileLoader to load json files
+             */
+            let loader = new THREE.FileLoader(manager);
+            loader.load(
+                // resource URL
+                url,
+                //onLoad callback
+                function (data) {
+                    console.log('Done loading: ', url);                        
+                },
+                //onProgress callback
+                function (xhr) {
+                    let pCentValue = (xhr.loaded/xhr.total*100);
+
+                    //let li = document.getElementById('li_' + url);
+                    let pBar = li.getElementsByClassName('bar')[0].children[0];
+                    pBar.style.width = pCentValue + '%';
+                    
+                    
+                    let pVal = li.getElementsByClassName('value')[0];
+                    pVal.innerText = Math.round(pCentValue*100)/100 + '%';
+
+                    //console.log(pCentValue + '% loaded');
+                },
+                //onError callback
+                function (err) {
+                    console.error('An error happened loading: ', url);
+                },
+            );
+        }        
+
+
     }
 
     // SVG and ICONS
@@ -1894,10 +1979,6 @@ function _el(type, id, classes) {
     }
 
     return el;
-}
-
-function _appendChild(el) {
-    document.body.appendChild(el);
 }
 
 function _get(name) {
