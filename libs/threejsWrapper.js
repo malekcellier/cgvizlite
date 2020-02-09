@@ -91,6 +91,10 @@ class ThreejsWrapper {
                     size: 200,
                     division: 20
                 },
+                cube: {
+                    show: false,
+                    color: 0xaa0000
+                },
                 renderer_info: {
                     show: false,
                     data: {
@@ -181,7 +185,7 @@ class ThreejsWrapper {
                 break;
         }
         this.camera.up = up;
-        this.camera.lookAt(c.lookAt.x, c.lookAt.y, c.lookAt.z);
+        //this.camera.lookAt(c.lookAt.x, c.lookAt.y, c.lookAt.z);
         this.scene.add(this.camera);
         this.createControls();
     }
@@ -249,6 +253,18 @@ class ThreejsWrapper {
             gridHelper.name = 'GridHelper'; 
             this.scene.add(gridHelper);
         }
+
+        let kube = this.params.helpers.cube;
+        this.removeFromScene('CubeHelper');
+        if (this.isObjectInScene('cube') && kube.show) {
+            let cube = this.scene.getObjectByName('cube');
+
+            let cubeHelperGeometry = new THREE.EdgesGeometry(cube.geometry);
+            let cubeHelperMaterial = new THREE.LineBasicMaterial({color: kube.color});
+            let cubeHelper = new THREE.LineSegments(cubeHelperGeometry, cubeHelperMaterial);
+            cubeHelper.name = 'CubeHelper'; 
+            this.scene.add(cubeHelper);
+        }
     }
 
     _createAxes() {
@@ -262,14 +278,17 @@ class ThreejsWrapper {
         if (h.use_arrows) {
             axesHelper = new THREE.Object3D();            
             let origin = new THREE.Vector3(0, 0, 0);
+
+            let headLength = 0.05*h.size;
+            let headWidth = 0.03*h.size;
             
-            let xAxis = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), origin, h.size, 0xaa0000);
+            let xAxis = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), origin, h.size, 0xff2222, headLength, headWidth);
             axesHelper.add(xAxis);
             
-            let yAxis = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), origin, h.size, 0x00aa00);
+            let yAxis = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), origin, h.size, 0x22ff22, headLength, headWidth);
             axesHelper.add(yAxis);
             
-            let zAxis = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), origin, h.size, 0x0000aa);
+            let zAxis = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), origin, h.size, 0x2222ff, headLength, headWidth);
             axesHelper.add(zAxis);
 
         } else {
@@ -408,6 +427,9 @@ class ThreejsWrapper {
         g_grid.add(this.params.helpers.grid, 'show').onChange(() => this.createHelpers());
         g_grid.add(this.params.helpers.grid, 'size').min(10).max(500).step(10).onChange(() => this.createHelpers());
         g_grid.add(this.params.helpers.grid, 'division').min(5).max(100).step(5).onChange(() => this.createHelpers());
+        let g_helpers_cube = g_helpers.addFolder('Cube');
+        g_helpers_cube.add(this.params.helpers.cube, 'show').onChange(() => this.createHelpers());
+        g_helpers_cube.addColor(this.params.helpers.cube, 'color').onChange(() => this.createHelpers());
         g_helpers.add(this.params.helpers.renderer_info, 'show').onChange(() => this.toggleRendererInfo());
     
     
@@ -453,9 +475,14 @@ class ThreejsWrapper {
     dispose(object) {
         /**
          * Cleaning the object from memory
+         * TODO: it is more complicated than that... see: https://github.com/infamous/infamous/blob/a16fc59473e11ac53e7fa67e1d3cb7e060fe1d72/src/utils/three.ts
          */
-        object.geometry.dispose();
-        object.material.dispose();
+        if (object.hasOwnProperty('geometry')) {
+            object.geometry.dispose();
+        } 
+        if (object.hasOwnProperty('material')) {
+            object.material.dispose();
+        }
     }
 
     animate() {
