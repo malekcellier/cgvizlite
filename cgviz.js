@@ -1,5 +1,5 @@
 /*
-cg-viz-light
+cg-viz-lite
 
 WEBGL based visualizer for QCM output
 Based off cg-viz from Markus Berglund
@@ -45,7 +45,7 @@ class CgVizJs extends ThreejsWrapper {
 
     createReusables() {        
         /**
-         * Creates resuable materials and geometries
+         * Creates resuable materials and geometries to save on memory
          */
         let reusables = {
             tx_pov: {
@@ -89,6 +89,38 @@ class CgVizJs extends ThreejsWrapper {
         this.colors.rays = chroma();
         this.colors.kpis = chroma.scale('Spectral');
         this.colors.qcmTrace = chroma.scale('Spectral');
+    }
+
+    toggleObjScript() {
+        /**
+         * NOT to be used. Just here for reference
+         */
+        var mtlLoader = new THREE.MTLLoader();
+        mtlLoader.setPath('/qcm/api/qcmObj/' + folder + "/");
+        mtlLoader.setMaterialOptions({ side: THREE.DoubleSide });
+        mtlLoader.load('mtl', function (materials) {
+            materials.preload();
+    
+            var objLoader = new THREE.OBJLoader();
+            objLoader.setMaterials(materials);
+            objLoader.setPath('/qcm/api/qcmObj/' + folder + "/");
+            objLoader.load('obj', function (object) {
+                object.children.forEach(function (mesh) {
+                    console.log('Loading mesh: ', mesh);
+                    var edges;
+                    mesh.material.polygonOffset = true;
+                    mesh.material.polygonOffsetFactor = 1;
+                    mesh.material.polygonOffsetUnits = 1;
+                    edges = new THREE.EdgesHelper(mesh, 0x333333);
+                    edges.material.lineWidth = 2;
+                    return scene.add(edges);
+                });
+                //object.position.set(0, -60, 0);
+                scene.add(object);
+            });
+    
+        });
+        console.log('Done loading mesh');        
     }
 
     toggleObj() {
@@ -136,14 +168,18 @@ class CgVizJs extends ThreejsWrapper {
         /**
          * If already visible, remove, otherwise show in the scene
          */
+        let pov_type = povId.replace(/[0-9]/g, '');
+        let pov_id = povId.replace(/\D/g,'');
         const name = povId + ".pov";
         if (this.isObjectInScene(name)) {
             this.removeFromScene(name);
             console.log(' > removed object: ', name);
         } else {
-            let data = this.getCurrentData().qcmPov[povId];
+            //let data = this.getCurrentData().qcmPov[povId];
+            let data = this.getCurrentData().qcmPov[pov_type][pov_id];
             // Use the reusables
-            let povType = this.getPovCategory(povId);
+            //let povType = this.getPovCategory(povId);
+            let povType = this.getPovCategory(pov_type);
             const geometry = this.reusables[povType].geometry;            
             const material = this.reusables[povType].material;            
             const povObject = new THREE.Mesh(geometry, material);
@@ -222,6 +258,35 @@ class CgVizJs extends ThreejsWrapper {
 
     }
 
+    getRaysRange() {
+        /**
+         * Find the min/max rx power for all the rays in the scenario
+         */
+        let scenarios = Object.keys(this.data.json);
+        if (scenarios.length === 0) {
+            console.log('no scenarios loaded');
+            return;
+        }
+        for (let i=0; i<scenarios.length; i++) {
+            let scenario = scenarios[i];
+            let data = this.data.json[scenario].qcmTrace;
+            let TxPovs = Object.keys(data);
+            for (let j=0; j<TxPovs.length; j++) {
+                let RxPovs = Object.keys(data[TxPovs[j]]);
+                for (let k=0; k<RxPovs.length; k++) {
+                    let Paths = data[TxPovs[j]][RxPovs[k]];
+                    for (let m=0; m<Paths.length;m++) {
+                        if (Paths[m].P < this.data.ranges.qcmTrace.min) {
+                            this.data.ranges.qcmTrace.min = Paths[m].P;
+                        } else if (Paths[m].P > this.data.ranges.qcmTrace.max) {
+                            this.data.ranges.qcmTrace.max = Paths[m].P;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     getColor(val) {
         this.colors.qcmTrace.domain([this.data.ranges.qcmTrace.min, this.data.ranges.qcmTrace.max]);
         let color = this.colors.qcmTrace(val);
@@ -249,10 +314,11 @@ class CgVizJs extends ThreejsWrapper {
 // 1) Create the THREEjs environment
 var cgviz = new CgVizJs({menu: new CgVizMenu()});
 cgviz.start();
+cgviz.updateBackgroundColor(0x102030);
 
 
 // Add an event to the directory selector
-document.getElementById("filepicker_").addEventListener("change", function(event) {
+document.getElementById("scenario-loader_").addEventListener("change", function(event) {
     let output = document.getElementById("listing");
     let files = event.target.files;
     if (files.length==0) {
