@@ -231,7 +231,7 @@ div.current-tab {
     padding: 9px 12px; /* overwrite .div-button*/
 }
 
-.div-scenario {    
+.div-scenario, .scenario-header, .obj-header, .pov-header, .trace-header, .kpis-header {    
     font-family: Tahoma;
     font-size: 13px;
     line-height: 18px;
@@ -239,17 +239,64 @@ div.current-tab {
     color: rgb(160, 167, 180);
     /*background-color: rgb(41, 50, 60);*/
     background-color: #29323c;
-    border-left: 3px solid rgb(143, 47, 191);
+    border-left: 3px solid rgb(  0,  92, 255);
     padding: 0px 10px 0px 10px;
     height: 48px;
     display: flex;
     -moz-box-pack: justify;
-    justify-content: space-between;
+    justify-content: start;
     -moz-box-align: center;
     align-items: center;
     transition: all 0.4s ease 0s;   
     margin-top: 10px;
     /*opacity: 0.5; */
+}
+
+.header-text {
+    flex: 1;
+    padding-left: 12px;
+}
+
+.header-svg {    
+    padding-left: 8px;
+}
+
+.header-svg svg {
+    opacity: 0.25;
+}
+
+.header-svg.weak svg {
+    opacity: 0.1;
+}
+
+.header-svg:hover {
+    cursor: pointer;
+}
+
+.header-svg:hover svg, .tab:focus svg{
+    color: rgb(240, 240, 240);
+    opacity: 1;
+}
+
+.obj-header, .pov-header, .trace-header, .kpis-header {
+    margin-left: 10px;
+    height: 38px;
+}
+
+.obj-header {
+    border-left: 3px solid rgb(192, 108, 132);
+}
+
+.pov-header {
+    border-left: 3px solid rgb( 84, 122, 130);
+}
+
+.trace-header {
+    border-left: 3px solid rgb(248, 177, 149);
+}
+
+.kpis-header {
+    border-left: 3px solid rgb( 62, 172, 168);
 }
 
 .div-scenario:hover {

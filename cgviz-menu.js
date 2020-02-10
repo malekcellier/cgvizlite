@@ -27,7 +27,7 @@ class CgVizMenu {
     setup() {
         this.createMenu();
         this.createPanel();
-        this.createModal_new();
+        this.createModal();
     }
 
     createMenu() {
@@ -173,7 +173,100 @@ class CgVizMenu {
         return scenarios;
     }
 
+    __populateMenuScenariosContent() {
+        /**
+         * The scenarios div contains:
+         *  A box with the name of the scenario, under which
+         *      a smaller box for each category: obj, pov, rays, kpis
+         *          a smaller box for elements of each category
+         * 
+         * Example:
+         *  HongKong:
+         *      Object
+         *          {list of obj files?}
+         *      Point of View
+         *          {list of simple boxes with eye and color}
+         *      Traces
+         *          {2 levels: tx level and then rx level}
+         *      Kpis
+         *          {...}
+         */
+        console.log(' Populating scenarios content....');
+
+        let div = _get('#div-scenarios');
+
+        // The ID of the scenario is contained in this.cgviz.data.current_dir
+        // in case the ID already exists, it is removed and built anew
+        let div_scenario = _get('#' + this.cgviz.data.current_dir);
+        if (div_scenario !== null) {
+            div.removeChild(div_scenario);
+        }
+
+        //
+        div_scenario = this._createMenuScenarioHeader(this.cgviz.data.current_dir, 'scenario-header');
+        div.appendChild(div_scenario);
+        
+        let div_obj = this._createMenuScenarioHeader('Universe', 'obj-header'); 
+        div.appendChild(div_obj);
+        
+        let div_pov = this._createMenuScenarioHeader('PoV', 'pov-header'); 
+        div.appendChild(div_pov);
+        
+        let div_trace = this._createMenuScenarioHeader('Traces', 'trace-header'); 
+        div.appendChild(div_trace);
+        
+        let div_kpis = this._createMenuScenarioHeader('Kpis', 'kpis-header'); 
+        div.appendChild(div_kpis);        
+    }
+
+    _createMenuScenarioHeader(id_, className, innerText) {
+        /**
+         * Generic header for:
+         *  - the scenario level (the actual simulation name)
+         *  - the categories below it, qcmpov, qcmobj, qcmtrace, qcmkpis
+         * It has:
+         *  - an id_
+         *  - a class: div-scenario
+         * It contains:
+         *  - a grab icon: move scenario up/down to reorganize
+         *  - an eye icon: click and everything is HIDDEN in the view
+         *  - a name bar: name of the scenario (same as folder where data was loaded from)
+         *  - a bin icon: click and the scenario is deleted, along with all the related data and meshes
+         *  - an expand icon: click and it shows the categories under (obj, pov, trace, kpis)
+         */
+
+        innerText = innerText || id_;
+
+        let div = _el('div', id_, [className]);
+
+        let grab = _el('div', '', ['header-svg', 'weak']);
+        grab.appendChild(this.createSvg('grab'));
+        div.appendChild(grab);
+        
+        let eye = _el('div', '', ['header-svg']);
+        eye.appendChild(this.createSvg('eye_open'));
+        div.appendChild(eye);
+        
+        let name = _el('div', '', ['header-text']);
+        name.innerText = innerText;
+        div.appendChild(name);
+        
+        let bin = _el('div', '', ['header-svg']);
+        bin.appendChild(this.createSvg('delete'));
+        div.appendChild(bin);
+        
+        let expand = _el('div', '', ['header-svg']);
+        expand.appendChild(this.createSvg('down'));
+        div.appendChild(expand);
+
+        return div;
+    }
+
     __createMenuFilters() {
+        /**
+         * Filters
+         *  allow users to filter data from the heatmap
+         */
         let filters = _el('div', 'Filters', ['container-tab-content']);
 
         let title = _el('div', '', ['menu-title']);
@@ -184,6 +277,12 @@ class CgVizMenu {
     }
 
     __createMenuInteractions() {
+        /**
+         * Interactions
+         *  Allow users to toggle helpers tools like:
+         *  - show GPS coordinates unders the mouse (per tile)
+         *  - show tooltip with selectable list of KPIs
+         */
         let interactions = _el('div', 'Interactions', ['container-tab-content']);
 
         let title = _el('div', '', ['menu-title']);
@@ -194,6 +293,13 @@ class CgVizMenu {
     }
 
     __createMenuSettings() {
+        /**
+         * Settings
+         *  Allow users to change the same settings as dat.gui allowed
+         *  -   background color
+         *  -   helpers
+         *  -   show info
+         */
         let settings = _el('div', 'Settings', ['container-tab-content']);
 
         let title = _el('div', '', ['menu-title']);
@@ -207,7 +313,7 @@ class CgVizMenu {
 
     }
 
-    createModal_new() {
+    createModal() {
         /**
          * Handles loading the files and populating the menu-body
          */
@@ -414,13 +520,21 @@ class CgVizMenu {
     _eventShowFilesFromDirectory(evt) {
         // Save the directory descriptor locally
         this._directory = evt.target;
+        // Create a progress bar for each file
         this.__createModalBodyProgress();
     }
 
     _eventUploadData() {
+        /**
+         * This function is called when the upload button is pressed, 
+         * after the list of files in the chosen directory has been read
+         * 
+         * Each file is loaded and processed by the appropriate handler
+         */
         let self = this;
         console.log('loading data...');
         let files = this._directory.files;
+        let threed = {'mtl': {}, 'obj': []};
         
         let li_total = document.getElementById('li_Total');
         let totalProgressVal = li_total.getElementsByClassName('value')[0];
@@ -437,6 +551,7 @@ class CgVizMenu {
             if (ext === 'json') {                
                 let file_reader = new FileReader();
                 file_reader.readAsText(url);
+
                 file_reader.onload = function(evt){
                     let this_file = JSON.parse(evt.target.result);
                     if (file.name.includes('qcmPov')) {
@@ -447,25 +562,75 @@ class CgVizMenu {
                         self.__handleQcmKpis(this_file);
                     }
                 };
+                
                 file_reader.onprogress = function(xhr) {
                     let pCentValue = (xhr.loaded/xhr.total*100);
                     
-                    let pBar = li.getElementsByClassName('bar')[0].children[0];
-                    pBar.style.width = pCentValue + '%';
-                    let pVal = li.getElementsByClassName('value')[0];
-                    pVal.innerText = Math.round(pCentValue*100)/100 + '%';
+                    li.getElementsByClassName('bar')[0].children[0].style.width = pCentValue + '%';
+                    li.getElementsByClassName('value')[0].innerText = Math.round(pCentValue*100)/100 + '%';
                 };
+                
                 file_reader.onloadend = function() {
                     li.getElementsByClassName('bar')[0].children[0].style.width = '100%';
                     li.getElementsByClassName('value')[0].innerText = '100%';
                     // update the total
                     i_files += 1;
+                    console.log(' from json: ', i_files);
                     let pcValue = ((i_files+1)/n_files*100);
                     totalProgressBar.style.width = pcValue + '%';
                     totalProgressVal.innerText = Math.round(pcValue*100)/100 + '%';
+                    self._finishedYet(i_files, n_files);
                 };
-            }
+            } else if (ext === 'obj') {
+                threed.obj = {'li': li, 'file': url};
+            } else if (ext === 'mtl') {
+                threed.mtl = {'li': li, 'file': url};
+            }            
         } 
+        // Handling the mtl and obj files separately
+        // I assume there is only one mtl object
+        let mtl_reader = new FileReader();
+        mtl_reader.readAsText(threed.mtl.file);
+        mtl_reader.onload = function(evt) {
+            let mtl = new THREE.MTLLoader().parse(evt.target.result);
+            //mtl.setMaterialOptions({side: THREE.DoubleSide});
+            self.__handleMtl(mtl)
+        };
+        mtl_reader.onloadend = function() {
+            i_files += 1;
+            console.log(' from mtl: ', i_files);
+            self._finishedYet(i_files, n_files);
+        };
+        // I assume there is only one obj object
+        let obj_reader = new FileReader();
+        obj_reader.readAsText(threed.obj.file);
+        obj_reader.onload = function(evt) {
+            let obj = new THREE.OBJLoader().parse(evt.target.result);
+            self.__handleObj(obj)
+        };
+        obj_reader.onloadend = function() {
+            i_files += 1;
+            console.log(' from obj: ', i_files);
+            self._finishedYet(i_files, n_files);
+        };
+    }
+
+    _finishedYet(i_files, n_files) {
+        if (i_files === n_files) {
+            console.log('done');
+            this.cgviz.getRaysRange();
+            this.__populateMenuScenariosContent();
+        }
+    }
+
+    __handleMtl(thisFile) {
+        let qcmObjects = this.cgviz.data.json[this.cgviz.data.current_dir].obj;
+        qcmObjects.mtl = thisFile;
+    }
+
+    __handleObj(thisFile) {
+        let qcmObjects = this.cgviz.data.json[this.cgviz.data.current_dir].obj;
+        qcmObjects.obj = thisFile;
     }
 
     __handleQcmPov(thisFile) {
@@ -571,6 +736,9 @@ class CgVizMenu {
                 break;
             case 'eye_closed': 
                 svg = this._logoEyeClosed();
+                break;
+            case 'grab': 
+                svg = this._logoGrab();
                 break;
         }
 
@@ -783,6 +951,40 @@ class CgVizMenu {
         return svg;
     }
 
+    _logoGrab() {
+        let svg = this._svgTemplate();  
+            
+        let rectangles = [
+            {x: '35.01', y:'48.31', width: '6.44', height: '6.44'},
+            {x: '35.01', y:'35.43', width: '6.44', height: '6.44'},
+            {x: '35.01', y:'22.55', width: '6.44', height: '6.44'},
+            {x: '35.01', y:'9.67', width: '6.44', height: '6.44'},
+            {x: '22.13', y:'48.31', width: '6.44', height: '6.44'},
+            {x: '22.13', y:'35.43', width: '6.44', height: '6.44'},
+            {x: '22.13', y:'22.55', width: '6.44', height: '6.44'},
+            {x: '22.13', y:'9.67', width: '6.44', height: '6.44'}            ,
+        ];
+
+        for (let i=0; i<rectangles.length; i++) {            
+            let rect = _getRect(rectangles[i]);
+            svg.appendChild(rect);
+        }
+
+        function _getRect(opts) {
+            let rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+            
+            rect.setAttribute('x', opts.x);
+            rect.setAttribute('y', opts.y);
+            rect.setAttribute('width', opts.width);
+            rect.setAttribute('height', opts.height);
+            
+            return rect; 
+        }
+           
+
+        return svg;
+    }
+
     _svgTemplate(opts) {
         /**
          * Creates a default svg file based off the commonly used values
@@ -825,7 +1027,7 @@ class CgVizMenu {
     }        
 
     // OLD
-    createModal() {
+    createModal_old() {
         /**
          * Structure:
          *   container div
