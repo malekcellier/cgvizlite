@@ -184,30 +184,23 @@ class ThreejsWrapper {
                 up = new THREE.Vector3(0, 0, 1);
                 break;
         }
-        this.camera.up = up;
-        //this.camera.lookAt(c.lookAt.x, c.lookAt.y, c.lookAt.z);
+        this.camera.up = up;        
         this.scene.add(this.camera);
         this.createControls();
     }
 
-    resetCamera() {
-        // Make the camera look at the origin
-        this.params.camera.lookAt = {x: 0, y: 0, z: 0};
-        this.createCamera(); // TODO save the current camera position and restore it
-    }
-
-    centerCamera(name) {
-        // Make the camera look at the center of the obj
-        let obj = this.scene.getObjectByName(name);
-        if (obj == null) {
-            console.log('no object called: ', name);
-            return;
+    centerCamera(center) {
+        center = center || 'origin';
+        if (center === 'scene') {
+            let limits = this.findCenter();
+            this.params.camera.lookAt = {x: limits.center.x, y: limits.center.y, z: limits.center.z};
+        } else {
+            // Make the camera look at the origin
+            this.params.camera.lookAt = {x: 0, y: 0, z: 0};            
         }
-        return;
-        obj.geometry.computeBoundingSphere();
-        let c = obj.geometry.boundingSphere.center;
-        this.params.camera.lookAt = {x: c.x, y: c.y, z: c.z};
+
         this.createCamera();
+
     }
 
     createRenderer() {
@@ -235,6 +228,9 @@ class ThreejsWrapper {
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.25;
         this.controls.rotateSpeed = 1.0;
+        // Look at a specific point in space
+        let c = this.params.camera.lookAt;
+        this.controls.target.set(c.x, c.y, c.z);
     }
 
     createHelpers() {        
@@ -469,6 +465,54 @@ class ThreejsWrapper {
             return false;
         } else {
             return true;
+        }
+    }
+
+    findCenter(method) {
+        /**
+         * Calculates the center of the scene
+         */
+        method = method || 'box';
+        if (method === 'box') {
+
+            let limits = {
+                center: {x: null, y: null, z: null},
+                min: {x: Infinity, y: Infinity, z: Infinity}, 
+                max: {x: -Infinity, y: -Infinity, z: -Infinity}
+            };
+            this.scene.traverse( function ( child ) {        
+                if ( child instanceof THREE.Mesh ) {    
+                    child.geometry.computeBoundingBox();
+                    let bb = child.geometry.boundingBox;
+                    if (bb.max.x > limits.max.x) {
+                        limits.max.x = bb.max.x;
+                    }
+                    if (bb.min.x < limits.min.x) {
+                        limits.min.x = bb.min.x;
+                    }
+                    if (bb.max.y > limits.max.y) {
+                        limits.max.y = bb.max.y;
+                    }
+                    if (bb.min.y < limits.min.y) {
+                        limits.min.y = bb.min.y;
+                    }
+                    if (bb.max.z > limits.max.z) {
+                        limits.max.z = bb.max.z;
+                    }
+                    if (bb.min.z < limits.min.z) {
+                        limits.min.z = bb.min.z;
+                    }
+                }    
+            });
+            // The center is calculated to be the min offset by half the dimensions
+            limits.center.x = (limits.max.x + limits.min.x)/2;
+            limits.center.y = (limits.max.y + limits.min.y)/2;
+            limits.center.z = (limits.max.z + limits.min.z)/2;
+            
+            return limits;
+
+        } else { // fallback to sphere
+            // Is there a meaningful way to combine various spheres? :-/
         }
     }
 
