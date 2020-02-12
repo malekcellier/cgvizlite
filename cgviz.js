@@ -159,9 +159,28 @@ class CgVizJs extends ThreejsWrapper {
             //let mesh = new THREE.Mesh(group, material);
             mesh.name = name;
             this.scene.add(mesh);
-            this.centerCamera(name);
+            //this.centerCamera(name);
             console.log(' > added object: ', name);
         }
+    }
+
+    toggleGroundPlane() {
+        const name = 'GroundPlane_' + this.data.current_dir;
+        if (this.isObjectInScene(name)) {
+            this.removeFromScene(name);
+            console.log(' > removed object: ', name);
+        } else {
+            let spans = this.getCurrentData().limits;
+            let x_span = spans.max.x - spans.min.x;
+            let y_span = spans.max.y - spans.min.y;
+            let geometry = new THREE.PlaneBufferGeometry(x_span, y_span);
+            // move the plane
+            geometry.translate(spans.min.x + x_span/2, spans.min.y + y_span/2, 0);
+            let material = new THREE.MeshPhongMaterial({color: 0x29323C, side: THREE.DoubleSide});
+            let plane = new THREE.Mesh(geometry, material);
+            plane.name = name;
+            this.scene.add(plane);
+        }        
     }
 
     togglePov(povId) {
@@ -315,194 +334,3 @@ class CgVizJs extends ThreejsWrapper {
 var cgviz = new CgVizJs({menu: new CgVizMenu()});
 cgviz.start();
 cgviz.updateBackgroundColor(0x102030);
-
-
-// Add an event to the directory selector
-document.getElementById("scenario-loader_").addEventListener("change", function(event) {
-    let output = document.getElementById("listing");
-    let files = event.target.files;
-    if (files.length==0) {
-        return;
-    }
-  
-    let dir_name = files[0].webkitRelativePath.split('/')[0];
-    cgviz.data.current_dir = dir_name;
-    cgviz.data.json[dir_name] = {
-        'qcmPov': {},
-        'qcmKpis': {},
-        'qcmTrace': {},
-        'obj': {'obj': null, 'mtl': null},
-        'files': []
-    };
-
-    for (let i=0; i<files.length; i++) {
-        let file = files[i];
-        let parts = file.webkitRelativePath.split('/');
-        // We ignore the subdirectories
-        if (parts.length > 2) {
-            continue;
-        }
-        // The files belong to the following categories: qcmPov, qcmKpis, qcmTrace, obj and mtl
-        if (file.name.includes('.json')) {
-            const fileread = new FileReader();
-            fileread.onload = function() {
-                // console.log("name: ", file.name, " type: ", typeof fileread.result);
-                // console.log(fileread.result);
-                let name_parts = parts[1].split('.');
-                let this_file = JSON.parse(fileread.result);
-
-                if (parts[1].includes('qcmPov')) {
-                    // the file name is built like so: qcmPov.Rx22.json
-                    cgviz.data.json[dir_name].qcmPov[this_file.tag] = this_file;
-
-                } else if (parts[1].includes('qcmKpis')) {
-                    // handling the nfo case first
-                    cgviz.data.json[dir_name].qcmKpis[name_parts[1]] = this_file;                    
-
-                } else if (parts[1].includes('qcmTrace')) {
-                    // the file name can be built in various ways:
-                    //      - qcmTrace.Tx01-Rx17.json
-                    //      - qcmTrace.BS-1-UE-1.json
-                    //      - qcmTrace.BS1-MS1.json
-                    //      - qcmTrace.PoleArray-1-UE-1.json
-                    // we count the levels
-                    let all_parts = name_parts[1].split('-');
-                    let n = all_parts.length;
-                    let txId;
-                    let rxId;
-                    if (n==2) {
-                        txId = all_parts[0];
-                        rxId = all_parts[1];
-                    } else if (n==4) {
-                        txId = all_parts[0] + '-' + all_parts[1];
-                        rxId = all_parts[2] + '-' + all_parts[3];
-                    } else {
-                        console.log('wtf');
-                    }
-
-                    if (!cgviz.data.json[dir_name].qcmTrace.hasOwnProperty(txId)) {
-                        cgviz.data.json[dir_name].qcmTrace[txId] = {};
-                    }
-                    cgviz.data.json[dir_name].qcmTrace[txId][rxId] = this_file;
-
-                    // Saving the min/max
-                    // TODO: make seprate operation somewhere else
-                    for (let i=0; i<this_file.length; i++) {
-                        if (this_file[i].P < cgviz.data.ranges.qcmTrace.min) {
-                            cgviz.data.ranges.qcmTrace.min = this_file[i].P;
-                        } else if (this_file[i].P > cgviz.data.ranges.qcmTrace.max) {
-                            cgviz.data.ranges.qcmTrace.max = this_file[i].P;
-                        }
-                    }
-
-                    /*
-                    let ids = name_parts[1].split('-');
-                    */
-                }
-            };
-            fileread.readAsText(file);
-
-        } else if (file.name.includes('.obj')) {
-            const fileread = new FileReader();
-            fileread.onload = function(event) {
-                /*
-                let name_parts = parts[1].split('.');
-                let this_file = JSON.parse(fileread.result);
-                cgviz.data.json[dir_name].obj.obj = this_file;
-                */
-                
-                //let objFileContent = fileread.result;
-                //objFileContent = objFileContent.replace('data:;base64,', '');
-                //objFileContent = window.atob(objFileContent);
-                //cgviz.data.json[dir_name].obj.obj = objFileContent;
-                let contents = event.target.result;
-
-                let object = new THREE.OBJLoader().parse( contents );
-                
-                cgviz.data.json[dir_name].obj.obj = object;
-            };
-
-            fileread.readAsText(file);
-
-            //cgviz.data.json[dir_name].obj.obj = files[i];
-
-        } else if (file.name.includes('.mtl')) {
-            const fileread = new FileReader();
-            fileread.onload = function(event) {
-                //let mtlFileContent = fileread.result;
-                //mtlFileContent = mtlFileContent.replace('data:;base64,', '');
-                //mtlFileContent = window.atob(mtlFileContent);
-                //cgviz.data.json[dir_name].obj.mtl = mtlFileContent;
-                //cgviz.data.json[dir_name].obj.mtl = URL.createObjectURL(mtlFileContent);
-                let contents = event.target.result;
-
-                let object = new THREE.MTLLoader().parse( contents );
-                
-                cgviz.data.json[dir_name].obj.mtl = object;
-            }
-            fileread.readAsText(file);
-
-            //cgviz.data.json[dir_name].obj.mtl = file;
-
-        }
-
-        cgviz.data.json[dir_name].files.push(file);
-
-        console.log('file ', i, ' of ', files.length);
-        
-    }
-    // Build a simple menu structure
-    let menu = document.getElementById('menu');
-    // First level is that of the directories
-    let categories = Object.keys(cgviz.data.json); 
-    for (let i=0; i<categories.length; i++) {
-     // Second level is that of the categories qcmPov, qcmKpis, qcmTrace..  
-        // Adding name of the category
-        let category = document.createElement('li');
-        category.innerHTML = categories[i];
-        output.appendChild(category);          
-        for (let j=0; j<cgviz.data.json[dir_name].files.length; j++) {
-            let name = cgviz.data.json[dir_name].files[j].name;
-            console.log(name);
-            
-            if (name.includes('.mtl')) {
-               continue; 
-            }
-            
-            let div = document.createElement('div');
-            
-            let btn = document.createElement('button');
-            btn.innerHTML = 'show: ' + name;
-            btn.addEventListener('click', function(evt) {
-                let text = evt.target.parentElement.lastElementChild.innerText;
-                console.log(text);
-                if (text.includes('qcmPov')) {
-                    // toggle pov
-                    cgviz.togglePov(name.split('.')[1]);
-                } else if (text.includes('qcmKpis')) {
-                    // toggle heatmap of kpi
-                } else if (text.includes('qcmTrace')) {
-                    // toggle trace
-                    let tx_rx = name.split('.')[1].split('-');
-                    if (tx_rx.length==2) {
-                        cgviz.toggleRays(tx_rx[0], tx_rx[1]);
-                    } else if (tx_rx.length==4) {
-                        cgviz.toggleRays(tx_rx[0] + '-' + tx_rx[1], tx_rx[2] + '-' + tx_rx[3]);
-                    }
-                } else if (text.includes('obj')) {
-                    cgviz.toggleObj();
-                }
-            }, true);
-
-            //div.appendChild(btn);
-            let item = document.createElement('li');
-            item.appendChild(btn);
-            output.appendChild(item);
-            /*
-            item.innerHTML = ' ' + name;
-            div.appendChild(item);
-            output.appendChild(div);
-            */
-        }
-    };
-  }, false);
