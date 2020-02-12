@@ -6,7 +6,7 @@
 :: this file aims at starting cg-viz-light
 
 echo off
-title cg-viz-light
+title cg-viz-lite
 
 :: echo opening browser...
 :: start /B http://localhost:8011

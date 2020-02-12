@@ -1,16 +1,13 @@
-# cg-viz-light
+# cg-viz-lite
 Visualizer for Coffe Grinder
 
 # Getting started
 
 * Install python (you can find instructions [here](http:///wikis/home))
-* Maybe it is necessary to install the libs for cg-universe-osm. You can find the instructions in the readme file for cg-universe-osm [here](http://-universe-osm) (Running cg-viz without these libs have not been tested)
-* Clone cg-viz-light repository
-* cd &lt;cg-viz root>
-* Run run "pip install --no-index --find-links ./py_libs/ -r requirements.txt "
+* Clone cg-viz-lite repository
 
-## How to
-Configure sys in QCM to enable the visualizer:
+## How to get results
+In order to get simulation results to display, configure sys in QCM to enable the visualizer:
 
     enableViz             = true
     cgvizPath             = '../cg-viz'
@@ -20,8 +17,10 @@ This will put output for the visualizer in the folder 'd:/temp/outputQcm'. You w
 
 Launch the visualization server by running the command
 
-    cg_viz.start
+    ./start.bat
 
-in Matlab.
+in a command line editor inside the cloned folder.
 
-This will launch a browser window for your default browser. **Note that the visualizer is only tested in Chrome.**
+This may or may not launch a browser window. Otherwise open one tab and navigate to the address: localhost:8011
+
+**Note that the visualizer is tested in Chrome & FIrefox.**
