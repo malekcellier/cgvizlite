@@ -44,9 +44,9 @@ class CgVizMenu {
         // The main menu
         let menu_main = _el('div', 'menu-main', ['hidden']);
         // The main menus's head
-        menu_main.appendChild(this._createMenuHead());        
+        menu_main.appendChild(this._createMenu_Head());        
         // The main menu's body        
-        menu_main.appendChild(this._createMenuBody());
+        menu_main.appendChild(this._createMenu_Body());
         
         // The menu control
         let menu_ctrl = _el('div', 'menu-control');
@@ -60,7 +60,7 @@ class CgVizMenu {
         document.body.appendChild(menu);
     }
     
-    _createMenuHead() {
+    _createMenu_Head() {
         /**
          * The menu head has 2 parts:
          *      the logo
@@ -68,33 +68,52 @@ class CgVizMenu {
          */
         let head_container = _el('div', 'menu-main-head-container');
 
-        head_container.appendChild(this.__createMenuMainHead());
+        head_container.appendChild(this.__createMenu_MainHead());
         
-        head_container.appendChild(this.__createMenuMainHeadTabs());
+        head_container.appendChild(this.__createMenu_MainHeadTabs());
 
         return head_container;
     }
 
-    __createMenuMainHead() {
+    __createMenu_MainHead() {
         let head = _el('div', 'menu-main-head');
 
+        // Head left contains the LOGO and Titles
+        let head_left = _el('div', 'menu-main-head-left');
+        head.appendChild(head_left);
+        // Head right contains the icons for bug report, share, info
+        let head_right = _el('div', 'menu-main-head-right');
+        head.appendChild(head_right);
+
+        // HEad LEFT
         // The cgviz logo with 2 circles
         let logo = _el('div', 'menu-main-head-logo-svg');
         logo.appendChild(this.createSvg('cgviz'));
-        head.appendChild(logo);
-
+        head_left.appendChild(logo);
         // The title and subtitle
         let title = _el('div', 'menu-main-head-logo');
         title.innerText = 'cg-viz';
         let subtitle = _el('div', 'menu-main-head-logo-subtitle');
         subtitle.appendChild(document.createTextNode('lite'));
-        title.appendChild(subtitle);
-        head.append(title);
+        title.appendChild(subtitle);        
+        head_left.append(title);
+
+        // HEAD RIGHT
+        let bug = _el('div', '', ['top-icon']);
+        bug.appendChild(this.createSvg('bug'));
+        bug.addEventListener('click', () => { window.open('https://www.w3schools.com', '_blank'); });
+        head_right.appendChild(bug);
+        let info = _el('div', '', ['top-icon']);
+        info.appendChild(this.createSvg('info'));
+        head_right.appendChild(info);
+        let share = _el('div', '', ['top-icon']);
+        share.appendChild(this.createSvg('share'));
+        head_right.appendChild(share);
 
         return head;
     }
 
-    __createMenuMainHeadTabs() {
+    __createMenu_MainHeadTabs() {
         /**
          *  One tab per menu category:
          *      scenarios
@@ -127,7 +146,7 @@ class CgVizMenu {
         return head_tabs;
     }
 
-    _createMenuBody() {
+    _createMenu_Body() {
         /**
          * The menu body contains as many divs as there are categories:
          *      scenarios
@@ -138,7 +157,7 @@ class CgVizMenu {
          */
         let main_body = _el('div', 'menu-main-body');
 
-        main_body.appendChild(this.__createMenuScenarios());
+        main_body.appendChild(this.__createMenu_Scenarios());
         main_body.appendChild(this.__createMenuFilters());
         main_body.appendChild(this.__createMenuInteractions());
         main_body.appendChild(this.__createMenuSettings());
@@ -147,7 +166,7 @@ class CgVizMenu {
 
     }
 
-    __createMenuScenarios() {
+    __createMenu_Scenarios() {
         let scenarios = _el('div', 'Scenarios', ['container-tab-content', 'visible']);
         
         let title = _el('div', '', ['menu-title']);
@@ -155,7 +174,7 @@ class CgVizMenu {
         scenarios.appendChild(title);
 
         // A visiual separator
-        scenarios.appendChild(_el('hr', 'scenarios-title-body-separator'));
+        scenarios.appendChild(_el('hr', '', ['title-body-separator']));
 
         // A container for the scenario data
         scenarios.appendChild(_el('div', 'div-scenarios'));
@@ -202,21 +221,143 @@ class CgVizMenu {
             div.removeChild(div_scenario);
         }
 
-        //
+        // 1) THE HEADER
         div_scenario = this._createMenuScenarioHeader(this.cgviz.data.current_dir, 'scenario-header');
+        // attach en event to the click on the expand element
+        div_scenario.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         div.appendChild(div_scenario);
+
+        // 2) THE CONTENT
+        let sce_content = _el('div', '', ['scenario-content', 'hidden']);
+        div.appendChild(sce_content);
+        // 2.1) The universe
+        // 2.1.1) the header
+        let obj_header = this._createMenuScenarioHeader('Universe', 'obj-header'); 
+        sce_content.appendChild(obj_header);
+        obj_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+        // 2.1.2) the content
+        let obj_content = _el('div', '', ['obj-content', 'hidden']);
+        obj_content.appendChild(this._createSubMenu('3d.obj'));
+        obj_content.getElementsByClassName('header-svg')[0].addEventListener('click', (evt) => this._eventToggleObj(evt));
+        //obj_content.appendChild(this._createSubMenu('3d.mtl'));
+        obj_content.appendChild(this._createSubMenu('ground plane'));
+        obj_content.getElementsByClassName('header-svg')[1].addEventListener('click', (evt) => this._eventToggleGroundPlane(evt));
+        sce_content.appendChild(obj_content);
         
-        let div_obj = this._createMenuScenarioHeader('Universe', 'obj-header'); 
-        div.appendChild(div_obj);
+        // 2.2) The Point of Views
+        // 2.2.1) the header
+        let pov_header = this._createMenuScenarioHeader('PoV', 'pov-header'); 
+        sce_content.appendChild(pov_header);
+        pov_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+        // 2.2.2) the content
+        //let pov_content = _el('div', '', ['pov-content', 'hidden']);
+        let pov_content = this.__populatePovContent();
+        sce_content.appendChild(pov_content);
+        // The point of view are:
+        // - grouped by name
+        // - represented by small boxes the size of up to 4 digits, for the POV ID
+        // TODO: general module to group the boxes by 50s for ex
+        //this.__populatePovContent(pov_content);
         
-        let div_pov = this._createMenuScenarioHeader('PoV', 'pov-header'); 
-        div.appendChild(div_pov);
+        // 2.3) The traces:
+        // 2.3.1) the header
+        let trace_header = this._createMenuScenarioHeader('Traces', 'trace-header'); 
+        sce_content.appendChild(trace_header);
+        trace_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+        // 2.3.2) the content
+        let trace_content = this.__populateTraceContent();
+        sce_content.appendChild(trace_content);
+        // The Traces are:
+        // - grouped by Tx name, then by Rx name
+        // - represented by small boxes the size of up to 4 digits, for the Rx ID
         
-        let div_trace = this._createMenuScenarioHeader('Traces', 'trace-header'); 
-        div.appendChild(div_trace);
         
-        let div_kpis = this._createMenuScenarioHeader('Kpis', 'kpis-header'); 
-        div.appendChild(div_kpis);        
+        // 2.4) The kpis
+        // 2.4.1) the header
+        let kpis_header = this._createMenuScenarioHeader('Kpis', 'kpis-header'); 
+        sce_content.appendChild(kpis_header);        
+        // 2.4.2) the content
+        let kpis_content = _el('div', '', ['kpis-content', 'hidden']);
+        sce_content.appendChild(kpis_content);
+        // The kpis are:
+        //  -
+    }
+
+    __populatePovContent() {
+        /**
+         *  The point of view are:
+         *      - grouped by name
+         *      - represented by small boxes the size of up to 4 digits, for the POV ID
+         *  TODO: general module to group the boxes by 50s for ex
+         */
+        // pov_content is the div
+        // TODO: change the key
+        let qcmPov = this.cgviz.data.json[this.cgviz.data.current_dir].qcmPov;
+        let pov_types = Object.keys(qcmPov);
+        if (pov_types.length === 0) {
+            console.log('No data in qcmPov');
+            return;
+        }
+        let pov_content = _el('div', '', ['pov-content', 'hidden']);
+
+        let pov_type;
+        for (let i=0; i<pov_types.length; i++) {
+            pov_type = pov_types[i];
+            let submenu = this._createSubMenu(pov_type, '', true);
+            pov_content.appendChild(submenu);
+            submenu.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));;
+            let submenu_content = _el('div', '', ['sub-menu-content', 'hidden']);            
+            let pov_ids = Object.keys(qcmPov[pov_type]).sort();
+            for (let j=0; j<pov_ids.length; j++) {
+                let item = _el('div', '', ['sub-menu-content-pov']);
+                submenu_content.appendChild(item);
+                let span = _el('span');
+                span.innerText = pov_ids[j];
+                item.appendChild(span);
+                //item.addEventListener('click', (evt) => {evt.target.classList.toggle('clicked');});
+                item.addEventListener('click', (evt) => this._eventTogglePov(evt));
+            }
+            pov_content.appendChild(submenu_content);
+        }
+
+        return pov_content;
+
+    }
+
+    __populateTraceContent() {
+        // The Traces are:
+        // - grouped by Tx name, then by Rx name
+        // - represented by small boxes the size of up to 4 digits, for the Rx ID
+        let qcmTrace = this.cgviz.data.json[this.cgviz.data.current_dir].qcmTrace;
+        let tx_ids = Object.keys(qcmTrace).sort();
+        if (tx_ids.length === 0) {
+            console.log('No data in qcmTrace');
+            return;
+        }
+
+        let trace_content = _el('div', '', ['trace-content', 'hidden']);
+        
+        let tx_id;        
+        for (let i=0; i<tx_ids.length; i++) {
+            tx_id = tx_ids[i];
+            let submenu = this._createSubMenu(tx_id, '', true);
+            trace_content.appendChild(submenu);
+            submenu.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+            let submenu_content = _el('div', '', ['sub-menu-content', 'hidden']);  
+            let rx_ids = Object.keys(qcmTrace[tx_id]).sort();
+            for (let j=0; j<rx_ids.length; j++) {
+                let item = _el('div', '', ['sub-menu-content-trace']);
+                submenu_content.appendChild(item);
+                let span = _el('span');
+                span.innerText = rx_ids[j];
+                item.appendChild(span);
+                //item.addEventListener('click', (evt) => {evt.target.classList.toggle('clicked');});
+                item.addEventListener('click', (evt) => this._eventToggleTrace(evt));
+            }
+            trace_content.appendChild(submenu_content);
+        }
+
+        return trace_content;
     }
 
     _createMenuScenarioHeader(id_, className, innerText) {
@@ -255,10 +396,38 @@ class CgVizMenu {
         bin.appendChild(this.createSvg('delete'));
         div.appendChild(bin);
         
-        let expand = _el('div', '', ['header-svg']);
+        let expand = _el('div', '', ['header-svg', 'expand']);
         expand.appendChild(this.createSvg('down'));
         div.appendChild(expand);
 
+        return div;
+    }
+
+    _createSubMenu(innerText, id_, expand) {
+        /**
+         * Contains a title and an eye
+         */
+        expand = expand || false;
+        if (id_ === '') {
+            id_ = null;
+        }
+
+        let div = _el('div', id_, ['sub-menu']);
+
+        let eye = _el('div', '', ['header-svg']);
+        eye.appendChild(this.createSvg('eye_open'));
+        div.appendChild(eye);
+        
+        let name = _el('div', '', ['header-text']);
+        name.innerText = innerText;
+        div.appendChild(name);
+
+        if (expand == true) {
+            let expand = _el('div', '', ['header-svg', 'expand']);
+            expand.appendChild(this.createSvg('down'));
+            div.appendChild(expand);            
+        }
+        
         return div;
     }
 
@@ -272,6 +441,9 @@ class CgVizMenu {
         let title = _el('div', '', ['menu-title']);
         title.innerText = 'Filters';
         filters.appendChild(title);        
+        
+        // A visiual separator
+        filters.appendChild(_el('hr', '', ['title-body-separator']));
 
         return filters;
     }
@@ -288,6 +460,9 @@ class CgVizMenu {
         let title = _el('div', '', ['menu-title']);
         title.innerText = 'Interactions';
         interactions.appendChild(title);
+        
+        // A visiual separator
+        interactions.appendChild(_el('hr', '', ['title-body-separator']));
 
         return interactions;
     }
@@ -305,6 +480,9 @@ class CgVizMenu {
         let title = _el('div', '', ['menu-title']);
         title.innerText = 'Settings';
         settings.appendChild(title);        
+        
+        // A visiual separator
+        settings.appendChild(_el('hr', '', ['title-body-separator']));
 
         return settings;
     }
@@ -483,7 +661,7 @@ class CgVizMenu {
         if (m.classList.contains('hidden')) {
             mcsvg.style.transform = 'rotate(0deg)';
         } else {
-            mcsvg.style.transform = 'rotate(180deg)';
+            mcsvg.style.transform = 'rotate(180deg';
         }
     }
 
@@ -530,6 +708,7 @@ class CgVizMenu {
          * after the list of files in the chosen directory has been read
          * 
          * Each file is loaded and processed by the appropriate handler
+         * TODO: use promises instead of this _finishedYet solution
          */
         let self = this;
         console.log('loading data...');
@@ -576,13 +755,14 @@ class CgVizMenu {
                     // update the total
                     i_files += 1;
                     console.log(' from json: ', i_files);
-                    let pcValue = ((i_files+1)/n_files*100);
+                    let pcValue = i_files/n_files*100;
                     totalProgressBar.style.width = pcValue + '%';
                     totalProgressVal.innerText = Math.round(pcValue*100)/100 + '%';
                     self._finishedYet(i_files, n_files);
                 };
             } else if (ext === 'obj') {
                 threed.obj = {'li': li, 'file': url};
+                self.cgviz.data.json
             } else if (ext === 'mtl') {
                 threed.mtl = {'li': li, 'file': url};
             }            
@@ -591,14 +771,25 @@ class CgVizMenu {
         // I assume there is only one mtl object
         let mtl_reader = new FileReader();
         mtl_reader.readAsText(threed.mtl.file);
+        let li = threed.mtl.li;
         mtl_reader.onload = function(evt) {
             let mtl = new THREE.MTLLoader().parse(evt.target.result);
             //mtl.setMaterialOptions({side: THREE.DoubleSide});
             self.__handleMtl(mtl)
         };
+        mtl_reader.onprogress = function(xhr) {
+            let pCentValue = (xhr.loaded/xhr.total*100);            
+            threed.mtl.li.getElementsByClassName('bar')[0].children[0].style.width = pCentValue + '%';
+            threed.mtl.li.getElementsByClassName('value')[0].innerText = Math.round(pCentValue*100)/100 + '%';
+        };
         mtl_reader.onloadend = function() {
+            threed.mtl.li.getElementsByClassName('bar')[0].children[0].style.width = '100%';
+            threed.mtl.li.getElementsByClassName('value')[0].innerText = '100%';
             i_files += 1;
             console.log(' from mtl: ', i_files);
+            let pcValue = i_files/n_files*100;
+            totalProgressBar.style.width = pcValue + '%';
+            totalProgressVal.innerText = Math.round(pcValue*100)/100 + '%';
             self._finishedYet(i_files, n_files);
         };
         // I assume there is only one obj object
@@ -608,9 +799,19 @@ class CgVizMenu {
             let obj = new THREE.OBJLoader().parse(evt.target.result);
             self.__handleObj(obj)
         };
+        obj_reader.onprogress = function(xhr) {
+            let pCentValue = (xhr.loaded/xhr.total*100);            
+            threed.obj.li.getElementsByClassName('bar')[0].children[0].style.width = pCentValue + '%';
+            threed.obj.li.getElementsByClassName('value')[0].innerText = Math.round(pCentValue*100)/100 + '%';
+        };
         obj_reader.onloadend = function() {
+            threed.obj.li.getElementsByClassName('bar')[0].children[0].style.width = '100%';
+            threed.obj.li.getElementsByClassName('value')[0].innerText = '100%';
             i_files += 1;
             console.log(' from obj: ', i_files);
+            let pcValue = i_files/n_files*100;
+            totalProgressBar.style.width = pcValue + '%';
+            totalProgressVal.innerText = Math.round(pcValue*100)/100 + '%';
             self._finishedYet(i_files, n_files);
         };
     }
@@ -631,6 +832,8 @@ class CgVizMenu {
     __handleObj(thisFile) {
         let qcmObjects = this.cgviz.data.json[this.cgviz.data.current_dir].obj;
         qcmObjects.obj = thisFile;
+        // Find the limits of the scene in order to display a plane..
+        this.cgviz.data.json[this.cgviz.data.current_dir].limits = this.cgviz.findCenter();
     }
 
     __handleQcmPov(thisFile) {
@@ -681,6 +884,46 @@ class CgVizMenu {
 
     }
 
+    _eventToggleNextSibling(evt) {
+        // add/remove the hidden key word to the target's classList
+        // the target is in the *-header
+        // the element to hide is the following *-content
+        evt.target.parentNode.nextSibling.classList.toggle('hidden');
+        // Applying a rotation
+        let svg = evt.target.querySelector('svg');
+        if (evt.target.parentNode.nextSibling.classList.contains('hidden')) {
+            svg.setAttribute('transform', 'rotate(0)');
+        } else {
+            svg.setAttribute('transform', 'rotate(180)');
+        }
+    }
+
+    _eventToggleObj(evt) {
+        // toggle icon between eye-open to eye-closed
+        // show object
+        this.cgviz.toggleObj();
+    }
+
+    _eventTogglePov(evt) {
+        evt.target.classList.toggle('clicked');
+        let pov_type = evt.target.parentNode.previousSibling.querySelector('.header-text').innerText;
+        let pov_id = evt.target.querySelector('span').innerText;
+        let pov = pov_type + pov_id;
+        this.cgviz.togglePov(pov);
+    }
+
+    _eventToggleTrace(evt) {
+        evt.target.classList.toggle('clicked');
+        let tx_pov = evt.target.parentNode.previousSibling.querySelector('.header-text').innerText;
+        let rx_pov = evt.target.querySelector('span').innerText;
+        this.cgviz.toggleRays(tx_pov, rx_pov);
+    }
+
+    _eventToggleGroundPlane(evt) {
+        // Here we should find out the scenario name and pass it
+        this.cgviz.toggleGroundPlane();
+    }
+
     // SVG and ICONS
 
     createSvg(name) {
@@ -708,6 +951,18 @@ class CgVizMenu {
                 break;
             case 'bug': 
                 svg = this._logoBug();
+                break;
+            case 'share': 
+                svg = this._logoShare();
+                break;
+            case 'info': 
+                svg = this._logoInfo();
+                break;
+            case 'legend': 
+                svg = this._logoLegend();
+                break;
+            case 'dual': 
+                svg = this._logoDual();
                 break;
             case 'add': 
                 svg = this._logoAdd();
@@ -829,6 +1084,111 @@ class CgVizMenu {
         g.appendChild(path1);
         svg.appendChild(g);
         
+        return svg;
+    }
+
+    _logoShare() {
+        let svg = this._svgTemplate();
+        
+        let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+        path.setAttribute('d', 'M49.26,56.17H14.74a6.91,6.91,0,0,1-6.91-6.91V32a3.45,3.45,0,1,1,6.91,0V49.26H49.26V32a3.45,3.45,0,1,1,6.91,0V49.26A6.91,6.91,0,0,1,49.26,56.17Z');
+        
+        let path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+        path1.setAttribute('d', 'M44.81,24.08a3.5,3.5,0,0,1-4.9,0l-4.45-4.45V35.44a3.45,3.45,0,0,1-6.91,0V19.62l-4.45,4.45a3.5,3.5,0,0,1-4.9,0,3.44,3.44,0,0,1,0-4.87L29.55,8.85a6,6,0,0,1,.52-.45,2.61,2.61,0,0,1,.62-.31,3.45,3.45,0,0,1,2.62,0,2.61,2.61,0,0,1,.62.31,6,6,0,0,1,.52.45L44.81,19.21A3.44,3.44,0,0,1,44.81,24.08Z');
+        
+        svg.appendChild(path);
+        svg.appendChild(path1);
+
+        return svg;
+    }
+
+    _logoInfo() {
+        let svg = this._svgTemplate();
+        
+        let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+        path.setAttribute('d', 'M23.62,23.41a1,1,0,0,1,.39.08,1,1,0,0,0-.78,0A1,1,0,0,1,23.62,23.41Z');
+        svg.appendChild(path);
+        
+        let path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+        path1.setAttribute('d', 'M32,57.5A24.83,24.83,0,1,1,56.83,32.67,24.86,24.86,0,0,1,32,57.5Zm0-44.86a20,20,0,1,0,20,20A20,20,0,0,0,32,12.64Z');
+        svg.appendChild(path1);
+        
+        let rect1 = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+        rect1.setAttribute('x', "28.8");
+        rect1.setAttribute('y', "29.46");
+        rect1.setAttribute('width', "6.41");
+        rect1.setAttribute('height', "16.02");
+        rect1.setAttribute('rx', "1.6");
+        rect1.setAttribute('ry', "1.6");
+        svg.appendChild(rect1);
+        
+        let rect2 = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+        rect2.setAttribute('x', "28.8");
+        rect2.setAttribute('y', "19.85");
+        rect2.setAttribute('width', "6.41");
+        rect2.setAttribute('height', "6.41");
+        rect2.setAttribute('rx', "1.6");
+        rect2.setAttribute('ry', "1.6");
+        svg.appendChild(rect2);
+        
+        return svg;
+    }
+
+    _logoLegend() {
+        let svg = this._svgTemplate({'width': '22px', 'height': '22px'});
+        
+        let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+        path.setAttribute('d', 'M29.78,45.89v5.56H46.44V45.89Zm-11.11,0v5.56h5.56V45.89ZM29.78,34.78v5.56H46.44V34.78Zm-11.11,0v5.56h5.56V34.78ZM29.78,23.67v5.56H46.44V23.67Zm-11.11,0v5.56h5.56V23.67ZM29.78,12.56v5.56H46.44V12.56Zm-11.11,0v5.56h5.56V12.56ZM15.89,7H49.22A2.78,2.78,0,0,1,52,9.78V54.22A2.78,2.78,0,0,1,49.22,57H15.89a2.78,2.78,0,0,1-2.78-2.78V9.78A2.78,2.78,0,0,1,15.89,7Z');
+        svg.appendChild(path);
+
+        return svg;
+    }
+
+    _logoDual() {
+        let svg = this._svgTemplate({'width': '18px', 'height': '18px'});
+        
+        let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+        path.setAttribute('d', 'M19.5,47.4137931 C19.5,48.8421157 20.6192881,50 22,50 C23.3807119,50 24.5,48.8421157 24.5,47.4137931 L24.5,2.5862069 C24.5,1.15788427 23.3807119,0 22,0 C20.6192881,0 19.5,1.15788427 19.5,2.5862069 L19.5,47.4137931 Z');
+        
+        let rect1 = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+        rect1.setAttribute('x', '0');
+        rect1.setAttribute('y', '4');
+        rect1.setAttribute('width', '44');
+        rect1.setAttribute('height', '5');
+        rect1.setAttribute('rx', '2.5');
+        
+        let rect2 = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+        rect2.setAttribute('transform', "translate(2.500000, 24.500000) rotate(90.000000) translate(-2.500000, -24.500000)");
+        rect2.setAttribute('x', '-18');
+        rect2.setAttribute('y', '22');
+        rect2.setAttribute('width', '41');
+        rect2.setAttribute('height', '5');
+        rect2.setAttribute('rx', '2.5');
+        
+        let rect3 = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+        rect3.setAttribute('transform', "translate(41.500000, 25.000000) rotate(90.000000) translate(-41.500000, -25.000000)");
+        rect3.setAttribute('x', '20.5');
+        rect3.setAttribute('y', '22.5');
+        rect3.setAttribute('width', '42');
+        rect3.setAttribute('height', '5');
+        rect3.setAttribute('rx', '2.5');
+        
+        let rect4 = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+        rect4.setAttribute('x', '0');
+        rect4.setAttribute('y', '41');
+        rect4.setAttribute('width', '44');
+        rect4.setAttribute('height', '5');
+        rect4.setAttribute('rx', '2.5');
+
+        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute('transform', "translate(7.500000, 7.500000)");
+        g.appendChild(path);
+        g.appendChild(rect1);
+        g.appendChild(rect2);
+        g.appendChild(rect3);
+        g.appendChild(rect4);
+        svg.appendChild(g);    
+      
         return svg;
     }
 
@@ -1026,502 +1386,6 @@ class CgVizMenu {
         return rect;
     }        
 
-    // OLD
-    createModal_old() {
-        /**
-         * Structure:
-         *   container div
-         *     content div
-         *       close x span
-         *       text p => replace with 
-         * 
-         * modal
-         *   modal-content
-         */
-        let container = document.createElement('div');
-        container.classList.add('modal');
-        container.id = 'modal';
-
-        let content = document.createElement('div');
-        content.classList.add('modal-content');
-
-        let span = document.createElement('span');
-        span.id = 'span-close';
-        span.classList.add('close');
-        span.appendChild(this.createLogoClose());
-        // When the user clicks on <span> (x), close the modal
-        
-        /*span.onclick = function() { 
-            container.style.display = "none";
-            document.getElementById('div-button-upload').style.display = 'none';
-        };
-        */
-        content.appendChild(span);
-        
-        // Create a header, body in this div
-        let subcontent = document.createElement('div');
-        subcontent.id = 'subcontent';
-        // HEAD
-        let sc_head = document.createElement('div');
-        sc_head.id = 'subcontent-head';
-
-        //let svg = this.createLogoFolder();
-        //sc_head.appendChild(svg);
-        
-        let div = document.createElement('div');
-        div.classList.add('modal-title');
-        div.innerText = 'Add Scenario';
-        sc_head.appendChild(div);
-        let div_under = document.createTextNode('select a directory below, then press the Upload button');
-        sc_head.appendChild(div_under);        
-
-        subcontent.appendChild(sc_head);
-        subcontent.appendChild(document.createElement('hr'));
-
-        // BODY
-        let sc_body = document.createElement('div');
-        sc_body.id = 'subcontent-body';
-
-        // Add progressbar
-        // ...
-
-        // update list of files as they are loaded
-        let div_ul = document.createElement('div');
-        div_ul.classList.add('modal-list-container');
-        let ul = document.createElement('ul');
-        ul.id = 'modal-list';
-        div_ul.appendChild(ul);
-        sc_body.appendChild(div_ul);
-
-        // Add input
-        let div_nput_btn_container = document.createElement('div');
-        div_nput_btn_container.id = 'div-input-btn-container';
-        
-        // UPLOAD button hidden to start with
-        let div_btn = document.createElement('div');
-        div_btn.id = 'div-button-upload';
-        div_btn.classList.add('div-button');
-        div_btn.addEventListener('click', () => {
-            // add the data to the left hand side menu
-            // this can be done by creating a div with all the subcategories using the inputs
-            // Load the files
-            this.loadScenarioFiles();
-            // Create the dom object representing the ocntent of the loaded folder
-            let div = this.createScenarioDiv();
-            document.getElementById('div-scenarios').appendChild(div);           
-           
-        });
-        div_btn.appendChild(document.createTextNode('Upload'));
-        div_nput_btn_container.appendChild(div_btn);
-
-        // BROWSE button
-        let div_nput = document.createElement('div');
-        div_nput.id = 'div-scenario-loader';        
-        let nput = document.createElement('input');
-        nput.setAttribute('type', 'file');
-        nput.setAttribute('id', 'scenario-loader');
-        nput.setAttribute('name', 'filelist');
-        nput.setAttribute('webkitdirectory', '')
-        nput.setAttribute('directory', '')
-        nput.setAttribute('multiple', '')
-        
-        div_nput.appendChild(nput);
-        div_nput_btn_container.appendChild(div_nput);        
-        sc_body.appendChild(div_nput_btn_container);
-        subcontent.appendChild(sc_body);        
-        content.appendChild(subcontent);
-        container.appendChild(content);
-
-        document.body.appendChild(container);
-
-    }
-
-    createScenarioDiv() {
-        /**
-         * Each scenario has:
-         *      - a title
-         *      - json data: pov, trace, kpis, etc..
-         * 
-         * This data is used to populate a list of widget on the menu-body
-         * 
-         * // TODO: this id should be the scenario name
-         */
-        // The ID is contained in this.cgviz.data.current_dir
-        // Remove the existing div with the same id
-        let div = document.getElementById(this.cgviz.data.current_dir);
-        // Put that in a function so that it can be called by the delte button
-        if (div != null) {
-            div.parentNode.removeChild(div);
-        }
-        
-        // 1) the main container for this scenario, which includes the header and submenus
-        let div_main = document.createElement('div');
-        div_main.id = this.cgviz.data.current_dir;
-        
-        // 2) the horizontal part that contains the controls like eye/trash/expand
-        let div_scenario = document.createElement('div');
-        div_scenario.classList.add('div-scenario');
-        // 2.1) The name of the scenario along with the eye
-        let div_content = document.createElement('div');
-        div_content.classList.add('div-scenario-content');
-        //div_scenario.innerText = 'Scenario1';
-        let p = document.createElement('p');
-        p.innerText = div_main.id; //'Engelbrektshallen_details_ref_5m_bugfix';
-        div_content.appendChild(p);
-        // 2.2) The actions: trash, expand
-        let div_actions = document.createElement('div');
-        div_actions.classList.add('div-scenario-actions');
-        let del_btn = this.createLogoDelete();
-        del_btn.addEventListener('click', (evt) => {
-            let containing_node = evt.target.parentNode.parentNode.parentNode;
-            containing_node.parentNode.remove(containing_node);
-            // Clean the data in cgviz
-            delete this.cgviz.data.json[this.cgviz.data.current_dir];
-            this.cgviz.data.current_dir = null;
-
-        });
-        div_actions.appendChild(del_btn);
-        let svg_expand = this.createLogoExpandDown();
-        svg_expand.addEventListener('click', () => {
-            // TODO: this id should be the scenario name
-            //document.getElementById('Engelbrektshallen_details_ref_5m_bugfix').classList.toggle('hidden');
-            document.getElementById('cat-con-' + div_main.id).classList.toggle('hidden');
-        });
-        div_actions.appendChild(svg_expand);
-
-        div_scenario.appendChild(div_content);
-        div_scenario.appendChild(div_actions);
-        div_main.appendChild(div_scenario);
-
-        // 3) The categories are listed below
-        // PoV, Paths, Kpis
-        let div_categories_container = document.createElement('div');
-        div_categories_container.classList.add('div-scenario-cat-container');
-        div_categories_container.classList.add('hidden');
-        //div_categories_container.id = 'Engelbrektshallen_details_ref_5m_bugfix'; // TODO: this id should be the scenario name
-        div_categories_container.id = 'cat-con-' + div_main.id; // TODO: this id should be the scenario name
-        // Universe
-        let div_cat_uni = this.createScenarioCat('Universe');
-        div_cat_uni.id = div_main.id.toLowerCase() + '-div-scenario-uni';
-        div_categories_container.appendChild(div_cat_uni);
-
-        // PoV
-        let div_cat_pov = this.createScenarioCat('Point of Views');
-        div_cat_pov.id = div_main.id.toLowerCase() + '-div-scenario-pov';
-        let div_pov = this.createPovMenu(div_main.id);
-        div_categories_container.appendChild(div_cat_pov);
-        div_categories_container.appendChild(div_pov);
-        
-        // Paths
-        let div_cat_path = this.createScenarioCat('Paths');
-        div_cat_path.id = div_main.id.toLowerCase() + '-div-scenario-path';
-        div_categories_container.appendChild(div_cat_path);
-        
-        // Kpis
-        let div_cat_kpis = this.createScenarioCat('KPIs');
-        div_cat_kpis.id = div_main.id.toLowerCase() + '-div-scenario-kpis';
-        div_categories_container.appendChild(div_cat_kpis);
-
-        div_main.appendChild(div_categories_container);
-
-        return div_main;
-    }
-
-    createPovMenu(div_id) {
-        /**
-         * Create a div with 2 levels
-         * 1st level is the name of the pov: Tx, Rx, TestRx, MS etc..
-         * 2nd level is the list of ids with an eye to select/unselect
-         */
-        let div = document.createElement('div');
-        let data = this.cgviz.data.json[div_id].qcmPov;
-        // for each pov category, we create a pov-el-container
-        let pov_types = Object.keys(data);
-        if (pov_types.length==0) {
-            console.log('No data in qcmpov');
-            return;
-        }
-        let pov_type;
-        for (let i=0; i<pov_types.length; i++) {
-            pov_type = pov_types[i];
-            // div for the pov type
-            let div_type = document.createElement('div');            
-            div_type.id = div_id + '-' + pov_type + '-pov-switch';
-            div_type.classList.add('pov-switch');
-            let span = document.createElement('span');
-            //span.id = div_id + '-' + pov_type + '-pov-switch';
-            span.innerText = pov_type;            
-            let dspan = document.createElement('div');
-            dspan.appendChild(span);
-            dspan.classList.add('pov-switch-span');
-            div_type.appendChild(dspan);
-            // the down arrow
-            let da = this.createLogoExpandDown();
-            da.onclick = function(evt) {
-                // put that among the event_ functions
-                // toggle visible of the div_ids_container below
-                console.log('1 clicked on: ', evt.target.parentNode.parentNode.id);
-                let el_id = evt.target.parentNode.parentNode.id.replace('switch', 'content');
-                let div = document.getElementById(el_id);
-                if (div!==null) {
-                    div.classList.toggle('hidden');
-                }
-            };
-            let divda = document.createElement('div');
-            divda.appendChild(da);
-            divda.classList.add('pov-switch-svg');
-            div_type.appendChild(divda);
-
-            div.appendChild(div_type);
-
-            // div for the container of povs
-            let div_ids_container = document.createElement('div');
-            div_ids_container.id = div_id + '-' + pov_type + '-pov-content';
-            div_ids_container.classList.add('pov-el-container');
-            //div_ids_container.classList.add('hidden');
-            // add the elements
-            let pov_ids = Object.keys(data[pov_type]);
-            for (let j=0; j<pov_ids.length; j++) {
-                let pov_id = pov_ids[j];
-                let div_pov = document.createElement('div');
-                div_pov.classList.add('pov-el');
-
-                // an eye to control the show/hide on the threejs scene
-                let svg = this.createLogoEyeClosed();
-                svg.onclick = function(evt) {
-                    console.log('clicked on: ', evt.target);
-                    let node = evt.target;
-                    if (node.tagName==='path') {
-                        console.log('path gets the click instead of the svg...');
-                        node = node.parentNode;
-                    }
-                    let povId = node.parentNode.nextSibling.childNodes[0].innerText;
-                    cgviz.togglePov(povId);
-                    console.log('2 clicked on: ', povId);                    
-                };
-                let div_svg = document.createElement('div');
-                div_svg.classList.add('pov-el-svg');
-                div_svg.appendChild(svg);
-                div_pov.appendChild(div_svg);
-
-                // the name as span
-                let span = document.createElement('span');
-                span.innerText = pov_type + pov_id;
-                let div_span = document.createElement('div');
-                div_span.classList.add('pov-el-span');
-                div_span.appendChild(span);                
-                div_pov.appendChild(div_span);
-
-                div_ids_container.appendChild(div_pov);
-            }
-            div.appendChild(div_ids_container);
-        }
-        
-        return div;
-
-    }
-
-    createScenarioCat(name) {
-        /**
-         * A div scenario category is made as so:
-         *  a header:      Border Name Dots
-         *   content:   depends on the category
-         *      pov:
-         *          list of povs grouped by type (tx/rx)
-         *      path:
-         *          list of sliders grouped by tx
-         *      kpis:
-         *          kpis selector:
-         *          mode selector: horizontal ID | BEST | WORST | AVG | SUM 
-         */
-
-        let div = document.createElement('div');
-        div.classList.add('div-scenario-cat');
-        // The label
-        let div_label = document.createElement('div');
-        div_label.classList.add('div-scenario-span-container');
-        let span = document.createElement('span');
-        span.classList.add('div-scenario-span');
-        span.innerText = name;
-        div_label.appendChild(span);
-        div.appendChild(div_label);
-        
-        // the dot icon used to signal for expansion
-        let div_icon = document.createElement('div');
-        div_icon.classList.add('div-scenario-icon');
-        let svg = this.createLogoDots();
-        div_icon.appendChild(svg);
-        div.appendChild(div_icon);
-
-        return div;
-    }
-
-    event_DeleteScenario() {
-        // remove from DOM
-        
-        // remove from CGVIZ
-    }
-
-    AddToolTips() {
-        /**
-         * Add all the tooltips in one single step
-         *  Build a dictionary containing the ids of all the elements for which a tooltip is needed
-         *  loop the structure that contains the class/id/position for the tooltip
-         *  Add the necessary class name that activate the tooltip
-         *  Done!
-         */
-
-        let tooltips = {
-           'Scenarios': {text: 'Scenarios', position: 'top'},
-           'Filters': {text: 'Scenarios', position: 'top'},
-           'Interactions': {text: 'Scenarios', position: 'top'},
-           'Settings': {text: 'Scenarios', position: 'top'},
-        };
-        let el = document.getElementById('Scenarios'); 
-        el.classList.add('tooltip');
-        let span = document.createElement('span');
-        span.className = 'tooltiptext';
-        span.innerText = el.id;
-
-    }
-
-    loadScenarioFiles() {
-        /**
-         * The event target of the directory loader is saved in this._directory
-         */
-        if (this._directory.files.length == 0) {
-            alert('No files were loaded');
-            return;
-        }   
-        let files = this._directory.files;
-        let dir_name = files[0].webkitRelativePath.split('/')[0];
-        // Create the data structure that holds the data from the files processing
-        let data = this.cgviz.data;
-        data.current_dir = dir_name;
-        // If the key already exist int he list of scenarios
-        let scenarios = Object.keys(data.json);
-        if (scenarios.length > 0 && scenarios.indexOf(dir_name) > -1) {            
-            alert('Directory exits! It will be overwritten');
-            console.log('This directory already exists. It will be overwritten.');
-        }
-        
-        data.json[dir_name] = {
-            'qcmPov': {},
-            'qcmKpis': {},
-            'qcmTrace': {},
-            'obj': {'obj': null, 'mtl': null},
-            'tmp': {'objs': [], 'mtl': null},
-            'files': []
-        };
-        // Processing files depending on the extension and name
-        for (let i=0; i<files.length; i++) {
-            let file = files[i];
-            let pathParts = file.webkitRelativePath.split('/');
-            // We ignore the subdirectories
-            if (pathParts.length > 2) {
-                continue;
-            }
-            // The files jas one following extensions: json, obj, and mtl
-            // TODO: deleguate the following to subfunction to make it leaner
-            if (file.name.includes('.json')) {
-                const fileread = new FileReader();
-                fileread.onload = function() {
-                    let filename = pathParts[1];
-                    let filenameParts = filename.split('.');
-                    let thisFile = JSON.parse(fileread.result);
-                    // distinguish between the different files: qcmPov, qcmTrace, qcmTrace
-                    if (filename.includes('qcmPov')) {
-                        // the file name is typically built like so: qcmPov.Rx22.json but it has a tag with its name
-                        //data.json[dir_name].qcmPov[thisFile.tag] = thisFile;
-                        // split the name in 2 parts: pov type & id
-                        // ex Rx01 becomes 'Rx' & '01'
-                        let pov_type = thisFile.tag.replace(/[0-9]/g, '');
-                        let pov_id = thisFile.tag.replace(/\D/g,'');
-                        if (!data.json[dir_name].qcmPov.hasOwnProperty(pov_type)) {
-                            data.json[dir_name].qcmPov[pov_type] = {};
-                        }
-                        data.json[dir_name].qcmPov[pov_type][pov_id] = thisFile;
-                    } else if (filename.includes('qcmTrace')) {
-                        // the file name can be built in various ways:
-                        //      - qcmTrace.Tx01-Rx17.json
-                        //      - qcmTrace.BS-1-UE-1.json
-                        //      - qcmTrace.BS1-MS1.json
-                        //      - qcmTrace.PoleArray-1-UE-1.json
-                        // we count the number of parts separated by - of the 2nd element (the central part between qcmTrace and json)
-                        let centralPart = filenameParts[1].split('-');
-                        let txId, rxId;
-                        if (centralPart.length==2) {
-                            txId = centralPart[0];
-                            rxId = centralPart[1];
-                        } else if (centralPart.length==4) {
-                            txId = centralPart[0] + '-' + centralPart[1];
-                            rxId = centralPart[2] + '-' + centralPart[3];
-                        } else {
-                            alert('the number of components in the name is not as expected :-S')
-                        }
-                        // Save the data on 3 levels: txId then rxId
-                        if (!data.json[dir_name].qcmTrace.hasOwnProperty(txId)) {
-                            data.json[dir_name].qcmTrace[txId] = {};
-                        }
-                        data.json[dir_name].qcmTrace[txId][rxId] = thisFile;
-
-                    } else if (filename.includes('qcmKpis')) {
-
-                    }
-                };
-                fileread.readAsText(file);
-            } else if (file.name.includes('.obj')) {
-                data.json[dir_name].tmp.objs.push(file);
-                
-                const fileread = new FileReader();
-                fileread.onload = function(event) {
-                    let content = event.target.result;
-                    let object = new THREE.OBJLoader().parse(content);
-                    data.json[dir_name].obj.obj = object;
-                };
-                fileread.readAsText(file);
-                
-
-            } else if (file.name.includes('.mtl')) {
-                data.json[dir_name].tmp.mtl = file;
-                
-                const fileread = new FileReader();
-                fileread.onload = function(event) {
-                    let content = event.target.result;
-                    let mtl = new THREE.MTLLoader().parse(content);
-                    data.json[dir_name].obj.mtl = mtl;
-                };
-                fileread.readAsText(file);
-                
-            }
-
-            data.json[dir_name].files.push(file); // NOTE: probably useless
-            console.log('> file ', i+1, ' of ', files.length);
-
-            // Saving the objs and mtl files
-            
-        }
-
-        /* 2020-02-08 that's the new one. Not finished yet though
-        // Create the obj files with the material
-        const fileread = new FileReader();
-        fileread.onload = function(event) {
-            let mtl = new THREE.MTLLoader().parse(event.target.result);
-            mtl.setMaterialOptions({side: THREE.DoubleSide});
-            mtl.load('mtl', function(materials){
-                materials.preload();
-
-                // Handle the Object
-                let object = new THREE.OBJLoader().parse(data.json[dir_name].tmp.objs[0].file);
-            });
-        };
-        fileread.readAsText(data.json[dir_name].tmp.mtl.file);
-        */
-
-        // TODO: remove the list of files otherwise the browse button still shows it...
-        //document.getElementById('scenario-loader').files = '';
-        this.cgviz.getRaysRange();
-    }
 }
 
 // Helper functions
@@ -1561,7 +1425,6 @@ function _get(name) {
         return els;
     }
 }
-
 
 function _cleanElement(el) {
     while (el.lastChild) {
