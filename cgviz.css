@@ -4,12 +4,12 @@
 # Email: malek.cellier@gmail.com
 # Created: 2020-02-02
 */
-
+/*
 @font-face {
     font-family: ff-clan-web-pro;
     src: url(vendors/ff-clan-web-pro.woff);
   }
-
+*/
 body {
     padding: 0;
     margin: 0;
@@ -129,7 +129,7 @@ div {
     /*background-color: rgb(106, 116, 133);*/
     align-items: flex-end;
     border-bottom: 2px solid transparent;
-    color:rgb(106, 116, 133);
+    color:rgb(144, 152, 167);
     display: flex;
     -moz-box-pack: center;
     justify-content: center;
@@ -211,7 +211,18 @@ div.current-tab {
 }
 
 #info {
-    right: 100px;
+    display: none;
+    position: absolute;
+    right: 10px;    
+    bottom: 10px;    
+    font-size: 13px;    
+    color:rgb(144, 152, 167);    
+    background-color: #242730;    
+    padding: 20px;    
+    font-weight: 900;    
+}
+
+#info.shown {
     display: block;
 }
 
@@ -753,15 +764,93 @@ ul {
     margin-left: 10px;    
 }
 
-
-/* Preparing the tooltips
-.tooltip {
-    position: relative;
-    display: inline-block;
-    border-bottom: 1px dotted black;
+#panel {    
+    position: absolute;
+    top: 0px;
+    width: 200px;
+    height: 150px;
+    padding: 20px;
+    right: 0px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;    
+    align-items: flex-end;    
+    justify-content: flex-end;    
 }
-  
-.tooltip .tooltiptext {
+
+.panel-icon {
+    height: 32px;
+    width: 32px;
+    border: 0px none;
+    background-color: rgb(41, 50, 60);
+    background-color: #29323C;
+    box-shadow:rgba(0, 0, 0, 0.16) 0px 6px 12px 0px;
+    margin: 2px;
+    padding: 0;
+}
+
+.panel-icon.clicked {
+    background: rgb(41, 0, 0);
+}
+
+.panel-icon svg {
+    display: block;
+    margin: auto;
+    margin-top: 5px;
+    pointer-events: none;
+    color: rgb(255,255,255);
+    color:rgb(144, 152, 167);
+}
+
+.panel-icon:hover {
+    cursor: pointer;
+    /*background-color: rgb(160, 167, 180);*/
+    color: rgb(255,255,255);
+}
+
+.panel-icon:hover svg {
+    color:rgb(255, 255, 255);
+}
+
+#legend-container {
+    /*position: absolute;*/
+    position: relative;
+    top: 20px;
+    /*right: 5px;*/
+    left: -148px;
+    width: 180px;
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(36, 39, 48);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+#legend-head {
+    background-color: rgb(41, 50, 60);
+    height: 42px;
+    padding: 12px;
+    color:rgb(240, 240, 240);    
+    font-size: 14px;    
+    font-weight: 400;    
+}
+
+#legend-body {
+    padding: 12px;
+    background-color: rgb(58, 65, 76);
+}
+
+.panel-icon svg text {
+    font-size: 9px;
+    fill:rgb(160, 167, 180);    
+}
+
+#legend-container.hidden {
+    display: none;
+}
+
+/* Preparing the tooltips*/
+.tooltip .tooltiptext-bottom, .tooltip .tooltiptext-top, .tooltip .tooltiptext-left, .tooltip .tooltiptext-right{
     visibility: hidden;
     width: 120px;
     background-color: black;
@@ -770,24 +859,61 @@ ul {
     border-radius: 6px;
     padding: 5px 0;
     position: absolute;
-    z-index: 1;
+    z-index: 100;
     bottom: 150%;
     left: 50%;
     margin-left: -60px;
 }
   
-.tooltip .tooltiptext::after {
-    content: "";
+/* bottom arrow*/
+.tooltip .tooltiptext-bottom::after {
+    content: " ";
     position: absolute;
-    top: 100%;
+    top: 100%; /* At the bottom of the tooltip */
     left: 50%;
     margin-left: -5px;
     border-width: 5px;
     border-style: solid;
     border-color: black transparent transparent transparent;
-}
+  }
   
-.tooltip:hover .tooltiptext {
+/* top arrow*/
+.tooltip .tooltiptext-top::after {
+    content: " ";
+    position: absolute;
+    bottom: 100%;  /* At the top of the tooltip */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent black transparent;
+  }
+  
+/* left arrow*/
+.tooltip .tooltiptext-left::after {
+    content: " ";
+    position: absolute;
+    top: 50%;
+    right: 100%; /* To the left of the tooltip */
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent black transparent transparent;
+  }
+  
+/* right arrow*/
+.tooltip .tooltiptext-right::after {
+    content: " ";
+    position: absolute;
+    top: 50%;
+    left: 100%; /* To the right of the tooltip */
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent black;
+  }
+
+/* Change tooltip to the class of the container div*/
+.tooltip:hover .tooltiptext-right, .tooltip:hover .tooltiptext-top, .tooltip:hover .tooltiptext-bottom, .tooltip:hover .tooltiptext-left {
     visibility: visible;
 }
-*/

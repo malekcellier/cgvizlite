@@ -99,15 +99,22 @@ class CgVizMenu {
         head_left.append(title);
 
         // HEAD RIGHT
+        // Create a new issue in GitLab
         let bug = _el('div', '', ['top-icon']);
         bug.appendChild(this.createSvg('bug'));
-        bug.addEventListener('click', () => { window.open('https://www.w3schools.com', '_blank'); });
+        bug.addEventListener('click', () => { window.open('http://rnd-gitlab-eu.gmail.com/ransystem-eu/cg-viz-lite/issues/new', '_blank'); });
+        addTooltip(bug, 'bottom', 'File an issue in the gitlab');
         head_right.appendChild(bug);
+        // Open the Wiki in Gitlab
         let info = _el('div', '', ['top-icon']);
         info.appendChild(this.createSvg('info'));
+        info.addEventListener('click', () => { window.open('http://rnd-gitlab-eu.gmail.com/ransystem-eu/cg-viz-lite/wikis/home', '_blank'); });
+        addTooltip(info, 'left', 'Wiki access');
         head_right.appendChild(info);
+        // Take a screenshot of the screen
         let share = _el('div', '', ['top-icon']);
         share.appendChild(this.createSvg('share'));
+        share.addEventListener('click', () => this._eventCaptureScreen());
         head_right.appendChild(share);
 
         return head;
@@ -403,6 +410,16 @@ class CgVizMenu {
         return div;
     }
 
+    _createGenericHeader(id_, className, innerText) {
+        innerText = innerText || id_;
+
+        let div = _el('div', id_, [className]);
+
+
+
+        return div;
+    }
+
     _createSubMenu(innerText, id_, expand) {
         /**
          * Contains a title and an eye
@@ -484,12 +501,105 @@ class CgVizMenu {
         // A visiual separator
         settings.appendChild(_el('hr', '', ['title-body-separator']));
 
+        // A container for the settings data
+        let div_settings = _el('div', 'div-settings');
+        settings.appendChild(div_settings);
+        // General
+        let general_header = this._createMenuScenarioHeader('General', 'obj-header');
+        settings.appendChild(general_header);
+        let general_content = this._createSubMenu('Background');
+        settings.appendChild(general_content);
+        // Helpers
+        let helpers_header = this._createMenuScenarioHeader('Helpers', 'pov-header');
+        settings.appendChild(helpers_header);
+        let helpers_content = this._createSubMenu('Axes');
+        settings.appendChild(helpers_content);
+
+
+
         return settings;
     }
 
     createPanel() {
+        /**
+         * The Panel has container which in turn has:
+         *  the info icon 
+         *      => provides desciption about the current scene
+         *      => should be updated each time a new scenario is selected
+         *  the dual screen icon
+         *      => splits the screen in 2
+         *      => one scenario per screen
+         *  the legend icon
+         *      => shows as many sublegends as are used in the main view
+         */
 
+        let panel = _el('div', 'panel');       
+
+        let info = _el('div', 'panel-info', ['panel-icon']);
+        info.addEventListener('click', (evt) => this._eventToggleInfo(evt));
+        let svg_info = this.createSvg('info');
+        svg_info.setAttribute('height', '22px');
+        svg_info.setAttribute('width', '22px');
+        info.appendChild(svg_info);
+        panel.appendChild(info);
+        
+        let dual = _el('div', 'panel-dual', ['panel-icon']);
+        let svg_dual = this.createSvg('dual');
+        svg_dual.setAttribute('height', '20px');
+        svg_dual.setAttribute('width', '20px');
+        dual.appendChild(svg_dual);
+        panel.appendChild(dual);
+
+        let legend = _el('div', 'panel-legend', ['panel-icon']);
+        let svg_legend = this.createSvg('legend');
+        svg_legend.setAttribute('height', '22px');
+        svg_legend.setAttribute('width', '22px');        
+        legend.appendChild(svg_legend);
+        legend.addEventListener('click', (evt) => {evt.target.classList.toggle('clicked');evt.target.querySelector('#legend-container').classList.toggle('hidden');});
+        legend.appendChild(this.createLegend());
+        panel.appendChild(legend);
+
+        document.body.appendChild(panel);
     }
+
+    createLegend() {
+        /**
+         * There are several categories of legend depending on the kpis:
+         *  - rays
+         *  - kpis of the heatmap
+         */
+        let container = _el('div', 'legend-container', ['hidden']);
+
+        let head = _el('div', 'legend-head');
+        head.innerText = 'Legend';
+        container.appendChild(head);
+
+        let body = _el('div', 'legend-body');
+        // For each colormap, a title and a legendset. A loop here is in order :-)
+        let title = _el('div','', ['title']);
+        title.innerText = 'Body';
+        body.appendChild(title);
+        let clr_map = _el('div', '', ['clrmap']);
+        //clr_map.appendChild(this._SvgColormap());
+        clr_map.appendChild(this._logoColorBox());
+        body.appendChild(clr_map);
+        container.appendChild(body);
+
+        return container;
+    }    
+
+    _createLegendSet() {
+        /**
+         * Inputs:
+         *      - a color scheme 
+         *      - a number of colors: n_colors 
+         *      - a range of values => n_colors intervals
+         */
+        let div = _el('div', '', ['clr']);
+
+        return div;
+    }
+
 
     createModal() {
         /**
@@ -515,8 +625,8 @@ class CgVizMenu {
         let span = _el('span', '', ['close-button']);
         let svg = this.createSvg('close');        
         svg.setAttribute('viewBox', '0 0 64 64');
-        svg.setAttribute('width', '64px');
-        svg.setAttribute('height', '64px');
+        svg.setAttribute('width', '32px');
+        svg.setAttribute('height', '32px');
         span.appendChild(svg);
         span.addEventListener('click', () => this._eventCloseModal());
         div.appendChild(span);
@@ -924,9 +1034,79 @@ class CgVizMenu {
         this.cgviz.toggleGroundPlane();
     }
 
+    _eventCaptureScreen() {
+        /**
+         * from: https://stackoverflow.com/questions/26193702/three-js-how-can-i-make-a-2d-snapshot-of-a-scene-as-a-jpg-image
+         * 
+         * TODO: add on screen information about the scenario etc
+         * 
+         */
+        let imgData, imgNode;
+        let strDownloadMime = "image/octet-stream";
+
+        let cdt = currentDateTime();
+
+        try {
+            var strMime = "image/jpeg";
+            imgData = this.cgviz.renderer.domElement.toDataURL(strMime);
+            let filename = 'cg-viz-lite_screenshot_' + cdt + '.jpg';
+            saveFile(imgData.replace(strMime, strDownloadMime), filename);
+        } catch (e) {
+            console.log(e);
+            return;
+        }
+
+        function saveFile(strData, filename) {
+            var link = document.createElement('a');
+            if (typeof link.download === 'string') {
+                document.body.appendChild(link); //Firefox requires the link to be in the body
+                link.download = filename;
+                link.href = strData;
+                link.click();
+                document.body.removeChild(link); //remove the link when done
+            } else {
+                location.replace(uri);
+            }        
+        }
+
+        function currentDateTime() {
+            let now = new Date();
+
+            let year = now.getFullYear();
+            let month = now.getMonth() + 1;
+            let date = now.getDate();
+            let hours = now.getHours();
+            let min = now.getMinutes();
+            let sec = now.getSeconds();
+
+            let cdt = '';
+            cdt += year + '-';
+            cdt += (month<10 ? '0' : '') + month + '-';
+            cdt += (date<10 ? '0' : '') + date + '_';
+            cdt += (hours<10 ? '0' : '') + hours + '-';
+            cdt += (min<10 ? '0' : '') + min + '-';
+            cdt += (sec<10 ? '0' : '') + sec + '-';
+
+            return cdt;
+        }
+    }
+
+    _eventToggleInfo(evt) {
+        // Removing style if found. This comes hidden from cgviz
+        let info = document.getElementById('info');
+        if (info.style.display !== null) {
+            info.style.display = null;
+        }
+        if (info.style.left !== null) {
+            info.style.left = null;
+        }
+        document.getElementById('info').classList.toggle('shown');
+        evt.target.classList.toggle('clicked');
+    }
+
     // SVG and ICONS
 
-    createSvg(name) {
+    createSvg(name) {        
         let svg;
 
         switch (name) {
@@ -955,6 +1135,9 @@ class CgVizMenu {
             case 'share': 
                 svg = this._logoShare();
                 break;
+            case 'camera': 
+                svg = this._logoCamera();
+                break;
             case 'info': 
                 svg = this._logoInfo();
                 break;
@@ -972,6 +1155,9 @@ class CgVizMenu {
                 break;
             case 'close': 
                 svg = this._logoClose();
+                break;
+            case 'reduce': 
+                svg = this._logoReduce();
                 break;
             case 'down': 
                 svg = this._logoDown();
@@ -1102,6 +1288,22 @@ class CgVizMenu {
         return svg;
     }
 
+    _logoCamera() {
+        // Looks bad...
+        let svg = this._svgTemplate({viewBox: '0 0 96 96'});
+        
+        let circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
+        circle.setAttribute('cx', '48');
+        circle.setAttribute('cy', '50.8');
+        circle.setAttribute('r', '38');
+
+        let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+        path.setAttribute('d', 'M39.8,23.3l-5,5.5H26c-3,0-5.5,2.5-5.5,5.5v33c0,3,2.5,5.5,5.5,5.5h44c3,0,5.5-2.5,5.5-5.5v-33c0-3-2.5-5.5-5.5-5.5h-8.7l-5-5.5H39.8z M48,64.5c-7.6,0-13.8-6.2-13.8-13.8S40.4,37,48,37s13.8,6.2,13.8,13.8S55.6,64.5,48,64.5z');        
+        svg.appendChild(path);
+
+        return svg;
+    }
+
     _logoInfo() {
         let svg = this._svgTemplate();
         
@@ -1226,6 +1428,42 @@ class CgVizMenu {
         return svg;
     }
 
+    _logoClose() {
+        /**
+         * overwrites the above since it rocks!
+         */
+        let svg = this._svgTemplate();  
+
+        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute('transform', "translate(8, 8)");
+        let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+        path.setAttribute('d', 'M31.5059707,24 L47.5987718,7.90719891 C48.1337427,7.37222791 48.1337427,6.50972364 47.5987718,5.97475264 L42.0252474,0.40122825 C41.4902764,-0.13374275 40.6277721,-0.13374275 40.0928011,0.40122825 L24,16.4940293 L7.90719891,0.40122825 C7.37222791,-0.13374275 6.50972364,-0.13374275 5.97475264,0.40122825 L0.40122825,5.97475264 C-0.13374275,6.50972364 -0.13374275,7.37222791 0.40122825,7.90719891 L16.4940293,24 L0.40122825,40.0928011 C-0.13374275,40.6277721 -0.13374275,41.4902764 0.40122825,42.0252474 L5.97475264,47.5987718 C6.50972364,48.1337427 7.37222791,48.1337427 7.90719891,47.5987718 L24,31.5059707 L40.0928011,47.5987718 C40.6277721,48.1337427 41.4902764,48.1337427 42.0252474,47.5987718 L47.5987718,42.0252474 C48.1337427,41.4902764 48.1337427,40.6277721 47.5987718,40.0928011 L31.5059707,24 Z');
+        g.appendChild(path);
+        svg.appendChild(g);
+
+        return svg;
+    }
+
+    _logoReduce() {
+        let svg = this._svgTemplate({'width': '16px', 'height': '16px'});  
+
+        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute('transform', "translate(8, 8)");
+        
+        let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+        path.setAttribute('d', 'M16.127688,49.4434399 L0.686714703,34.0024666 C-0.228904901,33.086847 -0.228904901,31.6023343 0.686714703,30.6867147 C1.12641074,30.2470187 1.72276655,30 2.34459065,30 L17.785564,30 C19.0804456,30 20.1301546,31.049709 20.1301546,32.3445907 L20.1301546,47.785564 C20.1301546,49.0804456 19.0804456,50.1301546 17.785564,50.1301546 C17.1637399,50.1301546 16.5673841,49.883136 16.127688,49.4434399 Z');
+        g.appendChild(path);
+
+        let path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+        path1.setAttribute('d', 'M45.127688,19.4434399 L29.6867147,4.0024666 C28.7710951,3.086847 28.7710951,1.60233431 29.6867147,0.686714703 C30.1264107,0.247018663 30.7227665,-8.17124146e-14 31.3445907,-8.17124146e-14 L46.785564,-7.7547585e-14 C48.0804456,-7.7547585e-14 49.1301546,1.04970899 49.1301546,2.34459065 L49.1301546,17.785564 C49.1301546,19.0804456 48.0804456,20.1301546 46.785564,20.1301546 C46.1637399,20.1301546 45.5673841,19.883136 45.127688,19.4434399 Z');
+        path1.setAttribute('transform', 'translate(39.065077, 10.065077) rotate(-180.000000) translate(-39.065077, -10.065077)');
+        g.appendChild(path1);
+
+        svg.appendChild(g);
+
+        return svg;
+    }
+
     _logoDown() {
         let svg = this._svgTemplate({'width': '18px', 'height': '18px'});       
 
@@ -1341,6 +1579,55 @@ class CgVizMenu {
             return rect; 
         }
            
+
+        return svg;
+    }
+
+    _logoColorBox() {
+        let svg = this._svgTemplate({'width': '100px', 'height': '100px'});  
+
+        let rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');            
+        rect.setAttribute('x', 0);
+        rect.setAttribute('y', 0);
+        rect.setAttribute('width', 40);
+        rect.setAttribute('height', 20);            
+        rect.setAttribute('style', 'fill: rgb(125, 0, 10)');   
+
+        svg.appendChild(rect);
+
+        return svg;
+    }
+
+    _SvgColormap(scheme, n_colors) {
+        scheme = scheme || '';
+        n_colors = n_colors || 10;
+        let height = 14*(n_colors + 1);
+        let svg = this._svgTemplate({'width': '156px', 'height': height + 'px'});
+        //svg.setAttribute('viewBox', '');
+
+        for (let i=0; i<n_colors; i++) {
+            // left and right values are bogus for now
+            let left_val = i;
+            let right_val = i + 1;
+            // RGB values, bogus too
+            let r_ = Math.floor(Math.random()*256);
+            let g_ = Math.floor(Math.random()*256);
+            let b_ = Math.floor(Math.random()*256);
+            //
+            let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            g.setAttribute('transform', 'translate(0, ' + 14*i + ')');
+            let rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+            rect.setAttribute('width', "20");
+            rect.setAttribute('height', "10");
+            rect.setAttribute('style', 'fill: rgb(' + r_ + ', ' + g_ + ', ' + b_ + ')');
+            g.appendChild(rect); 
+            let text = document.createElementNS('ttp://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', '28');
+            text.setAttribute('y', '9');
+            text.textContent = left_val + ' to ' + right_val;
+            g.appendChild(text);
+            svg.appendChild(g);
+        }    
 
         return svg;
     }
@@ -1466,4 +1753,17 @@ function createProgressBarListItem(name, h) {
     li.appendChild(span_bar);
 
     return li;
+}
+
+function addTooltip(el, position, tooltip_text) {
+    /**
+     *  Adds a tooltip to an existing div
+     */
+    if (!el.classList.contains('tooltip')) {
+        el.classList.add('tooltip');        
+        //el.classList.add('tooltip-' + position);
+        let span = _el('span', '', ['tooltiptext-' + position]);
+        span.innerText = tooltip_text;
+        el.appendChild(span);
+    }
 }
