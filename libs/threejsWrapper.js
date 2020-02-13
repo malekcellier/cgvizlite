@@ -187,24 +187,23 @@ class ThreejsWrapper {
         this.camera.up = up;        
         this.scene.add(this.camera);
         this.createControls();
+        this.createHelpers();
     }
 
     centerCamera(center) {
         center = center || 'origin';
         if (center === 'scene') {
             let limits = this.findCenter();
-            this.params.camera.lookAt = {x: limits.center.x, y: limits.center.y, z: limits.center.z};
+            this.params.camera.lookAt = {x: limits.center.x, y: limits.center.y, z: 0};
         } else {
             // Make the camera look at the origin
             this.params.camera.lookAt = {x: 0, y: 0, z: 0};            
         }
-
         this.createCamera();
-
     }
 
     createRenderer() {
-        this.renderer = new THREE.WebGLRenderer({canvas: this.canvas, antialias: true});
+        this.renderer = new THREE.WebGLRenderer({canvas: this.canvas, antialias: true, preserveDrawingBuffer: true});
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         if (this.params.effects.composer == true) {
             this.composer = new THREE.EffectComposer(this.renderer);
@@ -235,8 +234,10 @@ class ThreejsWrapper {
 
     createHelpers() {        
         this.removeFromScene('AxesHelper');
+        let a = this.params.camera.lookAt;
         if (this.params.helpers.axes.show) {
             let axesHelper = this._createAxes();
+            axesHelper.position.set(a.x, a.y, 0);
             axesHelper.name = 'AxesHelper'; 
             this.scene.add(axesHelper);
         }
@@ -246,6 +247,7 @@ class ThreejsWrapper {
         if (grid.show) {
             let gridHelper = new THREE.GridHelper(grid.size, grid.division);
             gridHelper.rotateX(Math.PI / 2);
+            gridHelper.position.set(a.x, a.y, 0);
             gridHelper.name = 'GridHelper'; 
             this.scene.add(gridHelper);
         }
