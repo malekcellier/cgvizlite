@@ -827,17 +827,18 @@ ul {
 }
 
 #legend-head {
-    background-color: rgb(41, 50, 60);
+    background-color: #29323c;
     height: 42px;
     padding: 12px;
     color:rgb(240, 240, 240);    
+    color:rgb(106, 116, 133);    
     font-size: 14px;    
     font-weight: 400;    
 }
 
 #legend-body {
     padding: 12px;
-    background-color: rgb(58, 65, 76);
+    background-color: #242730;
 }
 
 .panel-icon svg text {
@@ -847,6 +848,12 @@ ul {
 
 #legend-container.hidden {
     display: none;
+}
+
+.clrmap-item-div {
+    display: flex;
+    flex-direction: row;
+
 }
 
 /* Preparing the tooltips*/

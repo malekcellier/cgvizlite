@@ -33,8 +33,8 @@ class CgVizJs extends ThreejsWrapper {
     constructor({canvas: canvas, menu: menu}) {
         super(canvas);
         this.data = {
-            'json': {},
-            'current_dir': null,
+            'scenarios': {},
+            'selected': null,
             'ranges': {'qcmTrace': {'min': +Infinity, 'max': -Infinity,}}
         }; // Data structure that will hold the data from the json files
         this.colors = {'qcmTrace': chroma.scale('Spectral')};
@@ -65,7 +65,7 @@ class CgVizJs extends ThreejsWrapper {
 
     getCurrentData() {
         // convenience function to return the current configuration
-        return this.data.json[this.data.current_dir];
+        return this.data.scenarios[this.data.selected];
     }
 
     getRanges() {
@@ -76,7 +76,7 @@ class CgVizJs extends ThreejsWrapper {
          *      kpis: for each kpi, the min and max values
          */
         let data = this.getCurrentData();
-        let cdir = this.data.current_dir;
+        let cdir = this.data.selected;
         this.data.ranges[cdir] = {};
     }
 
@@ -127,7 +127,7 @@ class CgVizJs extends ThreejsWrapper {
         /**
          * Adds the obj file with mtl
          */
-        const name = this.data.current_dir;
+        const name = this.data.selected;
         if (this.isObjectInScene(name)) {
             this.removeFromScene(name);
             console.log(' > removed object: ', name);
@@ -161,11 +161,12 @@ class CgVizJs extends ThreejsWrapper {
             this.scene.add(mesh);
             //this.centerCamera(name);
             console.log(' > added object: ', name);
+            this.findCenter();
         }
     }
 
     toggleGroundPlane() {
-        const name = 'GroundPlane_' + this.data.current_dir;
+        const name = 'GroundPlane_' + this.data.selected;
         if (this.isObjectInScene(name)) {
             this.removeFromScene(name);
             console.log(' > removed object: ', name);
@@ -215,7 +216,7 @@ class CgVizJs extends ThreejsWrapper {
         /**
          * Returns the pov category in order to customize the mesh
          */
-        let tx_type = ['bs', 'enb', 'nb', 'tx', 'polearray'];
+        let tx_type = ['bs', 'enb', 'nb', 'tx', 'polearray', 'gnb', 'enodeb', 'gnodeb'];
         for (let i=0; i<tx_type.length; i++) {
             if(povId.toLowerCase().includes(tx_type[i])) {
                 return 'tx_pov';
@@ -279,16 +280,17 @@ class CgVizJs extends ThreejsWrapper {
 
     getRaysRange() {
         /**
-         * Find the min/max rx power for all the rays in the scenario
+         * Find the min/max rx power values across all the rays in the scenario
+         * This is mainly used to set a range for the colormap
          */
-        let scenarios = Object.keys(this.data.json);
+        let scenarios = Object.keys(this.data.scenarios);
         if (scenarios.length === 0) {
             console.log('no scenarios loaded');
             return;
         }
         for (let i=0; i<scenarios.length; i++) {
             let scenario = scenarios[i];
-            let data = this.data.json[scenario].qcmTrace;
+            let data = this.data.scenarios[scenario].qcmTrace;
             let TxPovs = Object.keys(data);
             for (let j=0; j<TxPovs.length; j++) {
                 let RxPovs = Object.keys(data[TxPovs[j]]);
@@ -317,16 +319,6 @@ class CgVizJs extends ThreejsWrapper {
 
     toggleHeatmap() {
     }
-
-    // Methods that handle the DOM interaction
-    createMenu() {
-        /**
-         * Creates the floating menu on the left hand side
-         * Structure:
-         *  
-         */
-    }
-
 
 }
 

@@ -221,15 +221,15 @@ class CgVizMenu {
 
         let div = _get('#div-scenarios');
 
-        // The ID of the scenario is contained in this.cgviz.data.current_dir
+        // The ID of the scenario is contained in this.cgviz.data.selected
         // in case the ID already exists, it is removed and built anew
-        let div_scenario = _get('#' + this.cgviz.data.current_dir);
+        let div_scenario = _get('#' + this.cgviz.data.selected);
         if (div_scenario !== null) {
             div.removeChild(div_scenario);
         }
 
         // 1) THE HEADER
-        div_scenario = this._createMenuScenarioHeader(this.cgviz.data.current_dir, 'scenario-header');
+        div_scenario = this._createMenuScenarioHeader(this.cgviz.data.selected, 'scenario-header');
         // attach en event to the click on the expand element
         div_scenario.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         div.appendChild(div_scenario);
@@ -237,6 +237,7 @@ class CgVizMenu {
         // 2) THE CONTENT
         let sce_content = _el('div', '', ['scenario-content', 'hidden']);
         div.appendChild(sce_content);
+        
         // 2.1) The universe
         // 2.1.1) the header
         let obj_header = this._createMenuScenarioHeader('Universe', 'obj-header'); 
@@ -255,11 +256,13 @@ class CgVizMenu {
         // 2.2.1) the header
         let pov_header = this._createMenuScenarioHeader('PoV', 'pov-header'); 
         sce_content.appendChild(pov_header);
-        pov_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         // 2.2.2) the content
         //let pov_content = _el('div', '', ['pov-content', 'hidden']);
         let pov_content = this.__populatePovContent();
-        sce_content.appendChild(pov_content);
+        if (pov_content !== undefined) {
+            sce_content.appendChild(pov_content);
+            pov_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+        }        
         // The point of view are:
         // - grouped by name
         // - represented by small boxes the size of up to 4 digits, for the POV ID
@@ -270,10 +273,12 @@ class CgVizMenu {
         // 2.3.1) the header
         let trace_header = this._createMenuScenarioHeader('Traces', 'trace-header'); 
         sce_content.appendChild(trace_header);
-        trace_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         // 2.3.2) the content
         let trace_content = this.__populateTraceContent();
-        sce_content.appendChild(trace_content);
+        if (trace_content !== undefined) {
+            sce_content.appendChild(trace_content);
+            trace_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+        }        
         // The Traces are:
         // - grouped by Tx name, then by Rx name
         // - represented by small boxes the size of up to 4 digits, for the Rx ID
@@ -284,7 +289,7 @@ class CgVizMenu {
         let kpis_header = this._createMenuScenarioHeader('Kpis', 'kpis-header'); 
         sce_content.appendChild(kpis_header);        
         // 2.4.2) the content
-        let kpis_content = _el('div', '', ['kpis-content', 'hidden']);
+        let kpis_content = _el('div', '', ['kpis-content', 'hidden']);        
         sce_content.appendChild(kpis_content);
         // The kpis are:
         //  -
@@ -299,7 +304,7 @@ class CgVizMenu {
          */
         // pov_content is the div
         // TODO: change the key
-        let qcmPov = this.cgviz.data.json[this.cgviz.data.current_dir].qcmPov;
+        let qcmPov = this.cgviz.data.scenarios[this.cgviz.data.selected].qcmPov;
         let pov_types = Object.keys(qcmPov);
         if (pov_types.length === 0) {
             console.log('No data in qcmPov');
@@ -335,7 +340,7 @@ class CgVizMenu {
         // The Traces are:
         // - grouped by Tx name, then by Rx name
         // - represented by small boxes the size of up to 4 digits, for the Rx ID
-        let qcmTrace = this.cgviz.data.json[this.cgviz.data.current_dir].qcmTrace;
+        let qcmTrace = this.cgviz.data.scenarios[this.cgviz.data.selected].qcmTrace;
         let tx_ids = Object.keys(qcmTrace).sort();
         if (tx_ids.length === 0) {
             console.log('No data in qcmTrace');
@@ -411,6 +416,9 @@ class CgVizMenu {
     }
 
     _createGenericHeader(id_, className, innerText) {
+        /**
+         * 
+         */
         innerText = innerText || id_;
 
         let div = _el('div', id_, [className]);
@@ -579,10 +587,15 @@ class CgVizMenu {
         let title = _el('div','', ['title']);
         title.innerText = 'Body';
         body.appendChild(title);
+        let clr_map = this._createLegendSet();
+        /*
         let clr_map = _el('div', '', ['clrmap']);
         //clr_map.appendChild(this._SvgColormap());
         clr_map.appendChild(this._logoColorBox());
+        */
         body.appendChild(clr_map);
+
+
         container.appendChild(body);
 
         return container;
@@ -595,9 +608,28 @@ class CgVizMenu {
          *      - a number of colors: n_colors 
          *      - a range of values => n_colors intervals
          */
-        let div = _el('div', '', ['clr']);
+        let clrmap = _el('div', '', ['clrmap']);
 
-        return div;
+        let data = [
+            {r: 12, g: 40, b: 80, txt: '0.127 to 0.291'},
+            {r: 40, g: 12, b: 80, txt: '0.291 to 0.342'},
+            {r: 12, g: 80, b: 40, txt: '0.342 to 0.572'},
+            {r: 80, g: 40, b: 12, txt: '0.572 to 0.913'},
+        ];
+        for (let i=0; i<data.length; i++) {
+            let d = data[i];
+            let item = _el('div', '', ['clrmap-item-div']);
+            let svg = this._logoColorBox(d.r, d.g, d.b);
+            item.appendChild(svg);
+            
+            let text = _el('div', '', ['clrmap-text']);
+            text.innerText = d.txt;
+            item.appendChild(text);
+    
+            clrmap.appendChild(item);
+        }
+
+        return clrmap;
     }
 
 
@@ -701,8 +733,8 @@ class CgVizMenu {
 
         let files = this._directory.files;
         if (this._directory.files.length > 0) {
-            this.cgviz.data.current_dir = files[0].webkitRelativePath.split('/')[0];
-            this.cgviz.data.json[this.cgviz.data.current_dir] = {
+            this.cgviz.data.selected = files[0].webkitRelativePath.split('/')[0];
+            this.cgviz.data.scenarios[this.cgviz.data.selected] = {
                 'qcmPov': {},
                 'qcmKpis': {},
                 'qcmTrace': {},
@@ -823,7 +855,7 @@ class CgVizMenu {
         let self = this;
         console.log('loading data...');
         let files = this._directory.files;
-        let threed = {'mtl': {}, 'obj': []};
+        let threed = {'mtl': {}, 'objs': []};
         
         let li_total = document.getElementById('li_Total');
         let totalProgressVal = li_total.getElementsByClassName('value')[0];
@@ -871,59 +903,63 @@ class CgVizMenu {
                     self._finishedYet(i_files, n_files);
                 };
             } else if (ext === 'obj') {
-                threed.obj = {'li': li, 'file': url};
-                self.cgviz.data.json
+                threed.objs.push({'li': li, 'file': url});
+                self.cgviz.data.scenarios
             } else if (ext === 'mtl') {
                 threed.mtl = {'li': li, 'file': url};
             }            
         } 
         // Handling the mtl and obj files separately
         // I assume there is only one mtl object
-        let mtl_reader = new FileReader();
-        mtl_reader.readAsText(threed.mtl.file);
-        let li = threed.mtl.li;
-        mtl_reader.onload = function(evt) {
-            let mtl = new THREE.MTLLoader().parse(evt.target.result);
-            //mtl.setMaterialOptions({side: THREE.DoubleSide});
-            self.__handleMtl(mtl)
-        };
-        mtl_reader.onprogress = function(xhr) {
-            let pCentValue = (xhr.loaded/xhr.total*100);            
-            threed.mtl.li.getElementsByClassName('bar')[0].children[0].style.width = pCentValue + '%';
-            threed.mtl.li.getElementsByClassName('value')[0].innerText = Math.round(pCentValue*100)/100 + '%';
-        };
-        mtl_reader.onloadend = function() {
-            threed.mtl.li.getElementsByClassName('bar')[0].children[0].style.width = '100%';
-            threed.mtl.li.getElementsByClassName('value')[0].innerText = '100%';
-            i_files += 1;
-            console.log(' from mtl: ', i_files);
-            let pcValue = i_files/n_files*100;
-            totalProgressBar.style.width = pcValue + '%';
-            totalProgressVal.innerText = Math.round(pcValue*100)/100 + '%';
-            self._finishedYet(i_files, n_files);
-        };
+        if (threed.mtl.file !== undefined) {
+            let mtl_reader = new FileReader();
+            mtl_reader.readAsText(threed.mtl.file);
+            let li = threed.mtl.li;
+            mtl_reader.onload = function(evt) {
+                let mtl = new THREE.MTLLoader().parse(evt.target.result);
+                //mtl.setMaterialOptions({side: THREE.DoubleSide});
+                self.__handleMtl(mtl)
+            };
+            mtl_reader.onprogress = function(xhr) {
+                let pCentValue = (xhr.loaded/xhr.total*100);            
+                threed.mtl.li.getElementsByClassName('bar')[0].children[0].style.width = pCentValue + '%';
+                threed.mtl.li.getElementsByClassName('value')[0].innerText = Math.round(pCentValue*100)/100 + '%';
+            };
+            mtl_reader.onloadend = function() {
+                threed.mtl.li.getElementsByClassName('bar')[0].children[0].style.width = '100%';
+                threed.mtl.li.getElementsByClassName('value')[0].innerText = '100%';
+                i_files += 1;
+                console.log(' from mtl: ', i_files);
+                let pcValue = i_files/n_files*100;
+                totalProgressBar.style.width = pcValue + '%';
+                totalProgressVal.innerText = Math.round(pcValue*100)/100 + '%';
+                self._finishedYet(i_files, n_files);
+            };
+        }
         // I assume there is only one obj object
-        let obj_reader = new FileReader();
-        obj_reader.readAsText(threed.obj.file);
-        obj_reader.onload = function(evt) {
-            let obj = new THREE.OBJLoader().parse(evt.target.result);
-            self.__handleObj(obj)
-        };
-        obj_reader.onprogress = function(xhr) {
-            let pCentValue = (xhr.loaded/xhr.total*100);            
-            threed.obj.li.getElementsByClassName('bar')[0].children[0].style.width = pCentValue + '%';
-            threed.obj.li.getElementsByClassName('value')[0].innerText = Math.round(pCentValue*100)/100 + '%';
-        };
-        obj_reader.onloadend = function() {
-            threed.obj.li.getElementsByClassName('bar')[0].children[0].style.width = '100%';
-            threed.obj.li.getElementsByClassName('value')[0].innerText = '100%';
-            i_files += 1;
-            console.log(' from obj: ', i_files);
-            let pcValue = i_files/n_files*100;
-            totalProgressBar.style.width = pcValue + '%';
-            totalProgressVal.innerText = Math.round(pcValue*100)/100 + '%';
-            self._finishedYet(i_files, n_files);
-        };
+        for (let i=0; i<threed.objs.length; i++) {
+            let obj_reader = new FileReader();
+            obj_reader.readAsText(threed.objs[i].file);
+            obj_reader.onload = function(evt) {
+                let obj = new THREE.OBJLoader().parse(evt.target.result);
+                self.__handleObj(obj)
+            };
+            obj_reader.onprogress = function(xhr) {
+                let pCentValue = (xhr.loaded/xhr.total*100);            
+                threed.objs[i].li.getElementsByClassName('bar')[0].children[0].style.width = pCentValue + '%';
+                threed.objs[i].li.getElementsByClassName('value')[0].innerText = Math.round(pCentValue*100)/100 + '%';
+            };
+            obj_reader.onloadend = function() {
+                threed.objs[i].li.getElementsByClassName('bar')[0].children[0].style.width = '100%';
+                threed.objs[i].li.getElementsByClassName('value')[0].innerText = '100%';
+                i_files += 1;
+                console.log(' from obj: ', i_files);
+                let pcValue = i_files/n_files*100;
+                totalProgressBar.style.width = pcValue + '%';
+                totalProgressVal.innerText = Math.round(pcValue*100)/100 + '%';
+                self._finishedYet(i_files, n_files);
+            };
+        }
     }
 
     _finishedYet(i_files, n_files) {
@@ -935,23 +971,23 @@ class CgVizMenu {
     }
 
     __handleMtl(thisFile) {
-        let qcmObjects = this.cgviz.data.json[this.cgviz.data.current_dir].obj;
+        let qcmObjects = this.cgviz.data.scenarios[this.cgviz.data.selected].obj;
         qcmObjects.mtl = thisFile;
     }
 
     __handleObj(thisFile) {
-        let qcmObjects = this.cgviz.data.json[this.cgviz.data.current_dir].obj;
+        let qcmObjects = this.cgviz.data.scenarios[this.cgviz.data.selected].obj;
         qcmObjects.obj = thisFile;
         // Find the limits of the scene in order to display a plane..
-        this.cgviz.data.json[this.cgviz.data.current_dir].limits = this.cgviz.findCenter();
+        this.cgviz.data.scenarios[this.cgviz.data.selected].limits = this.cgviz.findCenter();
     }
 
     __handleQcmPov(thisFile) {
         // the file name is typically built like so: qcmPov.Rx22.json but it has a tag with its name
-        //data.json[dir_name].qcmPov[thisFile.tag] = thisFile;
+        //data.scenarios[dir_name].qcmPov[thisFile.tag] = thisFile;
         // split the name in 2 parts: pov type & id
         // ex Rx01 becomes 'Rx' & '01'  
-        let qcmPov = this.cgviz.data.json[this.cgviz.data.current_dir].qcmPov;
+        let qcmPov = this.cgviz.data.scenarios[this.cgviz.data.selected].qcmPov;
         let pov_type = thisFile.tag.replace(/[0-9]/g, '');
         let pov_id = thisFile.tag.replace(/\D/g,'');
         if (!qcmPov.hasOwnProperty(pov_type)) {
@@ -967,7 +1003,7 @@ class CgVizMenu {
         //   - qcmTrace.BS1-MS1.json
         //   - qcmTrace.PoleArray-1-UE-1.json
         // we count the number of parts separated by - of the 2nd element (the central part between qcmTrace and json)
-        let qcmTrace = this.cgviz.data.json[this.cgviz.data.current_dir].qcmTrace;
+        let qcmTrace = this.cgviz.data.scenarios[this.cgviz.data.selected].qcmTrace;
 
         let pathParts = fileParts.split('/');
         let filename = pathParts[1];
@@ -1583,15 +1619,28 @@ class CgVizMenu {
         return svg;
     }
 
-    _logoColorBox() {
-        let svg = this._svgTemplate({'width': '100px', 'height': '100px'});  
+    _logoColorBox(r, g, b) {
+        let svg = this._svgTemplate({'view_box': '0 0 40 20', 'width': '40px', 'height': '20px'});  
 
         let rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');            
         rect.setAttribute('x', 0);
         rect.setAttribute('y', 0);
         rect.setAttribute('width', 40);
         rect.setAttribute('height', 20);            
-        rect.setAttribute('style', 'fill: rgb(125, 0, 10)');   
+        rect.setAttribute('style', 'fill: rgb(' + r + ' ,' + g + ',' + b + ')');   
+
+        /**
+         * COnsider:
+         *  const r = 192;
+            const g = 255;
+            const b = 64;
+            const rgbCSSColor = `rgb(${r},${g},${b})`;
+
+            OR 
+
+            const color = [192, 255, 64];
+            const rgbCSSColor = `rgb(${color.join(',')})`;
+         */
 
         svg.appendChild(rect);
 

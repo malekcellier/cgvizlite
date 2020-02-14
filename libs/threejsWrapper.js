@@ -463,7 +463,7 @@ class ThreejsWrapper {
 
     isObjectInScene(objectName) {
         let obj = this.scene.getObjectByName(objectName);
-        if (obj == undefined) {
+        if (obj === undefined) {
             return false;
         } else {
             return true;
@@ -473,6 +473,7 @@ class ThreejsWrapper {
     findCenter(method) {
         /**
          * Calculates the center of the scene
+         * could be also done per top-level group?
          */
         method = method || 'box';
         if (method === 'box') {
