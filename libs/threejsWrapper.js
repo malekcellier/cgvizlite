@@ -476,13 +476,13 @@ class ThreejsWrapper {
         }
     }
 
-    removeFromGroup(groupName, objectName) {
+    removeFromGroup(groupName, objectName, groupType) {
         if (this.isObjectInGroup(groupName, objectName)) {
             let group = this.scene.getObjectByName(groupName);
             let object = group.getObjectByName(objectName);
             group.remove(object);
             log.info(`Removed ${objectName} from ${groupName}`);
-            this.data.groups[groupName].povs.remove(object);
+            this.data.groups[groupName][groupType].remove(object);
             this.scene.remove(object);
             log.info(`Removed ${objectName} from scene`);
         }

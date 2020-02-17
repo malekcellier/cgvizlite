@@ -291,7 +291,7 @@ class CgVizJs extends ThreejsWrapper {
         let qcmPov = this.getData(scenarioName).qcmPov;
         let povName = povType + '_' + povId;
         if (this.isObjectInGroup(scenarioName, povName)) {
-            this.removeFromGroup(scenarioName, povName);            
+            this.removeFromGroup(scenarioName, povName, 'povs');            
         } else {
             let data = qcmPov[povType][povId];
             let povCat = this.getPovCategory(povType);
@@ -334,13 +334,6 @@ class CgVizJs extends ThreejsWrapper {
         }
     }
 
-    getPovState(scenarioName) {
-        /**
-         * FUTURE
-         * Find if 
-         */
-    }
-
     getPovCategory(povId) {
         /**
          * Returns the pov category in order to customize the mesh
@@ -374,7 +367,7 @@ class CgVizJs extends ThreejsWrapper {
          * allow the user to actually delete them
          *      - delete all
          *      - add a cross in front of a the dom representation of the trace obj 
-         *          this also means greying the slider and adding a kind of load button that actually creates the objec
+         *          this also means greying the slider and adding a kind of load button that actually creates the object
          *          this button (once the object3d is create) will turn into a x :-)
          *      - use a buffergeometry for the lines a
          */
@@ -407,16 +400,52 @@ class CgVizJs extends ThreejsWrapper {
 
     }
 
-    toggleRaysFromPov(scenarioName, povId) {
+    toggleRaysBetweenPovs(scenarioName, txPovId, rxPovId) {
         /**
-         * Toggle all rays from the given PoV
+         * Toggle all rays between the txPov and the rxPov
          */
+        let qcmTrace = this.getData(scenarioName).qcmTrace;
+        let traceName = txPovId + '_' + rxPovId;
+        if (this.isObjectInGroup(scenarioName, traceName)) {
+            this.removeFromGroup(scenarioName, traceName, 'traces');
+        } else {
+            let data = qcmTrace[txPovId][rxPovId];
+            let raysObject = new THREE.Group(); // All the rays inside a group
+            raysObject.name = traceName;
+            for (let i=0; i<data.length ; i++) {
+                let material = new THREE.LineBasicMaterial({color: this.getColor(scenarioName, data[i].P)});
+                let geometry = new THREE.Geometry();
+                let rays = data[i];
+                for (let j=0; j<rays.XData.length; j++) {
+                    geometry.vertices.push(new THREE.Vector3(rays.XData[j], rays.YData[j], rays.ZData[j]));
+                }
+                raysObject.add(new THREE.Line(geometry, material));
+            }
+            this.data.groups[scenarioName].traces.add(raysObject);
+            log.info(`Added object ${traceName} in ${scenarioName}`);
+        }
+    }
+
+    toggleAllRaysFromPovId(scenarioName, txPovId) {
+        /**
+         * Toggle all rays from the given txPoV to all other rxPovs
+         */
+        let qcmTrace = this.getData(scenarioName).qcmTrace;
+        let rxPovIds = Object.keys(qcmTrace[txPovId]);
+        for (let i=0; i<rxPovIds.length; i++) {
+            this.toggleRaysBetweenPovs(scenarioName, txPovId, rxPovIds[i]);
+        }
     }
 
     toggleAllRays(scenarioName) {
         /**
-         * Toggle all rays from all PoVs
+         * Toggle all rays from all txPoVs to all corresponding rxPovs
          */
+        let qcmTrace = this.getData(scenarioName).qcmTrace;
+        let txPovIds = Object.keys(qcmTrace);
+        for (let i=0; i<txPovIds.length; i++) {
+            this.toggleAllRaysFromPovId(scenarioName, txPovIds[i]);
+        }
     }
 
     getRaysRange(scenarioName) {
@@ -496,8 +525,11 @@ class CgVizJs extends ThreejsWrapper {
         }
     }
 
-    getColor(val) {
-        this.colors.qcmTrace.domain([this.data.ranges.qcmTrace.min, this.data.ranges.qcmTrace.max]);
+    getColor(scenarioName, val) {
+        scenarioName = scenarioName || 'overall';
+        let min_ = this.data.ranges[scenarioName].qcmTrace.min;
+        let max_ = this.data.ranges[scenarioName].qcmTrace.max;
+        this.colors.qcmTrace.domain([min_, max_]);
         let color = this.colors.qcmTrace(val);
         color.rgb();
         color = new THREE.Color(color.toString());

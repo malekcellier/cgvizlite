@@ -273,6 +273,7 @@ class CgVizMenu {
         // 2.3) The traces:
         // 2.3.1) the header
         let trace_header = this._createMenuScenarioHeader('Traces', 'trace-header'); 
+        trace_header.querySelector('.eye').addEventListener('click', (evt) => this._eventToggleAllRays(evt));
         sce_content.appendChild(trace_header);
         // 2.3.2) the content
         let trace_content = this.__populateTraceContent();
@@ -318,7 +319,7 @@ class CgVizMenu {
             pov_type = pov_types[i];
             let submenu = this._createSubMenu(pov_type, '', true);
             pov_content.appendChild(submenu);
-            // show/hide all the pov in the scene
+            // show/hide all the pov of this type in the scene
             submenu.querySelector('.eye').addEventListener('click', (evt) => this._eventTogglePovs(evt));
             // show/hide the submenu content i.e. the list of povs
             submenu.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
@@ -359,7 +360,11 @@ class CgVizMenu {
             tx_id = tx_ids[i];
             let submenu = this._createSubMenu(tx_id, '', true);
             trace_content.appendChild(submenu);
+            // show/hide all the traces from this txpovid in the scene
+            submenu.querySelector('.eye').addEventListener('click', (evt) => this._eventToggleAllRaysFromPovId(evt));
+            // show/hide the submenu content i.e. the list of traces
             submenu.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+            // The traces are shown in sub-menu-content
             let submenu_content = _el('div', '', ['sub-menu-content', 'hidden']);  
             let rx_ids = Object.keys(qcmTrace[tx_id]).sort();
             for (let j=0; j<rx_ids.length; j++) {
@@ -369,7 +374,8 @@ class CgVizMenu {
                 span.innerText = rx_ids[j];
                 item.appendChild(span);
                 //item.addEventListener('click', (evt) => {evt.target.classList.toggle('clicked');});
-                item.addEventListener('click', (evt) => this._eventToggleTrace(evt));
+                //item.addEventListener('click', (evt) => this._eventToggleTrace(evt));
+                item.addEventListener('click', (evt) => this._eventToggleRaysBetweenPovs(evt));
             }
             trace_content.appendChild(submenu_content);
         }
@@ -1063,6 +1069,7 @@ class CgVizMenu {
     }
 
     _eventToggleObj(evt) {
+        // REMOVE as it was replaced by _eventTogglePov, _eventTogglePovs, _eventToggleAllPovs
         // toggle icon between eye-open to eye-closed
         // show object
         this.cgviz.toggleObj();
@@ -1121,6 +1128,51 @@ class CgVizMenu {
         let tx_pov = evt.target.parentNode.previousSibling.querySelector('.header-text').innerText;
         let rx_pov = evt.target.querySelector('span').innerText;
         this.cgviz.toggleRays(tx_pov, rx_pov);
+    }
+
+    _eventToggleRaysBetweenPovs(evt) {
+        /**
+         * Toggle all rays between the specific txpov and rxpov
+         */
+        evt.target.classList.toggle('clicked');
+        let scenario = evt.target.parentNode.parentNode.parentNode.previousSibling.id;
+        let tx_pov = evt.target.parentNode.previousSibling.querySelector('.header-text').innerText;
+        let rx_pov = evt.target.querySelector('span').innerText;
+        this.cgviz.toggleRaysBetweenPovs(scenario, tx_pov, rx_pov);
+    }
+
+    _eventToggleAllRaysFromPovId(evt) {
+        /**
+         * Toggle all rays strting from this txPovId
+         */
+        evt.target.classList.toggle('clicked');
+        let scenario = evt.target.parentNode.parentNode.parentNode.previousSibling.id;
+        let txPovId = evt.target.parentNode.querySelector('.header-text').innerText;
+        this.cgviz.toggleAllRaysFromPovId(scenario, txPovId);
+        // mark the subcontent as clicked
+        let children = evt.target.parentNode.nextSibling.childNodes;
+        for (let i=0; i<children.length; i++) {
+            children[i].classList.toggle('clicked');
+        }
+    }
+
+    _eventToggleAllRays(evt) {
+        /**
+         * Toggle all rays from all txpov to all rxpov
+         */
+        evt.target.classList.toggle('clicked');
+        let scenario = evt.target.parentNode.parentNode.previousSibling.id;
+        this.cgviz.toggleAllRays(scenario);
+        // select all the povs types
+        let eyesDom = evt.target.parentNode.nextSibling.querySelectorAll('.eye');
+        for (let i=0; i<eyesDom.length; i++) {
+            eyesDom[i].classList.toggle('clicked');
+            // DRY warning!!! This is the same as in _eventTogglePovs !
+            let children = eyesDom[i].parentNode.nextSibling.childNodes;
+            for (let i=0; i<children.length; i++) {
+                children[i].classList.toggle('clicked');
+            }            
+        }
     }
 
     _eventToggleGroundPlane(evt) {
