@@ -229,7 +229,7 @@ class CgVizMenu {
         }
 
         // 1) THE HEADER
-        div_scenario = this._createMenuScenarioHeader(this.cgviz.data.selected, 'scenario-header');
+        div_scenario = this._createMenuScenarioHeader(this.cgviz.data.selected, 'scenario-header', '', false, true);
         // attach en event to the click on the expand element
         div_scenario.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         div.appendChild(div_scenario);
@@ -255,6 +255,7 @@ class CgVizMenu {
         // 2.2) The Point of Views
         // 2.2.1) the header
         let pov_header = this._createMenuScenarioHeader('PoV', 'pov-header'); 
+        pov_header.querySelector('.eye').addEventListener('click', (evt) => this._eventToggleAllPovs(evt));
         sce_content.appendChild(pov_header);
         // 2.2.2) the content
         //let pov_content = _el('div', '', ['pov-content', 'hidden']);
@@ -317,7 +318,11 @@ class CgVizMenu {
             pov_type = pov_types[i];
             let submenu = this._createSubMenu(pov_type, '', true);
             pov_content.appendChild(submenu);
-            submenu.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));;
+            // show/hide all the pov in the scene
+            submenu.querySelector('.eye').addEventListener('click', (evt) => this._eventTogglePovs(evt));
+            // show/hide the submenu content i.e. the list of povs
+            submenu.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+            // The povs are shown in sub-menu-content
             let submenu_content = _el('div', '', ['sub-menu-content', 'hidden']);            
             let pov_ids = Object.keys(qcmPov[pov_type]).sort();
             for (let j=0; j<pov_ids.length; j++) {
@@ -372,7 +377,7 @@ class CgVizMenu {
         return trace_content;
     }
 
-    _createMenuScenarioHeader(id_, className, innerText) {
+    _createMenuScenarioHeader(id_, className, innerText, grab, bin) {
         /**
          * Generic header for:
          *  - the scenario level (the actual simulation name)
@@ -387,16 +392,22 @@ class CgVizMenu {
          *  - a bin icon: click and the scenario is deleted, along with all the related data and meshes
          *  - an expand icon: click and it shows the categories under (obj, pov, trace, kpis)
          */
-
+        if (innerText === '') {
+            innerText = undefined;
+        }
         innerText = innerText || id_;
+        grab = grab || false;
+        bin = bin || false;
 
         let div = _el('div', id_, [className]);
 
-        let grab = _el('div', '', ['header-svg', 'weak']);
-        grab.appendChild(this.createSvg('grab'));
-        div.appendChild(grab);
+        if (grab === true) {
+            let grab = _el('div', '', ['header-svg', 'weak']);
+            grab.appendChild(this.createSvg('grab'));
+            div.appendChild(grab);
+        }
         
-        let eye = _el('div', '', ['header-svg']);
+        let eye = _el('div', '', ['header-svg', 'eye']);
         eye.appendChild(this.createSvg('eye_open'));
         div.appendChild(eye);
         
@@ -404,9 +415,11 @@ class CgVizMenu {
         name.innerText = innerText;
         div.appendChild(name);
         
-        let bin = _el('div', '', ['header-svg']);
-        bin.appendChild(this.createSvg('delete'));
-        div.appendChild(bin);
+        if (bin === true) {
+            let bin = _el('div', '', ['header-svg', 'delete']);
+            bin.appendChild(this.createSvg('delete'));
+            div.appendChild(bin);
+        }
         
         let expand = _el('div', '', ['header-svg', 'expand']);
         expand.appendChild(this.createSvg('down'));
@@ -439,7 +452,7 @@ class CgVizMenu {
 
         let div = _el('div', id_, ['sub-menu']);
 
-        let eye = _el('div', '', ['header-svg']);
+        let eye = _el('div', '', ['header-svg', 'eye']);
         eye.appendChild(this.createSvg('eye_open'));
         div.appendChild(eye);
         
@@ -963,9 +976,14 @@ class CgVizMenu {
     }
 
     _finishedYet(i_files, n_files) {
+        /**
+         * When all the loading is done, the menu and 3d structures can be created
+         */
         if (i_files === n_files) {
             console.log('done');
-            this.cgviz.getRaysRange();
+            let scenarioName = this.cgviz.data.selected;
+            this.cgviz.getRaysRange(scenarioName);
+            this.cgviz.setupGroups(scenarioName);
             this.__populateMenuScenariosContent();
         }
     }
@@ -1051,11 +1069,51 @@ class CgVizMenu {
     }
 
     _eventTogglePov(evt) {
+        /**
+         * Toggle a specific pov
+         */
         evt.target.classList.toggle('clicked');
-        let pov_type = evt.target.parentNode.previousSibling.querySelector('.header-text').innerText;
-        let pov_id = evt.target.querySelector('span').innerText;
-        let pov = pov_type + pov_id;
-        this.cgviz.togglePov(pov);
+        // Get the name components
+        let scenario = evt.target.parentNode.parentNode.parentNode.previousSibling.id;
+        let povType = evt.target.parentNode.previousSibling.querySelector('.header-text').innerText;
+        let povId = evt.target.querySelector('span').innerText;
+        this.cgviz.togglePov(scenario, povType, povId);
+        log.info(`Scenario: ${scenario} - PoV type: ${povType} - PoV Id: ${povId}`);
+    }
+
+    _eventTogglePovs(evt) {
+        /**
+         * Toggle all the povs of a certain type
+         */
+        evt.target.classList.toggle('clicked'); // to let the eye colored
+        // toggle all the povs in the scene
+        let scenario = evt.target.parentNode.parentNode.parentNode.previousSibling.id;
+        let povType = evt.target.parentNode.querySelector('.header-text').innerText;
+        this.cgviz.togglePovs(scenario, povType);
+        // mark the subcontent as clicked
+        let children = evt.target.parentNode.nextSibling.childNodes;
+        for (let i=0; i<children.length; i++) {
+            children[i].classList.toggle('clicked');
+        }
+    }
+
+    _eventToggleAllPovs(evt) {
+        /**
+         * Toggle all the povs
+         */
+        evt.target.classList.toggle('clicked'); // to let the eye colored
+        let scenario = evt.target.parentNode.parentNode.previousSibling.id;
+        this.cgviz.toggleAllPovs(scenario);
+        // select all the povs types
+        let eyesDom = evt.target.parentNode.nextSibling.querySelectorAll('.eye');
+        for (let i=0; i<eyesDom.length; i++) {
+            eyesDom[i].classList.toggle('clicked');
+            // DRY warning!!! This is the same as in _eventTogglePovs !
+            let children = eyesDom[i].parentNode.nextSibling.childNodes;
+            for (let i=0; i<children.length; i++) {
+                children[i].classList.toggle('clicked');
+            }            
+        }
     }
 
     _eventToggleTrace(evt) {
@@ -1085,7 +1143,8 @@ class CgVizMenu {
         try {
             var strMime = "image/jpeg";
             imgData = this.cgviz.renderer.domElement.toDataURL(strMime);
-            let filename = 'cg-viz-lite_screenshot_' + cdt + '.jpg';
+            //let filename = 'cg-viz-lite_screenshot_' + cdt + '.jpg';
+            let filename = `cg-viz-lite_screenshot_${cdt}.jpg`;
             saveFile(imgData.replace(strMime, strDownloadMime), filename);
         } catch (e) {
             console.log(e);

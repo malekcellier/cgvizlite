@@ -298,6 +298,10 @@ div.current-tab {
     padding-left: 8px;
 }
 
+.header-svg.expand {  
+    padding-left: 12px;
+}
+
 .header-svg svg {
     opacity: 0.25;
     pointer-events: none;   
@@ -313,6 +317,13 @@ div.current-tab {
 
 .header-svg:hover svg, .tab:focus svg{
     color: rgb(240, 240, 240);
+    opacity: 1;
+}
+
+.header-svg.eye.clicked svg{
+    /*TODO: toggle eye open/closed instead of just changing the color*/
+    color: rgb(240, 240, 240);
+    color: rgb(41, 0, 0);
     opacity: 1;
 }
 

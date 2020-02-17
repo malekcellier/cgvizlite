@@ -12,6 +12,12 @@
  * To use this class, I suggest to inherit from it and then add your extra methods
  */
 
+var log = {
+    'error': (text) => {console.log('%c' + text, 'color: red')},
+    'warn': (text) => {console.log('%c' + text, 'color: orange')},
+    'info': (text) => {console.log('%c' + text, 'color: blue')}
+};
+
 
 class ThreejsWrapper {
     /**
@@ -470,6 +476,33 @@ class ThreejsWrapper {
         }
     }
 
+    removeFromGroup(groupName, objectName) {
+        if (this.isObjectInGroup(groupName, objectName)) {
+            let group = this.scene.getObjectByName(groupName);
+            let object = group.getObjectByName(objectName);
+            group.remove(object);
+            log.info(`Removed ${objectName} from ${groupName}`);
+            this.data.groups[groupName].povs.remove(object);
+            this.scene.remove(object);
+            log.info(`Removed ${objectName} from scene`);
+        }
+    }
+
+    isObjectInGroup(groupName, objectName) {
+        if (this.isObjectInScene(groupName)) {
+            let group = this.scene.getObjectByName(groupName);
+            if (group.getObjectByName(objectName)) {
+                return true;
+            } else {
+                log.error(`No object named ${objectName} in ${groupName}`);    
+                return false;
+            }
+        } else {
+            log.error(`No group named ${groupName}`);
+            return false;
+        }
+    }
+
     findCenter(method) {
         /**
          * Calculates the center of the scene
@@ -533,8 +566,6 @@ class ThreejsWrapper {
     }
 
     animate() {
-        //requestAnimationFrame(this.animate);
-        
         requestAnimationFrame(() => this.animate());
 
         this.render();

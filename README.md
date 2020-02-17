@@ -24,3 +24,12 @@ in a command line editor inside the cloned folder.
 This may or may not launch a browser window. Otherwise open one tab and navigate to the address: localhost:8011
 
 **Note that the visualizer is tested in Chrome & FIrefox.**
+
+
+# Features
+- multiple scenes
+- deferred rendering
+- object life cycle
+- heatmaps
+- filters
+- screenshot

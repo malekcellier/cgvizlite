@@ -33,14 +33,76 @@ class CgVizJs extends ThreejsWrapper {
     constructor({canvas: canvas, menu: menu}) {
         super(canvas);
         this.data = {
-            'scenarios': {},
             'selected': null,
-            'ranges': {'qcmTrace': {'min': +Infinity, 'max': -Infinity,}}
+            'scenarios': {},
+            'ranges': {}, //{'qcmTrace': {'min': +Infinity, 'max': -Infinity,}}
+            'groups': {}
         }; // Data structure that will hold the data from the json files
         this.colors = {'qcmTrace': chroma.scale('Spectral')};
         this.reusables = this.createReusables();
         menu.cgviz = this;
         this.menu = menu;
+    }
+
+    setupGroups(scenarioName) {
+        /**
+         * Setup groups in the scene:
+         *  group for the scenario, then subgroups
+         * 1 group per category: universe, pov, traces, kpis
+         * 
+         * if found, replace it
+         */
+        scenarioName = scenarioName || this.cgviz.data.selected;
+        
+        // Scenario group
+        let grp_scenario = new THREE.Group();
+        grp_scenario.name = scenarioName;
+        // Ref to groups are kept in order to save time afterwards
+        this.data.groups[scenarioName] = {};
+        this.data.groups[scenarioName]['main'] = grp_scenario;
+        
+        // Subgroups
+        let grp_universe = new THREE.Group();
+        grp_universe.name = 'Universe';
+        grp_scenario.add(grp_universe);
+        this.data.groups[scenarioName]['universe'] = grp_universe;
+        
+        let grp_povs = new THREE.Group();
+        grp_povs.name = 'PoVs';
+        grp_scenario.add(grp_povs);
+        this.data.groups[scenarioName]['povs'] = grp_povs;
+        
+        let grp_traces = new THREE.Group();
+        grp_traces.name = 'Traces';
+        grp_scenario.add(grp_traces);
+        this.data.groups[scenarioName]['traces'] = grp_traces;
+        
+        let grp_kpis = new THREE.Group();
+        grp_kpis.name = 'Kpis';
+        grp_scenario.add(grp_kpis);
+        this.data.groups[scenarioName]['kpis'] = grp_kpis;
+
+        this.scene.add(grp_scenario);
+    }
+
+    removeGroup(scenarioName) {
+        /**
+         * Remove a scenarion group and all its content
+         */
+        if (!this.isObjectInScene(scenarioName)) {
+            return;
+        }
+        console.log('Removing group:', scenarioName);
+        this.scene.getObjectByName(scenarioName).traverse((child) => {
+            if (child.isGroup) {
+                this.removeGroup(child.name);
+            } else {
+                console.log('Removing chid: ', child.name);
+                child.geometry.dispose();
+                child.material.dispose();
+                this.scene.remove(child);
+            }
+        });
     }
 
     createReusables() {        
@@ -63,9 +125,13 @@ class CgVizJs extends ThreejsWrapper {
         return reusables;
     }
 
+    getData(scenario) {
+        return this.data.scenarios[scenario];
+    }
+
     getCurrentData() {
         // convenience function to return the current configuration
-        return this.data.scenarios[this.data.selected];
+        return this.getData(this.data.selected);
     }
 
     getRanges() {
@@ -184,6 +250,12 @@ class CgVizJs extends ThreejsWrapper {
         }        
     }
 
+    toggleUniverse(scenarioName, objName) {
+        /**
+         * Add/remove all the objects from the Universe 
+         */
+    }    
+
     togglePov(povId) {
         /**
          * If already visible, remove, otherwise show in the scene
@@ -210,6 +282,63 @@ class CgVizJs extends ThreejsWrapper {
             this.scene.add(povObject);
             console.log(' > added object: ', name);
         }
+    }
+
+    togglePov(scenarioName, povType, povId) {
+        /**
+         * 
+         */
+        let qcmPov = this.getData(scenarioName).qcmPov;
+        let povName = povType + '_' + povId;
+        if (this.isObjectInGroup(scenarioName, povName)) {
+            this.removeFromGroup(scenarioName, povName);            
+        } else {
+            let data = qcmPov[povType][povId];
+            let povCat = this.getPovCategory(povType);
+            const geometry = this.reusables[povCat].geometry;            
+            const material = this.reusables[povCat].material;            
+            const povObject = new THREE.Mesh(geometry, material);
+            povObject.name = povName;            
+            povObject.rotateY(-data.elevation); // BUG: not working due the order of the rotations?
+            povObject.rotateZ((data.azimuth) - (Math.PI / 2));
+            povObject.position.set(data.position[0]+this.reusables[povCat].dy, data.position[1], data.position[2]);
+            // Add the object to the correct subgroup, using the references
+            this.data.groups[scenarioName].povs.add(povObject);
+            log.info(`Added object ${povName} in ${scenarioName}`); 
+        }
+    }
+
+    togglePovs(scenarioName, povType) {
+        /**
+         * AdD/remove all povs from the given type
+         */
+        let qcmPov = this.getData(scenarioName).qcmPov;
+        let povIds = Object.keys(qcmPov[povType]).sort();
+        for (let i=0; i<povIds.length; i++) {
+            this.togglePov(scenarioName, povType, povIds[i]);
+        }
+    }
+
+    toggleAllPovs(scenarioName) {
+        /**
+         * Add/remove the povs from all types
+         *  if at least 1 is shown => show all
+         *  if all are hidden => show all
+         *  if at least 1 is hidden => show all
+         *  if all are shown => hide all
+         */
+        let qcmPov = this.getData(scenarioName).qcmPov;
+        let povTypes = Object.keys(qcmPov);
+        for (let i=0; i<povTypes.length; i++) {
+            this.togglePovs(scenarioName, povTypes[i]);
+        }
+    }
+
+    getPovState(scenarioName) {
+        /**
+         * FUTURE
+         * Find if 
+         */
     }
 
     getPovCategory(povId) {
@@ -278,7 +407,66 @@ class CgVizJs extends ThreejsWrapper {
 
     }
 
-    getRaysRange() {
+    toggleRaysFromPov(scenarioName, povId) {
+        /**
+         * Toggle all rays from the given PoV
+         */
+    }
+
+    toggleAllRays(scenarioName) {
+        /**
+         * Toggle all rays from all PoVs
+         */
+    }
+
+    getRaysRange(scenarioName) {
+        /**
+         * For the passed scenarioName, find the min/max values of the rays' rx power
+         */
+        // Reset the ranges container
+        this.data.ranges[scenarioName] = {'qcmTrace': {'min': +Infinity, 'max': -Infinity}};
+        // check if there is data in that scenario
+        let qcmTrace = this.data.scenarios[scenarioName].qcmTrace;
+        let txPovs = Object.keys(qcmTrace);
+        for (let i=0; i<txPovs.length; i++) {
+            let rxPovs = Object.keys(qcmTrace[txPovs[i]]);
+            for (let j=0; j<rxPovs.length; j++) {
+                let paths = qcmTrace[txPovs[i]][rxPovs[j]];
+                for (let k=0; k<paths.length; k++) {
+                    if (paths[k].P < this.data.ranges[scenarioName].qcmTrace.min) {
+                        this.data.ranges[scenarioName].qcmTrace.min = paths[k].P;
+                    } else if (paths[k].P > this.data.ranges[scenarioName].qcmTrace.max) {
+                        this.data.ranges[scenarioName].qcmTrace.max = paths[k].P;
+                    }
+                }
+            }
+        }
+    }
+
+    getOverallRaysRange() {
+        /**
+         * Get the ranges across all the scenarios
+         */
+        let scenarios = Object.keys(this.data.scenarios);
+        if (scenarios.length === 0) {
+            console.log('no scenarios loaded');
+            return;
+        }
+        this.data.ranges['overall'] = {'qcmTrace': {'min': +Infinity, 'max': -Infinity}};
+        for (let i=0; i<scenarios.length; i++) {
+            let scenarioName = scenarios[i];
+            // Traces range
+            this.getRaysRange(scenarioName);
+            if (this.data.ranges[scenarioName].qcmTrace.min < this.data.ranges.overall.qcmTrace.min) {
+                this.data.ranges.overall.qcmTrace.min = this.data.ranges[scenarioName].qcmTrace.min;
+            } else if (this.data.ranges[scenarioName].qcmTrace.max > this.data.ranges.overall.qcmTrace.max) {
+                this.data.ranges.overall.qcmTrace.max = this.data.ranges[scenarioName].qcmTrace.max;
+            }
+            // Others? KPIS?
+        }
+    }
+
+    getRaysRange_() {
         /**
          * Find the min/max rx power values across all the rays in the scenario
          * This is mainly used to set a range for the colormap
