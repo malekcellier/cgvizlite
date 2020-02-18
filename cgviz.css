@@ -276,7 +276,8 @@ div.current-tab {
     color: rgb(160, 167, 180);
     /*background-color: rgb(41, 50, 60);*/
     background-color: #29323c;
-    border-left: 3px solid rgb(  0,  92, 255);
+    /*border-left: 3px solid rgb(  0,  92, 255);*/
+    border-left: 3px solid rgb(31, 186, 214); ;
     padding: 0px 10px 0px 10px;
     height: 48px;
     display: flex;
@@ -354,6 +355,35 @@ div.current-tab {
     display: flex;
     background: rgb(41, 50, 60);
     opacity: 0.6;
+}
+
+.sub-menu.switch {
+    width: 100%;
+    align-items: center;
+    margin-left: 0px;
+}
+.switch > .header-text {
+    padding-bottom: 8px;
+}
+
+.switch-svg {
+    padding-right: 12px;
+    color: rgb(240, 240, 240);
+    opacity: 1;
+}
+.switch-svg svg {
+    pointer-events: none;   
+    color: rgb(240, 240, 240);
+    opacity: 1;
+}
+.switch-svg svg.ON {
+    fill: rgb(240, 240, 240);
+}
+.switch-svg svg.OFF {
+    fill: rgb( 84, 122, 130);
+}
+.switch-svg:hover {
+    cursor: pointer;
 }
 
 .sub.menu:hover {
@@ -934,4 +964,15 @@ ul {
 /* Change tooltip to the class of the container div*/
 .tooltip:hover .tooltiptext-right, .tooltip:hover .tooltiptext-top, .tooltip:hover .tooltiptext-bottom, .tooltip:hover .tooltiptext-left {
     visibility: visible;
+}
+
+
+/*Colors from kepler*/
+.kepler {
+    color: rgb(143, 47, 191);
+    color: rgb(  0, 92, 255);
+    color: rgb(192, 108, 132);
+    color: rgb( 84, 122, 130);
+    color: rgb(248, 177, 149);
+    color: rgb( 62, 172, 168);
 }

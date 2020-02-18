@@ -229,7 +229,7 @@ class CgVizMenu {
         }
 
         // 1) THE HEADER
-        div_scenario = this._createMenuScenarioHeader(this.cgviz.data.selected, 'scenario-header', '', false, true);
+        div_scenario = this.HeaderMenu(this.cgviz.data.selected, 'scenario-header', '', false, true);
         // attach en event to the click on the expand element
         div_scenario.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         div.appendChild(div_scenario);
@@ -240,21 +240,21 @@ class CgVizMenu {
         
         // 2.1) The universe
         // 2.1.1) the header
-        let obj_header = this._createMenuScenarioHeader('Universe', 'obj-header'); 
+        let obj_header = this.HeaderMenu('Universe', 'obj-header'); 
         sce_content.appendChild(obj_header);
         obj_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         // 2.1.2) the content
         let obj_content = _el('div', '', ['obj-content', 'hidden']);
-        obj_content.appendChild(this._createSubMenu('3d.obj'));
+        obj_content.appendChild(this.HeaderSubMenu('3d.obj'));
         obj_content.getElementsByClassName('header-svg')[0].addEventListener('click', (evt) => this._eventToggleObj(evt));
-        //obj_content.appendChild(this._createSubMenu('3d.mtl'));
-        obj_content.appendChild(this._createSubMenu('ground plane'));
+        //obj_content.appendChild(this.HeaderSubMenu('3d.mtl'));
+        obj_content.appendChild(this.HeaderSubMenu('ground plane'));
         obj_content.getElementsByClassName('header-svg')[1].addEventListener('click', (evt) => this._eventToggleGroundPlane(evt));
         sce_content.appendChild(obj_content);
         
         // 2.2) The Point of Views
         // 2.2.1) the header
-        let pov_header = this._createMenuScenarioHeader('PoV', 'pov-header'); 
+        let pov_header = this.HeaderMenu('PoV', 'pov-header'); 
         pov_header.querySelector('.eye').addEventListener('click', (evt) => this._eventToggleAllPovs(evt));
         sce_content.appendChild(pov_header);
         // 2.2.2) the content
@@ -272,7 +272,7 @@ class CgVizMenu {
         
         // 2.3) The traces:
         // 2.3.1) the header
-        let trace_header = this._createMenuScenarioHeader('Traces', 'trace-header'); 
+        let trace_header = this.HeaderMenu('Traces', 'trace-header'); 
         trace_header.querySelector('.eye').addEventListener('click', (evt) => this._eventToggleAllRays(evt));
         sce_content.appendChild(trace_header);
         // 2.3.2) the content
@@ -288,7 +288,7 @@ class CgVizMenu {
         
         // 2.4) The kpis
         // 2.4.1) the header
-        let kpis_header = this._createMenuScenarioHeader('Kpis', 'kpis-header'); 
+        let kpis_header = this.HeaderMenu('Kpis', 'kpis-header'); 
         sce_content.appendChild(kpis_header);        
         // 2.4.2) the content
         let kpis_content = _el('div', '', ['kpis-content', 'hidden']);        
@@ -317,7 +317,7 @@ class CgVizMenu {
         let pov_type;
         for (let i=0; i<pov_types.length; i++) {
             pov_type = pov_types[i];
-            let submenu = this._createSubMenu(pov_type, '', true);
+            let submenu = this.HeaderSubMenu(pov_type, '', true);
             pov_content.appendChild(submenu);
             // show/hide all the pov of this type in the scene
             submenu.querySelector('.eye').addEventListener('click', (evt) => this._eventTogglePovs(evt));
@@ -358,7 +358,7 @@ class CgVizMenu {
         let tx_id;        
         for (let i=0; i<tx_ids.length; i++) {
             tx_id = tx_ids[i];
-            let submenu = this._createSubMenu(tx_id, '', true);
+            let submenu = this.HeaderSubMenu(tx_id, '', true);
             trace_content.appendChild(submenu);
             // show/hide all the traces from this txpovid in the scene
             submenu.querySelector('.eye').addEventListener('click', (evt) => this._eventToggleAllRaysFromPovId(evt));
@@ -383,9 +383,9 @@ class CgVizMenu {
         return trace_content;
     }
 
-    _createMenuScenarioHeader(id_, className, innerText, grab, bin) {
+    HeaderMenu(id_, className, innerText, grab, bin, eye) {
         /**
-         * Generic header for:
+         * Header for Menu, used for example in:
          *  - the scenario level (the actual simulation name)
          *  - the categories below it, qcmpov, qcmobj, qcmtrace, qcmkpis
          * It has:
@@ -404,6 +404,9 @@ class CgVizMenu {
         innerText = innerText || id_;
         grab = grab || false;
         bin = bin || false;
+        if (eye === undefined) {
+            eye = true;
+        }
 
         let div = _el('div', id_, [className]);
 
@@ -413,9 +416,11 @@ class CgVizMenu {
             div.appendChild(grab);
         }
         
-        let eye = _el('div', '', ['header-svg', 'eye']);
-        eye.appendChild(this.createSvg('eye_open'));
-        div.appendChild(eye);
+        if (eye === true) {
+            let eye_ = _el('div', '', ['header-svg', 'eye']);
+            eye_.appendChild(this.createSvg('eye_open'));
+            div.appendChild(eye_);
+        }
         
         let name = _el('div', '', ['header-text']);
         name.innerText = innerText;
@@ -434,21 +439,9 @@ class CgVizMenu {
         return div;
     }
 
-    _createGenericHeader(id_, className, innerText) {
+    HeaderSubMenu(innerText, id_, expand) {
         /**
-         * 
-         */
-        innerText = innerText || id_;
-
-        let div = _el('div', id_, [className]);
-
-
-
-        return div;
-    }
-
-    _createSubMenu(innerText, id_, expand) {
-        /**
+         * A simpler Header
          * Contains a title and an eye
          */
         expand = expand || false;
@@ -472,6 +465,45 @@ class CgVizMenu {
             div.appendChild(expand);            
         }
         
+        return div;
+    }
+
+    HeaderSwitch(innerText, id_, default_on) {
+        if (id_ === '') {
+            id_ = null;
+        }
+
+        if (default_on === undefined) {
+            default_on = true;
+        }
+
+        let div = _el('div', id_, ['sub-menu', 'switch']);
+
+        let name = _el('div', '', ['header-text']);
+        name.innerText = innerText;
+        div.appendChild(name);
+
+        let svg = this.createSvg('switch-off');
+        if (default_on) {
+            svg = this.createSvg('switch-on');
+        }
+
+        let icon =_el('div', '', ['switch-svg']);
+        /*
+        icon.addEventListener('click', (evt) => {
+            if (icon.querySelector('svg').classList.contains('ON')) {
+                // remove the ON icon and replace it with the OFF
+                icon.removeChild(icon.querySelector('svg'));
+                icon.appendChild(this.createSvg('switch-off'));
+            } else {
+                // remove the OFF icon and replace it with the ON
+                icon.removeChild(icon.querySelector('svg'));
+                icon.appendChild(this.createSvg('switch-on'));
+            }
+        });*/
+        icon.appendChild(svg);
+        div.appendChild(icon);
+
         return div;
     }
 
@@ -531,15 +563,65 @@ class CgVizMenu {
         // A container for the settings data
         let div_settings = _el('div', 'div-settings');
         settings.appendChild(div_settings);
-        // General
-        let general_header = this._createMenuScenarioHeader('General', 'obj-header');
+        // 1) General
+        let general_header = this.HeaderMenu('General', 'scenario-header', '', false, false, false);
+        general_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         settings.appendChild(general_header);
-        let general_content = this._createSubMenu('Background');
+        let general_content = _el('div', '', ['obj-content', 'hidden']);;
         settings.appendChild(general_content);
-        // Helpers
-        let helpers_header = this._createMenuScenarioHeader('Helpers', 'pov-header');
+        //let general_content = this.HeaderSubMenu('Background');
+        
+        // 2) Helpers
+        let helpers_header = this.HeaderMenu('Helpers', 'scenario-header', '', false, false, false);
+        helpers_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         settings.appendChild(helpers_header);
-        let helpers_content = this._createSubMenu('Axes');
+        // Axes and Grid
+        let helpers_content = _el('div', '', ['obj-content', 'hidden']);
+        
+        // 2.1) The axes: show/hide, use arrows, size
+        let helpers_axes = this.HeaderMenu('Axes', 'obj-header', '', false, false, false);
+        helpers_axes.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+        helpers_content.appendChild(helpers_axes);
+        let axes_content = _el('div', '', ['sub-menu-content', 'hidden'], true);
+        helpers_content.appendChild(axes_content);
+        
+        let axes_centered = this.HeaderSwitch('Center on scene', '', false);
+        axes_centered.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleCenteredAxes(evt));
+        axes_content.appendChild(axes_centered);
+        let axes_visible = this.HeaderSwitch('Visible');
+        axes_visible.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleAxes(evt));
+        axes_content.appendChild(axes_visible);
+        let axes_arrows = this.HeaderSwitch('Use arrows');
+        axes_arrows.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleAxesArrows(evt));
+        axes_content.appendChild(axes_arrows);
+        axes_content.appendChild(this.HeaderSwitch('Size'));
+        
+        // 2.2) the grid: show/hide, size, divisions
+        let helpers_grid = this.HeaderMenu('Grid', 'obj-header', '', false, false, false);
+        helpers_grid.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+        helpers_content.appendChild(helpers_grid);
+        let grid_content = _el('div', '', ['sub-menu-content', 'hidden'], true);
+        helpers_content.appendChild(grid_content);
+        
+        let grid_centered = this.HeaderSwitch('Center on scene', '', false);
+        grid_centered.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleCenteredGrid(evt));
+        grid_content.appendChild(grid_centered);
+        let grid_visible = this.HeaderSwitch('Visible');
+        grid_visible.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleGrid(evt));
+        grid_content.appendChild(grid_visible);
+
+        // 2.3) the camera: center
+        let helpers_camera = this.HeaderMenu('Controls', 'obj-header', '', false, false, false);
+        helpers_camera.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+        helpers_content.appendChild(helpers_camera);
+        let camera_content = _el('div', '', ['sub-menu-content', 'hidden'], true);
+        helpers_content.appendChild(camera_content);
+        
+        let camera_centered = this.HeaderSwitch('Center on scene', '', false);
+        camera_centered.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleCenteredCamera(evt));
+        camera_content.appendChild(camera_centered);
+
+
         settings.appendChild(helpers_content);
 
 
@@ -1251,6 +1333,79 @@ class CgVizMenu {
         evt.target.classList.toggle('clicked');
     }
 
+    _eventToggleSwitch(evt) {
+        /**
+         * Change the switch svg icon from open to closed
+         */
+        let icon = evt.target;
+        if (icon.querySelector('svg').classList.contains('ON')) {
+            // remove the ON icon and replace it with the OFF
+            icon.removeChild(icon.querySelector('svg'));
+            icon.appendChild(this.createSvg('switch-off'));
+        } else {
+            // remove the OFF icon and replace it with the ON
+            icon.removeChild(icon.querySelector('svg'));
+            icon.appendChild(this.createSvg('switch-on'));
+        }        
+    }
+
+    _eventToggleAxes(evt) {
+        // change the svg
+        this._eventToggleSwitch(evt);
+        // toggle the axes visibility
+        this.cgviz.params.helpers.axes.show = !this.cgviz.params.helpers.axes.show;
+        // invoke the function
+        this.cgviz.createHelpers();
+    }
+
+    _eventToggleCenteredAxes(evt) {
+        // change the svg
+        this._eventToggleSwitch(evt);
+        // toggle the axes visibility
+        this.cgviz.params.helpers.axes.center_on_scene = !this.cgviz.params.helpers.axes.center_on_scene;
+        this.cgviz.centerOnScene();
+        // invoke the function
+        this.cgviz.createHelpers();
+    }
+
+    _eventToggleGrid(evt) {
+        // change the svg
+        this._eventToggleSwitch(evt);
+        // toggle the axes visibility
+        this.cgviz.params.helpers.grid.show = !this.cgviz.params.helpers.grid.show;
+        // invoke the function
+        this.cgviz.createHelpers();
+    }
+
+    _eventToggleCenteredGrid(evt) {
+        // change the svg
+        this._eventToggleSwitch(evt);
+        // toggle the axes visibility
+        this.cgviz.params.helpers.grid.center_on_scene = !this.cgviz.params.helpers.grid.center_on_scene;
+        this.cgviz.centerOnScene();
+        // invoke the function
+        this.cgviz.createHelpers();
+    }    
+
+    _eventToggleCenteredCamera(evt) {
+        // change the svg
+        this._eventToggleSwitch(evt);
+        // toggle the axes visibility
+        this.cgviz.params.camera.center_on_scene = !this.cgviz.params.camera.center_on_scene;
+        this.cgviz.centerOnScene();
+        // invoke the function
+        this.cgviz.createHelpers();
+    }    
+
+    _eventToggleAxesArrows(evt) {
+        // change the svg
+        this._eventToggleSwitch(evt);
+        // toggle the axes visibility
+        this.cgviz.params.helpers.axes.use_arrows = !this.cgviz.params.helpers.axes.use_arrows;
+        // invoke the function
+        this.cgviz.createHelpers();
+    }
+
     // SVG and ICONS
 
     createSvg(name) {        
@@ -1327,6 +1482,12 @@ class CgVizMenu {
                 break;
             case 'grab': 
                 svg = this._logoGrab();
+                break;
+            case 'switch-on': 
+                svg = this._logoSwitchOn();
+                break;
+            case 'switch-off':
+                svg = this._logoSwitchOff();
                 break;
         }
 
@@ -1697,7 +1858,7 @@ class CgVizMenu {
     }
 
     _logoGrab() {
-        let svg = this._svgTemplate();  
+        let svg = this._svgTemplate();
             
         let rectangles = [
             {x: '35.01', y:'48.31', width: '6.44', height: '6.44'},
@@ -1726,6 +1887,35 @@ class CgVizMenu {
             return rect; 
         }
            
+
+        return svg;
+    }
+
+    _logoSwitchOn() {
+        let svg = this._svgTemplate({'width': '32px', 'height': '32px', 'view_box': '0 0 330 330'});
+        svg.setAttribute('style', 'enable-background:new 0 0 60 60');
+        svg.setAttribute('class', 'ON');
+
+        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+        path.setAttribute('d', 'M240,75H90c-49.626,0-90,40.374-90,90s40.374,90,90,90h150c49.626,0,90-40.374,90-90S289.626,75,240,75zM240,225c-33.084,0-60-26.916-60-60s26.916-60,60-60s60,26.916,60,60S273.084,225,240,225z');
+        g.appendChild(path);
+        svg.appendChild(g);
+
+        return svg;
+    }
+
+    _logoSwitchOff() {
+        let svg = this._svgTemplate({'width': '32px', 'height': '32px', 'view_box': '0 0 483.5 483.5'});
+        svg.setAttribute('style', 'enable-background:new 0 0 60 60');
+        svg.setAttribute('class', 'OFF');
+
+        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+        path.setAttribute('d', 'M354.75,113h-227.5C56.946,113.827,0,171.258,0,241.75s56.946,127.923,127.25,128.731c0,0.019,227.5,0.019,227.5,0.019c70.993,0,128.75-57.757,128.75-128.75S425.743,113,354.75,113z M128.75,340.5C74.299,340.5,30,296.201,30,241.75S74.299,143,128.75,143s98.75,44.299,98.75,98.75S183.201,340.5,128.75,340.5z');
+        g.appendChild(path);
+
+        svg.appendChild(g);
 
         return svg;
     }

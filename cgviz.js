@@ -225,7 +225,7 @@ class CgVizJs extends ThreejsWrapper {
             //let mesh = new THREE.Mesh(group, material);
             mesh.name = name;
             this.scene.add(mesh);
-            //this.centerCamera(name);
+            //this.centerCamera();
             console.log(' > added object: ', name);
             this.findCenter();
         }

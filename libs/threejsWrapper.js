@@ -76,7 +76,8 @@ class ThreejsWrapper {
                 y: 250,
                 z: 250,
                 up: 'z',
-                lookAt: {x: 0, y:0, z: 0}
+                center_on_scene: false,
+                lookAt: {x: 0, y: 0, z: 0}
             },
             light: {
                 color: 0xffffff,
@@ -89,11 +90,13 @@ class ThreejsWrapper {
             helpers: {
                 axes: {
                     show: true,
+                    center_on_scene: false,
                     use_arrows: true,
                     size: 150
                 },
                 grid: {
                     show: true,
+                    center_on_scene: false,
                     size: 200,
                     division: 20
                 },
@@ -196,11 +199,15 @@ class ThreejsWrapper {
         this.createHelpers();
     }
 
-    centerCamera(center) {
-        center = center || 'origin';
-        if (center === 'scene') {
+    centerOnScene() {
+        let c = this.params.camera;
+        if (c.center_on_scene) {
             let limits = this.findCenter();
-            this.params.camera.lookAt = {x: limits.center.x, y: limits.center.y, z: 0};
+            this.params.camera.lookAt = {
+                x: limits.center.x || 0,
+                y: limits.center.y || 0,
+                z: 0
+            };
         } else {
             // Make the camera look at the origin
             this.params.camera.lookAt = {x: 0, y: 0, z: 0};            
@@ -243,7 +250,9 @@ class ThreejsWrapper {
         let a = this.params.camera.lookAt;
         if (this.params.helpers.axes.show) {
             let axesHelper = this._createAxes();
-            axesHelper.position.set(a.x, a.y, 0);
+            if (this.params.camera.center_on_scene) {
+                axesHelper.position.set(a.x, a.y, 0);
+            }
             axesHelper.name = 'AxesHelper'; 
             this.scene.add(axesHelper);
         }
@@ -253,7 +262,9 @@ class ThreejsWrapper {
         if (grid.show) {
             let gridHelper = new THREE.GridHelper(grid.size, grid.division);
             gridHelper.rotateX(Math.PI / 2);
-            gridHelper.position.set(a.x, a.y, 0);
+            if (this.params.camera.center_on_scene) {
+                gridHelper.position.set(a.x, a.y, 0);
+            }
             gridHelper.name = 'GridHelper'; 
             this.scene.add(gridHelper);
         }
@@ -516,7 +527,8 @@ class ThreejsWrapper {
                 min: {x: Infinity, y: Infinity, z: Infinity}, 
                 max: {x: -Infinity, y: -Infinity, z: -Infinity}
             };
-            this.scene.traverse( function ( child ) {        
+            this.scene.traverse( function ( child ) {   
+                log.info('child:', child.name);
                 if ( child instanceof THREE.Mesh ) {    
                     child.geometry.computeBoundingBox();
                     let bb = child.geometry.boundingBox;
