@@ -254,9 +254,18 @@ class CgVizJs extends ThreejsWrapper {
         /**
          * Add/remove all the objects from the Universe 
          */
+        let qcmUniverse = this.getData(scenarioName).qcmUniverse.objs;
+        if (this.isObjectInGroup(scenarioName, objName)) {
+            this.removeFromGroup(scenarioName, objName, 'universe');            
+        } else {
+            let universeObject = qcmUniverse[objName];
+            // Add the object to the correct subgroup, using the references
+            this.data.groups[scenarioName].universe.add(universeObject);
+            log.info(`Added object ${objName} in ${scenarioName}`); 
+        }        
     }    
 
-    togglePov(povId) {
+    togglePovOld(povId) {
         /**
          * If already visible, remove, otherwise show in the scene
          */
@@ -281,6 +290,30 @@ class CgVizJs extends ThreejsWrapper {
             povObject.position.set(data.position[0]+this.reusables[povType].dy, data.position[1], data.position[2]);
             this.scene.add(povObject);
             console.log(' > added object: ', name);
+        }
+    }
+
+    togglePovMast(scenarioName, povType, povId) {
+        /**
+         * This has to be coordinated with the PoV
+         */
+        let qcmPov = this.getData(scenarioName).qcmPov;
+        let mastName = 'mast_' + povType + '_' + povId;
+        let povName = povType + '_' + povId;
+        if (this.isObjectInGroup(scenarioName, povName)) {
+            // Only toggle if the parent is shown
+            if (this.isObjectInGroup(scenarioName, mastName)) {
+                this.removeFromGroup(scenarioName, mastName, 'povs');  
+            } else {
+                let data = qcmPov[povType][povId];
+                let material = new THREE.LineDashedMaterial({color: 0xffffff});
+                let geometry = new THREE.Geometry();
+                geometry.vertices.push(new THREE.Vector(data.position[0], data.position[1], 0));
+                geometry.vertices.push(new THREE.Vector(data.position[0], data.position[1], data.position[2]));
+                let mastObject = new THREE.Line(geometry, material);
+                mastObject.name = mastName;
+                this.data.groups[scenarioName].povs.add(mastObject);
+            }
         }
     }
 

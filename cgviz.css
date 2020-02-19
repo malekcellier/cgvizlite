@@ -361,6 +361,7 @@ div.current-tab {
     width: 100%;
     align-items: center;
     margin-left: 0px;
+    margin-bottom: 0px;
 }
 .switch > .header-text {
     padding-bottom: 8px;

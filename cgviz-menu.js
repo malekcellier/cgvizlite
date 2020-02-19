@@ -241,16 +241,14 @@ class CgVizMenu {
         // 2.1) The universe
         // 2.1.1) the header
         let obj_header = this.HeaderMenu('Universe', 'obj-header'); 
+        obj_header.querySelector('.eye').addEventListener('click', (evt) => this._eventToggleEntireUniverse(evt));
         sce_content.appendChild(obj_header);
-        obj_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
-        // 2.1.2) the content
-        let obj_content = _el('div', '', ['obj-content', 'hidden']);
-        obj_content.appendChild(this.HeaderSubMenu('3d.obj'));
-        obj_content.getElementsByClassName('header-svg')[0].addEventListener('click', (evt) => this._eventToggleObj(evt));
-        //obj_content.appendChild(this.HeaderSubMenu('3d.mtl'));
-        obj_content.appendChild(this.HeaderSubMenu('ground plane'));
-        obj_content.getElementsByClassName('header-svg')[1].addEventListener('click', (evt) => this._eventToggleGroundPlane(evt));
-        sce_content.appendChild(obj_content);
+        // 2.1.2 the content
+        let obj_content = this.__populateUniverseContent();
+        if (obj_content !== undefined) {
+            sce_content.appendChild(obj_content);
+            obj_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+        }
         
         // 2.2) The Point of Views
         // 2.2.1) the header
@@ -295,6 +293,31 @@ class CgVizMenu {
         sce_content.appendChild(kpis_content);
         // The kpis are:
         //  -
+    }
+
+    __populateUniverseContent() {
+        /**
+         * The Universe is a list of .obj files with show/hide option
+         */
+        let qcmUniverse = this.cgviz.data.scenarios[this.cgviz.data.selected].qcmUniverse;
+        let objects = Object.keys(qcmUniverse.objs);
+        if (objects.length === 0) {
+            log.warn('no universe objects found');
+            return;
+        }
+        let obj_content = _el('div', '', ['obj-content', 'hidden']);
+        // Add the .obj files
+        for (let i=0; i<objects.length; i++) {
+            let submenu = this.HeaderSubMenu(objects[i]);
+            submenu.querySelector('.eye').addEventListener('click', (evt) => this._eventToggleUniverse(evt));
+            obj_content.appendChild(submenu);            
+        }
+        // Add a ground plane
+        let submenu = this.HeaderSubMenu('ground plane');
+        submenu.querySelector('.eye').addEventListener('click', (evt) => this._eventToggleGroundPlane(evt));
+        obj_content.appendChild(submenu);
+
+        return obj_content;
     }
 
     __populatePovContent() {
@@ -489,18 +512,6 @@ class CgVizMenu {
         }
 
         let icon =_el('div', '', ['switch-svg']);
-        /*
-        icon.addEventListener('click', (evt) => {
-            if (icon.querySelector('svg').classList.contains('ON')) {
-                // remove the ON icon and replace it with the OFF
-                icon.removeChild(icon.querySelector('svg'));
-                icon.appendChild(this.createSvg('switch-off'));
-            } else {
-                // remove the OFF icon and replace it with the ON
-                icon.removeChild(icon.querySelector('svg'));
-                icon.appendChild(this.createSvg('switch-on'));
-            }
-        });*/
         icon.appendChild(svg);
         div.appendChild(icon);
 
@@ -539,6 +550,36 @@ class CgVizMenu {
         
         // A visiual separator
         interactions.appendChild(_el('hr', '', ['title-body-separator']));
+
+        // A container for the interaction data
+        let div_interactions = _el('div', 'div-interactions');
+        interactions.appendChild(div_interactions);
+
+        // 1) Tooltips
+        // The header
+        let tooltip_header = this.HeaderMenu('Tooltips', 'scenario-header', '', false, false, false);
+        tooltip_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+        interactions.appendChild(tooltip_header);
+        // The content
+        let tooltip_content = _el('div', '', ['obj-content', 'hidden']);        
+        // 1.1) Visibility
+        let tooltip_visible = this.HeaderSwitch('Visible');
+        tooltip_visible.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleTooltip(evt));
+        tooltip_content.appendChild(tooltip_visible);
+        // 1.2) Coordinates
+        let tooltip_coord = this.HeaderSwitch('Coordinates');
+        tooltip_coord.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleTooltip(evt));
+        tooltip_content.appendChild(tooltip_coord);
+        // 1.3) Pov ID
+        let tooltip_povid = this.HeaderSwitch('PoV ID');
+        tooltip_povid.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleTooltip(evt));
+        tooltip_content.appendChild(tooltip_povid);
+        // 1.4) KPIs => TODO: allow user to select which KPIs => offer a list
+        let tooltip_kpis = this.HeaderSwitch('KPIs');
+        tooltip_kpis.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleTooltip(evt));
+        tooltip_content.appendChild(tooltip_kpis);
+
+        interactions.appendChild(tooltip_content);
 
         return interactions;
     }
@@ -585,9 +626,6 @@ class CgVizMenu {
         let axes_content = _el('div', '', ['sub-menu-content', 'hidden'], true);
         helpers_content.appendChild(axes_content);
         
-        let axes_centered = this.HeaderSwitch('Center on scene', '', false);
-        axes_centered.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleCenteredAxes(evt));
-        axes_content.appendChild(axes_centered);
         let axes_visible = this.HeaderSwitch('Visible');
         axes_visible.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleAxes(evt));
         axes_content.appendChild(axes_visible);
@@ -602,29 +640,27 @@ class CgVizMenu {
         helpers_content.appendChild(helpers_grid);
         let grid_content = _el('div', '', ['sub-menu-content', 'hidden'], true);
         helpers_content.appendChild(grid_content);
-        
-        let grid_centered = this.HeaderSwitch('Center on scene', '', false);
-        grid_centered.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleCenteredGrid(evt));
-        grid_content.appendChild(grid_centered);
+        // Visibility
         let grid_visible = this.HeaderSwitch('Visible');
         grid_visible.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleGrid(evt));
         grid_content.appendChild(grid_visible);
+        // Autosize
+        let grid_autosize = this.HeaderSwitch('Auto-size');
+        grid_autosize.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleAutoGrid(evt));
+        grid_content.appendChild(grid_autosize);
 
-        // 2.3) the camera: center
-        let helpers_camera = this.HeaderMenu('Controls', 'obj-header', '', false, false, false);
-        helpers_camera.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
-        helpers_content.appendChild(helpers_camera);
-        let camera_content = _el('div', '', ['sub-menu-content', 'hidden'], true);
-        helpers_content.appendChild(camera_content);
+        // 2.3) the controls: center
+        let helpers_controls = this.HeaderMenu('Controls', 'obj-header', '', false, false, false);
+        helpers_controls.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+        helpers_content.appendChild(helpers_controls);
+        let controls_content = _el('div', '', ['sub-menu-content', 'hidden'], true);
+        helpers_content.appendChild(controls_content);
         
-        let camera_centered = this.HeaderSwitch('Center on scene', '', false);
-        camera_centered.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleCenteredCamera(evt));
-        camera_content.appendChild(camera_centered);
-
+        let controls_centered = this.HeaderSwitch('Center on scene', '', false);
+        controls_centered.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleCenteredControls(evt));
+        controls_content.appendChild(controls_centered);
 
         settings.appendChild(helpers_content);
-
-
 
         return settings;
     }
@@ -733,7 +769,6 @@ class CgVizMenu {
         return clrmap;
     }
 
-
     createModal() {
         /**
          * Handles loading the files and populating the menu-body
@@ -836,12 +871,10 @@ class CgVizMenu {
         if (this._directory.files.length > 0) {
             this.cgviz.data.selected = files[0].webkitRelativePath.split('/')[0];
             this.cgviz.data.scenarios[this.cgviz.data.selected] = {
+                'qcmUniverse': {'objs': {}, 'mtl': null},
                 'qcmPov': {},
-                'qcmKpis': {},
                 'qcmTrace': {},
-                'obj': {'obj': null, 'mtl': null},
-                'tmp': {'objs': [], 'mtl': null},
-                'files': []                
+                'qcmKpis': {}
             };
             let file_index = 0; // counts the files in the passed directory
             for (let i=0; i<files.length; i++) {
@@ -956,7 +989,7 @@ class CgVizMenu {
         let self = this;
         console.log('loading data...');
         let files = this._directory.files;
-        let threed = {'mtl': {}, 'objs': []};
+        let threed = {'mtl': {}, 'objs': []}; // temporary structure to store the ref to obj files
         
         let li_total = document.getElementById('li_Total');
         let totalProgressVal = li_total.getElementsByClassName('value')[0];
@@ -1043,6 +1076,7 @@ class CgVizMenu {
             obj_reader.readAsText(threed.objs[i].file);
             obj_reader.onload = function(evt) {
                 let obj = new THREE.OBJLoader().parse(evt.target.result);
+                obj.name = threed.objs[i].file.name;
                 self.__handleObj(obj)
             };
             obj_reader.onprogress = function(xhr) {
@@ -1077,15 +1111,16 @@ class CgVizMenu {
     }
 
     __handleMtl(thisFile) {
-        let qcmObjects = this.cgviz.data.scenarios[this.cgviz.data.selected].obj;
-        qcmObjects.mtl = thisFile;
+        let qcmUniverse = this.cgviz.data.scenarios[this.cgviz.data.selected].qcmUniverse;
+        qcmUniverse.mtl = thisFile;
     }
 
     __handleObj(thisFile) {
-        let qcmObjects = this.cgviz.data.scenarios[this.cgviz.data.selected].obj;
-        qcmObjects.obj = thisFile;
+        let selected = this.cgviz.data.selected;
+        let qcmUniverse = this.cgviz.data.scenarios[selected].qcmUniverse;
+        qcmUniverse.objs[thisFile.name] = thisFile;
         // Find the limits of the scene in order to display a plane..
-        this.cgviz.data.scenarios[this.cgviz.data.selected].limits = this.cgviz.findCenter();
+        this.cgviz.data.scenarios[selected].limits = this.cgviz.findCenter(selected);
     }
 
     __handleQcmPov(thisFile) {
@@ -1151,10 +1186,24 @@ class CgVizMenu {
     }
 
     _eventToggleObj(evt) {
-        // REMOVE as it was replaced by _eventTogglePov, _eventTogglePovs, _eventToggleAllPovs
+        // REMOVE as it is replaced by _eventToggleUniverse
         // toggle icon between eye-open to eye-closed
         // show object
         this.cgviz.toggleObj();
+    }
+
+    _eventToggleEntireUniverse(evt) {
+        /**
+         * Toggle all the obj included in the universe
+         */
+    }
+
+    _eventToggleUniverse(evt) {
+        evt.target.classList.toggle('clicked');
+        let scenarioName = evt.target.parentNode.parentNode.parentNode.previousSibling.id;
+        let objectName = evt.target.nextSibling.innerText;
+        this.cgviz.toggleUniverse(scenarioName, objectName);
+        log.info(`Scenario: ${scenario} - Object: ${objectName}`);
     }
 
     _eventTogglePov(evt) {
@@ -1358,12 +1407,11 @@ class CgVizMenu {
         this.cgviz.createHelpers();
     }
 
-    _eventToggleCenteredAxes(evt) {
+    _eventToggleAxesArrows(evt) {
         // change the svg
         this._eventToggleSwitch(evt);
         // toggle the axes visibility
-        this.cgviz.params.helpers.axes.center_on_scene = !this.cgviz.params.helpers.axes.center_on_scene;
-        this.cgviz.centerOnScene();
+        this.cgviz.params.helpers.axes.use_arrows = !this.cgviz.params.helpers.axes.use_arrows;
         // invoke the function
         this.cgviz.createHelpers();
     }
@@ -1377,17 +1425,14 @@ class CgVizMenu {
         this.cgviz.createHelpers();
     }
 
-    _eventToggleCenteredGrid(evt) {
+    _eventToggleAutoGrid(evt) {
         // change the svg
         this._eventToggleSwitch(evt);
-        // toggle the axes visibility
-        this.cgviz.params.helpers.grid.center_on_scene = !this.cgviz.params.helpers.grid.center_on_scene;
-        this.cgviz.centerOnScene();
-        // invoke the function
-        this.cgviz.createHelpers();
-    }    
+        // Adjust the size of the grid such that its footprint is 10% bigger than that of the group
+        log.info('Autosizing the grid..TBD');
+    }
 
-    _eventToggleCenteredCamera(evt) {
+    _eventToggleCenteredControls(evt) {
         // change the svg
         this._eventToggleSwitch(evt);
         // toggle the axes visibility
@@ -1397,13 +1442,14 @@ class CgVizMenu {
         this.cgviz.createHelpers();
     }    
 
-    _eventToggleAxesArrows(evt) {
+    _eventToggleTooltip(evt) {
+        /**
+         * Toggle mouse-based tooltip
+         *  different levels of information can be shown
+         */
         // change the svg
         this._eventToggleSwitch(evt);
-        // toggle the axes visibility
-        this.cgviz.params.helpers.axes.use_arrows = !this.cgviz.params.helpers.axes.use_arrows;
-        // invoke the function
-        this.cgviz.createHelpers();
+
     }
 
     // SVG and ICONS

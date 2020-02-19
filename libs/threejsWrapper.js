@@ -90,13 +90,11 @@ class ThreejsWrapper {
             helpers: {
                 axes: {
                     show: true,
-                    center_on_scene: false,
                     use_arrows: true,
                     size: 150
                 },
                 grid: {
                     show: true,
-                    center_on_scene: false,
                     size: 200,
                     division: 20
                 },
@@ -175,8 +173,15 @@ class ThreejsWrapper {
     }
 
     createCamera() {
-        this.removeFromScene('Camera');
         let c = this.params.camera; // retrieve parameters
+        // If the camera is in the scene, save the coordinates
+        if (this.isObjectInScene('Camera')) {
+            let camera_ = this.scene.getObjectByName('Camera');
+            c.x = camera_.position.x;
+            c.y = camera_.position.y;
+            c.z = camera_.position.z;
+        }
+        this.removeFromScene('Camera');
         this.camera = new THREE.PerspectiveCamera(c.fov, window.innerWidth / window.innerHeight, c.near, c.far);
         this.camera.position.set(c.x, c.y, c.z);
         this.camera.name = 'Camera';
@@ -514,11 +519,21 @@ class ThreejsWrapper {
         }
     }
 
-    findCenter(method) {
+    findCenter(groupName, method) {
         /**
          * Calculates the center of the scene
          * could be also done per top-level group?
          */
+        let groupToTraverse = this.scene;
+        if (groupName === undefined || groupName === '' ) {
+            log.info('group not specified');
+        } else {
+            // if the group exists
+            if (this.isObjectInScene(groupName)) {
+                groupToTraverse = this.scene.getObjectByName(groupName);
+            }
+        }
+
         method = method || 'box';
         if (method === 'box') {
 
@@ -527,29 +542,17 @@ class ThreejsWrapper {
                 min: {x: Infinity, y: Infinity, z: Infinity}, 
                 max: {x: -Infinity, y: -Infinity, z: -Infinity}
             };
-            this.scene.traverse( function ( child ) {   
+            groupToTraverse.traverse( function ( child ) {   
                 log.info('child:', child.name);
                 if ( child instanceof THREE.Mesh ) {    
                     child.geometry.computeBoundingBox();
                     let bb = child.geometry.boundingBox;
-                    if (bb.max.x > limits.max.x) {
-                        limits.max.x = bb.max.x;
-                    }
-                    if (bb.min.x < limits.min.x) {
-                        limits.min.x = bb.min.x;
-                    }
-                    if (bb.max.y > limits.max.y) {
-                        limits.max.y = bb.max.y;
-                    }
-                    if (bb.min.y < limits.min.y) {
-                        limits.min.y = bb.min.y;
-                    }
-                    if (bb.max.z > limits.max.z) {
-                        limits.max.z = bb.max.z;
-                    }
-                    if (bb.min.z < limits.min.z) {
-                        limits.min.z = bb.min.z;
-                    }
+                    limits.max.x = Math.max(limits.max.x, bb.max.x);
+                    limits.min.x = Math.min(limits.min.x, bb.min.x);
+                    limits.max.y = Math.max(limits.max.y, bb.max.y);
+                    limits.min.y = Math.min(limits.min.y, bb.min.y);
+                    limits.max.z = Math.max(limits.max.z, bb.max.z);
+                    limits.min.z = Math.min(limits.min.z, bb.min.z);
                 }    
             });
             // The center is calculated to be the min offset by half the dimensions
