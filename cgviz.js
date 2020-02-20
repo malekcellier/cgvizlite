@@ -146,6 +146,34 @@ class CgVizJs extends ThreejsWrapper {
         this.data.ranges[cdir] = {};
     }
 
+    getUniverseBounds(scenarioName) {
+        /**
+         * Calculates the bounds for each obj in the universe and finds the overall bounding box
+         */
+        let qcmUniverse = this.getData(scenarioName).qcmUniverse.objs;
+        // Find the limits of the scene in order to display a plane..
+        let objects = Object.keys(qcmUniverse);
+        let limits = {
+            center: {x: 0, y: 0, z: 0},
+            min: {x: Infinity, y: Infinity, z: Infinity}, 
+            max: {x: -Infinity, y: -Infinity, z: -Infinity}
+        };
+        for (let i=0; i<objects.length; i++) {
+            let lims = this.findGroupCenter(qcmUniverse[objects[i]]);
+            limits.max.x = Math.max(limits.max.x, lims.max.x);
+            limits.min.x = Math.min(limits.min.x, lims.min.x);
+            limits.max.y = Math.max(limits.max.y, lims.max.y);
+            limits.min.y = Math.min(limits.min.y, lims.min.y);
+            limits.max.z = Math.max(limits.max.z, lims.max.z);
+            limits.min.z = Math.min(limits.min.z, lims.min.z);
+            limits.center.x += lims.center.x/objects.length;
+            limits.center.y += lims.center.y/objects.length;
+            limits.center.z += lims.center.z/objects.length;
+        }
+
+        this.data.scenarios[scenarioName].limits = limits;
+    }
+
     createColorScales() {
         /**
          * Each group has its own color scale
@@ -231,7 +259,10 @@ class CgVizJs extends ThreejsWrapper {
         }
     }
 
-    toggleGroundPlane() {
+    toggleGroundPlane_Old() {
+        /**
+         * Add a ground place for the given scenario
+         */
         const name = 'GroundPlane_' + this.data.selected;
         if (this.isObjectInScene(name)) {
             this.removeFromScene(name);
@@ -249,6 +280,24 @@ class CgVizJs extends ThreejsWrapper {
             this.scene.add(plane);
         }        
     }
+  
+    toggleGroundPlane(scenarioName) {        
+        let planeName = 'GroundPlane';
+        if (this.isObjectInGroup(scenarioName, planeName)) {
+            this.removeFromGroup(scenarioName, planeName, 'universe');
+            log.info(`Removed ground plane from ${scenarioName}`);
+        } else {
+            let limits = this.getData(scenarioName).limits;
+            let x_span = limits.max.x - limits.min.x;
+            let y_span = limits.max.y - limits.min.y;
+            let geometry = new THREE.PlaneBufferGeometry(x_span, y_span);
+            // move the plane
+            geometry.translate(limits.min.x + x_span/2, limits.min.y + y_span/2, 0);
+            let material = new THREE.MeshPhongMaterial({color: 0x29323C, side: THREE.DoubleSide});
+            let plane = new THREE.Mesh(geometry, material); 
+            this.data.groups[scenarioName].universe.add(plane);
+        }
+    }
 
     toggleUniverse(scenarioName, objName) {
         /**
@@ -263,7 +312,16 @@ class CgVizJs extends ThreejsWrapper {
             this.data.groups[scenarioName].universe.add(universeObject);
             log.info(`Added object ${objName} in ${scenarioName}`); 
         }        
-    }    
+    } 
+
+    toggleEntireUniverse(scenarioName) {
+        let qcmUniverse = this.getData(scenarioName).qcmUniverse.objs;
+        let objects = Object.keys(qcmUniverse);
+        for (let i=0; i<objects.length; i++) {
+            this.toggleUniverse(scenarioName, objects[i]);
+        }
+        this.toggleGroundPlane();
+    }
 
     togglePovOld(povId) {
         /**
@@ -296,6 +354,7 @@ class CgVizJs extends ThreejsWrapper {
     togglePovMast(scenarioName, povType, povId) {
         /**
          * This has to be coordinated with the PoV
+         * It looks at the povs of a given type and turns on the mast for those which are shown.
          */
         let qcmPov = this.getData(scenarioName).qcmPov;
         let mastName = 'mast_' + povType + '_' + povId;

@@ -76,6 +76,8 @@ div {
     /*font-family: Consolas;*/
     display: inline-block;
     color: rgb(31, 186, 214);    
+    /*color: rgb(192, 108, 132);    */
+    ;    
     font-size: 16px;    
     font-weight: 400;    
     letter-spacing: 1.17px;
@@ -277,7 +279,8 @@ div.current-tab {
     /*background-color: rgb(41, 50, 60);*/
     background-color: #29323c;
     /*border-left: 3px solid rgb(  0,  92, 255);*/
-    border-left: 3px solid rgb(31, 186, 214); ;
+    border-left: 3px solid rgb(31, 186, 214);
+    /*border-left: 3px solid rgb(192, 108, 132);*/
     padding: 0px 10px 0px 10px;
     height: 48px;
     display: flex;
@@ -332,6 +335,7 @@ div.current-tab {
     margin-left: 10px;
     height: 38px;
     border-left: 3px solid rgb(192, 108, 132);
+    /*border-left: 3px solid rgb(84, 122, 130);*/
 }
 
 .obj-content.hidden {
@@ -346,12 +350,17 @@ div.current-tab {
     display: none;
 }
 
+.kpis-content.hidden {
+    display: none;
+}
+
 .sub-menu {
     color: rgb(240, 240, 240);
     padding-top: 6px;    
     margin: 8px 0px 6px 20px;
     height: 32px;
     border-left: 3px solid rgb(84, 122, 130);
+    /*border-left: 3px solid rgb(  0, 92, 255);*/
     display: flex;
     background: rgb(41, 50, 60);
     opacity: 0.6;
@@ -401,6 +410,21 @@ div.current-tab {
     opacity: 1;
 }
 
+.sub-menu.radio {
+    display: flex;
+    width: 100%;
+}
+
+.sub-menu.radio .active {
+    background-color: rgb(106, 116, 133);
+}
+
+.sub-menu.radio .header-text {
+    flex-grow: 1;
+    padding: 0;
+    height: 100%;
+}
+
 .sub-menu-content {
     display: flex;
     flex-wrap: wrap;
@@ -443,6 +467,7 @@ div.current-tab {
     margin: 8px 0px 0px 20px;
     height: 32px;
     border-left: 3px solid rgb(84, 122, 130);
+    /*border-left: 3px solid rgb(  0, 92, 255);*/
     display: flex;
     background: rgb(41, 50, 60);
     opacity: 0.6;
@@ -971,9 +996,9 @@ ul {
 /*Colors from kepler*/
 .kepler {
     color: rgb(143, 47, 191);
-    color: rgb(  0, 92, 255);
     color: rgb(192, 108, 132);
     color: rgb( 84, 122, 130);
+    color: rgb(  0, 92, 255);
     color: rgb(248, 177, 149);
     color: rgb( 62, 172, 168);
 }

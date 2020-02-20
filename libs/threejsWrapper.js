@@ -205,6 +205,9 @@ class ThreejsWrapper {
     }
 
     centerOnScene() {
+        /**
+         * Make the camera look at the approxiate center of the scene
+         */
         let c = this.params.camera;
         if (c.center_on_scene) {
             let limits = this.findCenter();
@@ -218,6 +221,39 @@ class ThreejsWrapper {
             this.params.camera.lookAt = {x: 0, y: 0, z: 0};            
         }
         this.createCamera();
+    }
+
+    setView(view) {
+        /**
+         * Set the view to one of the planes xy, yz, zx
+         */
+        view = view.toLowerCase();
+        // Get the current camera position
+        let c = this.scene.getObjectByName('Camera');
+        let pos = {
+            x: c.position.x,
+            y: c.position.y,
+            z: c.position.z,
+        };
+        let distance = Math.sqrt(pos.x*pos.x + pos.y*pos.y + pos.z*pos.z);
+        let x = 0;
+        let y = 0;
+        let z = 0;
+        if (view === 'xy') {
+            z = distance;
+        } else if (view === 'yz') {
+            x = distance;
+        } else if (view === 'zx') {
+            y = distance;
+        } else {
+            x = distance/2;
+            y = distance/2;
+            z = distance/Math.sqrt(2);
+        }
+        this.camera.position.x = x;
+        this.camera.position.y = y;
+        this.camera.position.z = z;
+        //this.createCamera();
     }
 
     createRenderer() {
@@ -519,6 +555,37 @@ class ThreejsWrapper {
         }
     }
 
+    findGroupCenter(group) {
+        if (group.isGroup === true) {
+            let limits = {
+                center: {x: null, y: null, z: null},
+                min: {x: Infinity, y: Infinity, z: Infinity}, 
+                max: {x: -Infinity, y: -Infinity, z: -Infinity}
+            };
+            group.traverse( function ( child ) {   
+                log.info('child:', child.name);
+                if ( child instanceof THREE.Mesh ) {    
+                    child.geometry.computeBoundingBox();
+                    let bb = child.geometry.boundingBox;
+                    limits.max.x = Math.max(limits.max.x, bb.max.x);
+                    limits.min.x = Math.min(limits.min.x, bb.min.x);
+                    limits.max.y = Math.max(limits.max.y, bb.max.y);
+                    limits.min.y = Math.min(limits.min.y, bb.min.y);
+                    limits.max.z = Math.max(limits.max.z, bb.max.z);
+                    limits.min.z = Math.min(limits.min.z, bb.min.z);
+                }    
+            });
+            // The center is calculated to be the min offset by half the dimensions
+            limits.center.x = (limits.max.x + limits.min.x)/2;
+            limits.center.y = (limits.max.y + limits.min.y)/2;
+            limits.center.z = (limits.max.z + limits.min.z)/2;
+            
+            return limits;            
+        } else {
+            log.warn('Passed object is not a Group');
+        }
+    }
+
     findCenter(groupName, method) {
         /**
          * Calculates the center of the scene
@@ -531,7 +598,7 @@ class ThreejsWrapper {
             // if the group exists
             if (this.isObjectInScene(groupName)) {
                 groupToTraverse = this.scene.getObjectByName(groupName);
-            }
+            } // Even if the group does not exist
         }
 
         method = method || 'box';

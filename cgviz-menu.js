@@ -289,8 +289,16 @@ class CgVizMenu {
         let kpis_header = this.HeaderMenu('Kpis', 'kpis-header'); 
         sce_content.appendChild(kpis_header);        
         // 2.4.2) the content
+        let kpis_content = this.__populateKpisContent();
+        if (kpis_content !== undefined) {
+            sce_content.appendChild(kpis_content);
+            kpis_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+        }  
+        // OLD
+        /*
         let kpis_content = _el('div', '', ['kpis-content', 'hidden']);        
         sce_content.appendChild(kpis_content);
+        */
         // The kpis are:
         //  -
     }
@@ -406,6 +414,31 @@ class CgVizMenu {
         return trace_content;
     }
 
+    __populateKpisContent() {
+        let qcmKpis = this.cgviz.data.scenarios[this.cgviz.data.selected].qcmKpis;
+        let tx_ids = Object.keys(qcmKpis).sort();
+        if (tx_ids.length === 0) {
+            console.log('No data in qcmTrace');
+            return;
+        }
+
+        let kpis_content = _el('div', '', ['kpis-content', 'hidden']);
+
+        let kpiList = qcmKpis.nfo.KPIS;
+        for (let i=0; i<kpiList.length; i++) {
+            let submenu = this.HeaderSubMenu(kpiList[i], '',  true);
+            kpis_content.appendChild(submenu);
+            // show/hide the submenu content
+            submenu.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+            let submenu_content = _el('div', '', ['sub-menu-content', 'hidden']);
+            // some other loop to add the elements:
+            // - 
+            kpis_content.appendChild(submenu_content);
+        }
+        
+        return kpis_content;
+    }
+
     HeaderMenu(id_, className, innerText, grab, bin, eye) {
         /**
          * Header for Menu, used for example in:
@@ -518,6 +551,27 @@ class CgVizMenu {
         return div;
     }
 
+    HeaderRadioButton(optionsList, defaultOption, id_) {
+        // optionsList is an array of strings
+        if (id_ === '') {
+            id_ = null;
+        }
+
+        let div = _el('div', id_, ['sub-menu', 'radio']);
+
+        for (let i=0; i<optionsList.length; i++) {
+            let option = _el('div', '', ['header-text']);
+            option.innerText = optionsList[i];
+            if (optionsList[i] === defaultOption) {
+                option.classList.add('active');
+            }
+
+            div.appendChild(option);
+        }
+
+        return div;
+    }
+
     __createMenuFilters() {
         /**
          * Filters
@@ -605,18 +659,43 @@ class CgVizMenu {
         let div_settings = _el('div', 'div-settings');
         settings.appendChild(div_settings);
         // 1) General
+        // Header
         let general_header = this.HeaderMenu('General', 'scenario-header', '', false, false, false);
         general_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         settings.appendChild(general_header);
+        // Content
         let general_content = _el('div', '', ['obj-content', 'hidden']);;
         settings.appendChild(general_content);
         //let general_content = this.HeaderSubMenu('Background');
+        let general_view = this.HeaderMenu('View', 'obj-header', '', false, false, false);
+        general_view.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+        general_content.appendChild(general_view);
+        let view_content = _el('div', '', ['sub-menu-content', 'hidden'], true);
+        general_content.appendChild(view_content);
+        // Change view TODO: change this to a radio button with options Current, XY, YZ, ZX
+        //let view_xyz = this.HeaderSwitch('XY View');
+        //let view_xyz = this.HeaderRadioButton(['D', 'XY', 'YZ', 'ZX'], 'D');
+        //view_xyz.addEventListener('click', (evt) => this._eventToggleXYZView(evt));
+        let options = ['Dft', 'XY ', 'YZ', 'ZX'];
+        for (let i=0; i<options.length; i++) {
+            let item = _el('div', '', ['sub-menu-content-pov', 'hidden']);
+            if (options[i] === 'Dft') {
+                item.classList.add('clicked');
+            }
+            view_content.appendChild(item);
+            let span = _el('span');
+            span.innerText = options[i];
+            item.appendChild(span);
+            item.addEventListener('click', (evt) => this._eventToggleXYZView(evt));
+        }
+        //view_content.appendChild(view_xyz);
         
         // 2) Helpers
+        // Header
         let helpers_header = this.HeaderMenu('Helpers', 'scenario-header', '', false, false, false);
         helpers_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         settings.appendChild(helpers_header);
-        // Axes and Grid
+        // Content (Axes and Grid)
         let helpers_content = _el('div', '', ['obj-content', 'hidden']);
         
         // 2.1) The axes: show/hide, use arrows, size
@@ -661,6 +740,7 @@ class CgVizMenu {
         controls_content.appendChild(controls_centered);
 
         settings.appendChild(helpers_content);
+
 
         return settings;
     }
@@ -1014,7 +1094,7 @@ class CgVizMenu {
                     } else if (file.name.includes('qcmTrace')) {
                         self.__handleQcmTrace(this_file, file.webkitRelativePath);
                     } else if (file.name.includes('qcmKpis')) {
-                        self.__handleQcmKpis(this_file);
+                        self.__handleQcmKpis(this_file, file.webkitRelativePath);
                     }
                 };
                 
@@ -1106,6 +1186,7 @@ class CgVizMenu {
             let scenarioName = this.cgviz.data.selected;
             this.cgviz.getRaysRange(scenarioName);
             this.cgviz.setupGroups(scenarioName);
+            this.cgviz.getUniverseBounds(scenarioName);
             this.__populateMenuScenariosContent();
         }
     }
@@ -1119,8 +1200,6 @@ class CgVizMenu {
         let selected = this.cgviz.data.selected;
         let qcmUniverse = this.cgviz.data.scenarios[selected].qcmUniverse;
         qcmUniverse.objs[thisFile.name] = thisFile;
-        // Find the limits of the scene in order to display a plane..
-        this.cgviz.data.scenarios[selected].limits = this.cgviz.findCenter(selected);
     }
 
     __handleQcmPov(thisFile) {
@@ -1167,7 +1246,14 @@ class CgVizMenu {
         qcmTrace[txId][rxId] = thisFile;
     }
 
-    __handleQcmKpis(thisFile) {
+    __handleQcmKpis(thisFile, fileParts) {
+        let qcmKpis = this.cgviz.data.scenarios[this.cgviz.data.selected].qcmKpis;
+
+        let pathParts = fileParts.split('/');
+        let filename = pathParts[1];
+        let filenameParts = filename.split('.');
+        let centralPart = filenameParts[1].split('-');
+        qcmKpis[centralPart] = thisFile;
 
     }
 
@@ -1196,6 +1282,10 @@ class CgVizMenu {
         /**
          * Toggle all the obj included in the universe
          */
+        evt.target.classList.toggle('clicked');
+        let scenarioName = evt.target.parentNode.parentNode.previousSibling.id;
+        this.cgviz.toggleEntireUniverse(scenarioName);
+        log.info(`ToggleEntireUniverse: Scenario: ${scenarioName}`);
     }
 
     _eventToggleUniverse(evt) {
@@ -1203,8 +1293,16 @@ class CgVizMenu {
         let scenarioName = evt.target.parentNode.parentNode.parentNode.previousSibling.id;
         let objectName = evt.target.nextSibling.innerText;
         this.cgviz.toggleUniverse(scenarioName, objectName);
-        log.info(`Scenario: ${scenario} - Object: ${objectName}`);
+        log.info(`ToggleUniverse: Scenario: ${scenarioName} - Object: ${objectName}`);
     }
+
+    _eventToggleGroundPlane(evt) {
+        evt.target.classList.toggle('clicked');
+        let scenarioName = evt.target.parentNode.parentNode.parentNode.previousSibling.id;
+        // Here we should find out the scenario name and pass it
+        this.cgviz.toggleGroundPlane(scenarioName);
+        log.info(`Scenario: ${scenarioName} - GroundPlane`);
+    }    
 
     _eventTogglePov(evt) {
         /**
@@ -1306,11 +1404,6 @@ class CgVizMenu {
         }
     }
 
-    _eventToggleGroundPlane(evt) {
-        // Here we should find out the scenario name and pass it
-        this.cgviz.toggleGroundPlane();
-    }
-
     _eventCaptureScreen() {
         /**
          * from: https://stackoverflow.com/questions/26193702/three-js-how-can-i-make-a-2d-snapshot-of-a-scene-as-a-jpg-image
@@ -1396,6 +1489,18 @@ class CgVizMenu {
             icon.removeChild(icon.querySelector('svg'));
             icon.appendChild(this.createSvg('switch-on'));
         }        
+    }
+
+    _eventToggleXYZView(evt) {
+        // Remove the click from all
+        let siblings = evt.target.parentNode.childNodes;
+        for (let i=0; i<siblings.length; i++) {
+            siblings[i].classList.remove('clicked');
+        }
+        // select the clicked one
+        evt.target.classList.add('clicked');
+        // Give the camera the change in position and direction
+        this.cgviz.setView(evt.target.querySelector('span').innerText);
     }
 
     _eventToggleAxes(evt) {
