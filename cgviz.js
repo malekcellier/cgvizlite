@@ -52,7 +52,7 @@ class CgVizJs extends ThreejsWrapper {
          * 
          * if found, replace it
          */
-        scenarioName = scenarioName || this.cgviz.data.selected;
+        scenarioName = scenarioName || this.data.selected;
         
         // Scenario group
         let grp_scenario = new THREE.Group();
@@ -79,6 +79,14 @@ class CgVizJs extends ThreejsWrapper {
         
         let grp_kpis = new THREE.Group();
         grp_kpis.name = 'Kpis';
+        // Adding one sub-group per kpi
+        let kpis = this.data.scenarios[scenarioName].qcmKpis.nfo.KPIS;
+        for (let i=0; i<kpis.length; i++) {
+            let sg = new THREE.Group();
+            sg.name = kpis[i];
+            grp_kpis.add(sg);
+            log.info(`SetUpGroups: added group ${kpis[i]}`);
+        }
         grp_scenario.add(grp_kpis);
         this.data.groups[scenarioName]['kpis'] = grp_kpis;
 
@@ -657,7 +665,143 @@ class CgVizJs extends ThreejsWrapper {
         return color;
     }
 
-    toggleHeatmap() {
+    processKpis(scenarioName) {
+        /**
+         * process the kpis data
+         */
+        scenarioName = scenarioName || this.data.selected;
+        let processedKpis = {
+            coords: {x: [], y: [], z: []},
+            tx: {}
+        };
+        let qcmKpis = this.getData(scenarioName).qcmKpis;
+        // the coords are the same for all the tx
+        let n_values = qcmKpis['Tx01'].length;
+        for (let i=0; i<qcmKpis['Tx01'].length ; i++) {
+            let xyz = qcmKpis['Tx01'][i].XYZ;
+            processedKpis.coords.x.push(xyz[0]);
+            processedKpis.coords.y.push(xyz[1]);
+            processedKpis.coords.z.push(xyz[2]);
+        }
+        // Collect the data per TX
+        let txIds = Object.keys(qcmKpis);
+        for (let i=0; i<txIds.length; i++) {
+            if (txIds[i] === 'nfo') {
+                continue;
+            }
+            let txId = txIds[i].replace(/\D/g,''); // stripping the letters
+            processedKpis.tx[txId] = {};
+            // init the KPIs array
+            for (let j=0; j<qcmKpis.nfo.KPIS.length; j++) {
+                processedKpis.tx[txId][qcmKpis.nfo.KPIS[j]] = [];
+            }
+            for (let k=0; k<qcmKpis[txIds[i]].length ; k++) {
+                let data = qcmKpis[txIds[i]][k].KPIS;
+                for (let m=0; m<qcmKpis.nfo.KPIS.length; m++) {
+                    let kpiName = qcmKpis.nfo.KPIS[m];
+                    processedKpis.tx[txId][kpiName].push(data[kpiName][0]);
+                }
+            }
+        }
+        /*
+        // Add the extra categories: min, max, mean, sum
+        let extras = ['Best', 'Worst', 'Mean', 'Sum'];
+        for (let i=0; i<extras.length; i++) {
+            processedKpis[extras[i]] = {};
+            for (let j=0; j<qcmKpis.nfo.KPIS.length; j++) {
+                //processedKpis[extras[i]][qcmKpis.nfo.KPIS[j]] = {id: [], val: []};
+                if (extras[i] === 'Worst') {
+                    processedKpis.Worst[qcmKpis.nfo.KPIS[j]] = {
+                        id: Array(n_values).fill(null),
+                        val: Array(n_values).fill(Infinity)
+                    };
+                }
+                if (extras[i] === 'Best') {
+                    processedKpis.Best[qcmKpis.nfo.KPIS[j]] = {
+                        id: Array(n_values).fill(null),
+                        val: Array(n_values).fill(-Infinity)
+                    };
+                }
+                if (extras[i] === 'Mean') {
+                    processedKpis.Mean[qcmKpis.nfo.KPIS[j]] = [];
+                }
+                if (extras[i] === 'Sum') {
+                    processedKpis.Sum[qcmKpis.nfo.KPIS[j]] = [];
+                }
+            }
+        }
+        // add te data to the extra categories
+        let kpiNames = qcmKpis.nfo.KPIS;
+        for (let i=0; i<kpiNames.length; i++) {
+            for (let j=0; j<n_values; j++) {
+                for (let k=0; k<txIds.length; k++) {
+                    if (txIds[k] === 'nfo') {continue;}
+                    let txId = txIds[k].replace(/\D/g,'');
+                    let val = processedKpis.tx[txId][kpiNames[i]][j];
+                    if (val > processedKpis.Best[kpiNames[i]].val) {
+                        processedKpis.Best[kpiNames[i]].val = val;
+                        processedKpis.Best[kpiNames[i]].id = txId;
+                    }
+                    if (val < processedKpis.Worst[kpiNames[i]].val) {
+                        processedKpis.Worst[kpiNames[i]].val = val;
+                        processedKpis.Worst[kpiNames[i]].id = txId;
+                    }
+
+                }
+            }
+        }
+        */
+
+        // Save the post processed data
+        this.data.scenarios[scenarioName].processedKpis = processedKpis;
+    }
+
+    toggleHeatmap_old(scenarioName, kpiName, txPovType, txPovId) {
+        /**
+         * TODO: when clicked away, all other heatmap have to be removed!!!
+         */
+        let qcmKpis = this.getData(scenarioName).processedKpis;
+        let heatMapName = kpiName + '_' + txPovType + '_' + txPovId;
+        if (this.isObjectInGroup(scenarioName, heatMapName)) {
+            this.removeFromGroup(scenarioName, heatMapName, 'kpis');
+        } else {
+            let xyz = qcmKpis.coords;
+            let values = qcmKpis.tx[txPovId][kpiName];
+            let heatMap = new Heatmap();
+            heatMap.updateData({x: xyz.x, y: xyz.y, val: values, size: 5});
+            heatMap.mesh.name = heatMapName;
+            this.data.groups[scenarioName].kpis.add(heatMap.mesh);
+            log.info(`Added object ${heatMapName} in ${scenarioName}`);
+        }
+    }
+
+    toggleHeatmap(scenarioName, kpiName, txPovType, txPovIds, ids) {
+        /**
+         * TODO: when clicked away, all other heatmap have to be removed!!!
+         */
+        let qcmKpis = this.getData(scenarioName).processedKpis;
+
+        // Remove all the heatmaps
+        for (let i=0; i<txPovIds.length; i++) {
+            let heatMapName = kpiName + '_' + txPovType + '_' + txPovIds[i];    
+            if (ids[i] === false) { // remove if present
+                if (this.isObjectInGroup(scenarioName, heatMapName)) {
+                    this.removeFromGroup(scenarioName, heatMapName, 'kpis');
+                }
+            } else {
+                if (this.isObjectInGroup(scenarioName, heatMapName)) {
+                    this.removeFromGroup(scenarioName, heatMapName, 'kpis');
+                } else {
+                    let xyz = qcmKpis.coords;
+                    let values = qcmKpis.tx[txPovIds[i]][kpiName];
+                    let heatMap = new Heatmap();
+                    heatMap.updateData({x: xyz.x, y: xyz.y, val: values, size: 5});
+                    heatMap.mesh.name = heatMapName;
+                    this.data.groups[scenarioName].kpis.add(heatMap.mesh);
+                    log.info(`Added object ${heatMapName} in ${scenarioName}`);
+                }                
+            }
+        }
     }
 
 }

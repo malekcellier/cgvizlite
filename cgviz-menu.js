@@ -425,9 +425,50 @@ class CgVizMenu {
             kpis_content.appendChild(submenu);
             // show/hide the submenu content
             submenu.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
-            let submenu_content = _el('div', '', ['sub-menu-content', 'hidden']);
+            let submenu_content = _el('div', '', ['sub-menu-content', 'vertical', 'hidden']);
             // some other loop to add the elements:
-            // - 
+            // Header TX content:
+            //  - Best (of all TX), Worst (of all TX), Mean (of all TX), Sum  (of all TX), IDs (1, 2, ...)
+            //  - highlight IDs => if best or worst is chosen, then use other colors: 1 color per tx and change the luminosity with intensity
+            //  - AA selection
+            // Header RX:
+            //  - AA selection?
+            // Header position
+            // - x, y, z?
+            // Header configuration
+            //  - tile shape
+            //  - tile size
+            //  - color scheme
+            let subsubmenus = ['tx', 'rx', 'position', 'customization'];
+            for (let i=0; i<subsubmenus.length; i++) {
+                let ssm = this.HeaderSubSubMenu(subsubmenus[i], '');
+                ssm.querySelector('.dots').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+                submenu_content.appendChild(ssm);
+                // Add the TX part
+                if (subsubmenus[i] === 'tx') {
+                    let subsubmenu_content = _el('div', '', ['subsub-menu-content', 'hidden']);
+                    let tx_options = ['Best', 'Worst', 'Mean', 'Sum'];
+                    let tx_ids = qcmKpis.nfo.TXPOVIDS;
+                    let tx_all = [...tx_options, ...tx_ids]
+                    // loop on the elements
+                    for (let j=0; j<tx_all.length; j++) {
+                        //let item = _el('div', '', ['subsub-menu-content-kpi']);
+                        let item = _el('div', '', ['sub-menu-content-pov']);
+                        if (tx_options.includes(tx_all[j])) {
+                            item.classList.add('option');
+                        } else {
+                            // HACK to add a 0 in front of the name
+                            tx_all[j] = '0' + tx_all[j];
+                        }
+                        subsubmenu_content.appendChild(item);
+                        let span = _el('span');
+                        span.innerText = tx_all[j];
+                        item.appendChild(span);
+                        item.addEventListener('click', (evt) => this._eventToggleHeatmap(evt))
+                    }
+                    submenu_content.appendChild(subsubmenu_content);
+                }
+            }
             kpis_content.appendChild(submenu_content);
         }
         
@@ -516,6 +557,20 @@ class CgVizMenu {
             div.appendChild(expand);            
         }
         
+        return div;
+    }
+
+    HeaderSubSubMenu(innerText, id_) {
+        let div = _el('div', id_, ['subsub-menu']);
+
+        let name = _el('span', '', ['header-text']);
+        name.innerText = innerText;
+        div.appendChild(name);
+
+        let dots = _el('div', '', ['header-svg', 'dots']);
+        dots.appendChild(this.createSvg('dots'));
+        div.appendChild(dots);
+
         return div;
     }
 
@@ -612,19 +667,19 @@ class CgVizMenu {
         // The content
         let tooltip_content = _el('div', '', ['obj-content', 'hidden']);        
         // 1.1) Visibility
-        let tooltip_visible = this.HeaderSwitch('Visible');
+        let tooltip_visible = this.HeaderSwitch('Visible', '', false);
         tooltip_visible.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleTooltip(evt));
         tooltip_content.appendChild(tooltip_visible);
         // 1.2) Coordinates
-        let tooltip_coord = this.HeaderSwitch('Coordinates');
+        let tooltip_coord = this.HeaderSwitch('Coordinates', '', false);
         tooltip_coord.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleTooltip(evt));
         tooltip_content.appendChild(tooltip_coord);
         // 1.3) Pov ID
-        let tooltip_povid = this.HeaderSwitch('PoV ID');
+        let tooltip_povid = this.HeaderSwitch('PoV ID', '', false);
         tooltip_povid.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleTooltip(evt));
         tooltip_content.appendChild(tooltip_povid);
         // 1.4) KPIs => TODO: allow user to select which KPIs => offer a list
-        let tooltip_kpis = this.HeaderSwitch('KPIs');
+        let tooltip_kpis = this.HeaderSwitch('KPIs', '', false);
         tooltip_kpis.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleTooltip(evt));
         tooltip_content.appendChild(tooltip_kpis);
 
@@ -1182,6 +1237,7 @@ class CgVizMenu {
             this.cgviz.getRaysRange(scenarioName);
             this.cgviz.setupGroups(scenarioName);
             this.cgviz.getUniverseBounds(scenarioName);
+            this.cgviz.processKpis(scenarioName);
             this.__populateMenuScenariosContent();
         }
     }
@@ -1249,7 +1305,6 @@ class CgVizMenu {
         let filenameParts = filename.split('.');
         let centralPart = filenameParts[1].split('-');
         qcmKpis[centralPart] = thisFile;
-
     }
 
     _eventToggleNextSibling(evt) {
@@ -1405,6 +1460,39 @@ class CgVizMenu {
                 children[i].classList.toggle('clicked');
             }            
         }
+    }
+
+    _eventToggleHeatmap(evt) {
+        evt.target.classList.toggle('clicked');
+        let els = evt.target.parentNode.childNodes;        
+        // Get the list of active elements
+        let ids = Array(els.length).fill(false);
+        // Only one can have the clicked class at most
+        for (let i=0; i<els.length; i++) {
+            if (els[i] !== evt.target) {
+                els[i].classList.remove('clicked');
+            } else {
+                if (evt.target.classList.contains('clicked')) {
+                    ids[i] = true;
+                }
+            }
+        }
+        
+        let scenarioName = evt.target.parentNode.parentNode.parentNode.parentNode.previousSibling.id;
+        let kpiName = evt.target.parentNode.parentNode.previousSibling.querySelector('.header-text').innerText;
+        let txPovType = evt.target.parentNode.previousSibling.querySelector('.header-text').innerText;
+        let txPovId = evt.target.innerText;
+        // Get all the txPovIds
+        let siblings = evt.target.parentNode.childNodes;
+        let txPovIds = [];
+        for (let i=0; i<siblings.length; i++) {
+            txPovIds.push(siblings[i].querySelector('span').innerText);
+            if (!siblings[i].classList.contains('option')) {
+            }
+        }
+        //this.cgviz.toggleHeatmap_old(scenarioName, kpiName, txPovType, txPovId);
+        this.cgviz.toggleHeatmap(scenarioName, kpiName, txPovType, txPovIds, ids);
+        log.info(`ToggleHeatmap - Scenario: ${scenarioName} - PoV type: ${txPovType} - PoV ID: ${txPovId} - KPI: ${kpiName}`);
     }
 
     _eventCaptureScreen() {

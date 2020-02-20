@@ -1,5 +1,6 @@
 /**
- * Date: 2019-11-12
+ * Date Created: 2019-11-12
+ * Date Modified: 2020-02-20
  * Author: Malek Cellier
  * Email: malek.cellier@gmail.com
  * Heatmap class, requires THREE.js, colorbar.js and chroma.js
@@ -7,12 +8,11 @@
 
 
 class Heatmap {
-    constructor({scene=undefined, x=undefined, y=undefined, val=undefined, size=undefined}) {
-        this.scene = scene;
-        this.x = x;
-        this.y = y;
-        this.val = val;
-        this.size = size || 10;
+    constructor() {
+        this.x = undefined;
+        this.y = undefined;
+        this.val = undefined;
+        this.size = 10;
         this.n = undefined;
         this.colormap = {  // TODO: better handling og n_colors and min/max
             name: 'Spectral',
@@ -26,35 +26,35 @@ class Heatmap {
             n_segments: 16,
             radius: 0.5
         };
+        this.mesh = null;
     }
 
     init() {
-
         this._checkInput();
     }
 
-    updateData({x=undefined, y=undefined, val=undefined, size=undefined}) {
+    updateData(opts) {
         /**
          * Updates the heatmap data: x, y vectors as well as data and size
          */
-        this.x = x;
-        this.y = y;
-        this.val = val;
-        this.size = size;
+        this.x = opts.x;
+        this.y = opts.y;
+        this.val = opts.val;
+        this.size = opts.size || 10;
         this._checkInput();
-        this.clear();
-        this.show();
+        /*this.clear();*/
+        this.create();
     }
 
+    /*
     clear() {
-        /**
-         * Removes the heatmap from the scene
-         */
+        // Removes the heatmap from the scene
         let obj = this.scene.getObjectByName('heatmap');
         if (obj!=undefined) {
             this.scene.remove(obj);
-        }        
+        } 
     }
+    */       
 
     _checkInput() {
         /**
@@ -157,11 +157,11 @@ class Heatmap {
         return shapes[this.shape.name];
     }
 
-    show() {
+    create() {
         /**
          * Creates the buffer geometry and adds it to the scene
          */
-        this.clear();
+        //this.clear();
         this.updateColors();
         // A custom geometry
         const geometry = new THREE.BufferGeometry();
@@ -174,7 +174,7 @@ class Heatmap {
             // Scale the tile
             vertices = vertices.map(p => p.multiplyScalar(this.size));
             // Move the vertices to the position of the point
-            const offset = new THREE.Vector3(this.x[i], this.y[i], 0);
+            const offset = new THREE.Vector3(this.x[i], this.y[i], 10);
             vertices = vertices.map(p => p.add(offset));
             // And now turn this into an array of arrays
             vertices = vertices.map(p => p.toArray());
@@ -189,10 +189,10 @@ class Heatmap {
             }
         }
         const positionAttribute = new THREE.BufferAttribute(new Float32Array(positions), 3);
-        geometry.addAttribute("position", positionAttribute);
+        geometry.setAttribute("position", positionAttribute);
 
         const colorAttribute = new THREE.BufferAttribute(new Float32Array(colors), 3);
-        geometry.addAttribute("color", colorAttribute);
+        geometry.setAttribute("color", colorAttribute);
 
         // Enable vertex colors on the material
         const material = new THREE.MeshBasicMaterial({vertexColors: THREE.VertexColors, side: THREE.DoubleSide});
@@ -201,6 +201,7 @@ class Heatmap {
         const mesh = new THREE.Mesh(geometry, material);
         mesh.name = 'heatmap';
 
-        this.scene.add(mesh);
+        //this.scene.add(mesh);
+        this.mesh = mesh;
     }
 }
