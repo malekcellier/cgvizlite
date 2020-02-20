@@ -150,6 +150,7 @@ class CgVizJs extends ThreejsWrapper {
         /**
          * Calculates the bounds for each obj in the universe and finds the overall bounding box
          */
+        scenarioName = scenarioName || this.data.selected; // fallback to currently selected
         let qcmUniverse = this.getData(scenarioName).qcmUniverse.objs;
         // Find the limits of the scene in order to display a plane..
         let objects = Object.keys(qcmUniverse);
@@ -172,6 +173,13 @@ class CgVizJs extends ThreejsWrapper {
         }
 
         this.data.scenarios[scenarioName].limits = limits;
+    }
+
+    fitGridToScenario(scenarioName) {
+        scenarioName = scenarioName || this.data.selected; // fallback to currently selected
+        let limits = this.data.scenarios[scenarioName].limits;
+        this.params.helpers.grid.size = Math.max(limits.max.x-limits.min.x, limits.max.y-limits.min.y);
+        this.createHelpers();
     }
 
     createColorScales() {

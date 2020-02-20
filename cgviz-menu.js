@@ -718,10 +718,10 @@ class CgVizMenu {
         let grid_visible = this.HeaderSwitch('Visible');
         grid_visible.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleGrid(evt));
         grid_content.appendChild(grid_visible);
-        // Autosize
-        let grid_autosize = this.HeaderSwitch('Auto-size');
-        grid_autosize.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleAutoGrid(evt));
-        grid_content.appendChild(grid_autosize);
+        // Fit the grid to the scene
+        let grid_fittoscene = this.HeaderSwitch('Fit to scene', '', false);
+        grid_fittoscene.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleFitGridToScene(evt));
+        grid_content.appendChild(grid_fittoscene);
 
         // 2.3) the controls: center
         let helpers_controls = this.HeaderMenu('Controls', 'obj-header', '', false, false, false);
@@ -1533,11 +1533,12 @@ class CgVizMenu {
         this.cgviz.createHelpers();
     }
 
-    _eventToggleAutoGrid(evt) {
+    _eventToggleFitGridToScene(evt) {
         // change the svg
         this._eventToggleSwitch(evt);
         // Adjust the size of the grid such that its footprint is 10% bigger than that of the group
-        log.info('Autosizing the grid..TBD');
+        this.cgviz.fitGridToScenario();
+        log.info('Fit the grid to the scene');
     }
 
     _eventToggleCenteredControls(evt) {
