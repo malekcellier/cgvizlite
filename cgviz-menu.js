@@ -202,14 +202,14 @@ class CgVizMenu {
     __populateMenuScenariosContent() {
         /**
          * The scenarios div contains:
-         *  A box with the name of the scenario, under which
-         *      a smaller box for each category: obj, pov, rays, kpis
-         *          a smaller box for elements of each category
+         *  A Header with the name of the scenario, under which
+         *      a smaller header for each category: obj, pov, rays, kpis
+         *          a box for elements of each category
          * 
          * Example:
          *  HongKong:
          *      Object
-         *          {list of obj files?}
+         *          {list of obj files}
          *      Point of View
          *          {list of simple boxes with eye and color}
          *      Traces
@@ -261,10 +261,7 @@ class CgVizMenu {
         if (pov_content !== undefined) {
             sce_content.appendChild(pov_content);
             pov_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
-        }        
-        // The point of view are:
-        // - grouped by name
-        // - represented by small boxes the size of up to 4 digits, for the POV ID
+        }
         // TODO: general module to group the boxes by 50s for ex
         //this.__populatePovContent(pov_content);
         
@@ -278,12 +275,8 @@ class CgVizMenu {
         if (trace_content !== undefined) {
             sce_content.appendChild(trace_content);
             trace_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
-        }        
-        // The Traces are:
-        // - grouped by Tx name, then by Rx name
-        // - represented by small boxes the size of up to 4 digits, for the Rx ID
-        
-        
+        }
+      
         // 2.4) The kpis
         // 2.4.1) the header
         let kpis_header = this.HeaderMenu('Kpis', 'kpis-header'); 
@@ -294,13 +287,7 @@ class CgVizMenu {
             sce_content.appendChild(kpis_content);
             kpis_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         }  
-        // OLD
-        /*
-        let kpis_content = _el('div', '', ['kpis-content', 'hidden']);        
-        sce_content.appendChild(kpis_content);
-        */
-        // The kpis are:
-        //  -
+
     }
 
     __populateUniverseContent() {
@@ -357,6 +344,14 @@ class CgVizMenu {
             // The povs are shown in sub-menu-content
             let submenu_content = _el('div', '', ['sub-menu-content', 'hidden']);            
             let pov_ids = Object.keys(qcmPov[pov_type]).sort();
+            // we had a spcial character to symbolize mast toggle
+            let item = _el('div', '', ['sub-menu-content-pov']);
+            submenu_content.appendChild(item);
+            let span = _el('span');
+            span.innerText = 'M';
+            item.appendChild(span);
+            item.addEventListener('click', (evt) => this._eventTogglePovTypeMast(evt));
+            // Now the actual povs
             for (let j=0; j<pov_ids.length; j++) {
                 let item = _el('div', '', ['sub-menu-content-pov']);
                 submenu_content.appendChild(item);
@@ -1350,6 +1345,14 @@ class CgVizMenu {
                 children[i].classList.toggle('clicked');
             }            
         }
+    }
+
+    _eventTogglePovTypeMast(evt) {
+        evt.target.classList.toggle('clicked');
+        let scenario = evt.target.parentNode.parentNode.parentNode.previousSibling.id;
+        let povType = evt.target.parentNode.previousSibling.querySelector('.header-text').innerText;
+        this.cgviz.togglePovTypeMast(scenario, povType);
+        log.info(`TogglePovTypeMast - Scenario: ${scenario} - PoV type: ${povType}`);
     }
 
     _eventToggleTrace(evt) {

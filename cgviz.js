@@ -351,29 +351,49 @@ class CgVizJs extends ThreejsWrapper {
         }
     }
 
-    togglePovMast(scenarioName, povType, povId) {
+    togglePovTypeMast(scenarioName, povType) {
         /**
-         * This has to be coordinated with the PoV
-         * It looks at the povs of a given type and turns on the mast for those which are shown.
+         * Loop the povs using the ID
+         *  for each pov
+         *      if it is in the scene
+         *      then check if the nast is there
+         *          if the mast is there
+         *          then remove it
+         *          else add it
+         * if there are no povs
+         * then remove all masts
          */
         let qcmPov = this.getData(scenarioName).qcmPov;
-        let mastName = 'mast_' + povType + '_' + povId;
-        let povName = povType + '_' + povId;
-        if (this.isObjectInGroup(scenarioName, povName)) {
-            // Only toggle if the parent is shown
-            if (this.isObjectInGroup(scenarioName, mastName)) {
-                this.removeFromGroup(scenarioName, mastName, 'povs');  
-            } else {
-                let data = qcmPov[povType][povId];
-                let material = new THREE.LineDashedMaterial({color: 0xffffff});
-                let geometry = new THREE.Geometry();
-                geometry.vertices.push(new THREE.Vector(data.position[0], data.position[1], 0));
-                geometry.vertices.push(new THREE.Vector(data.position[0], data.position[1], data.position[2]));
-                let mastObject = new THREE.Line(geometry, material);
-                mastObject.name = mastName;
-                this.data.groups[scenarioName].povs.add(mastObject);
+        let povIds = Object.keys(qcmPov[povType]);
+        for (let i=0; i<povIds.length; i++) {
+            // The Pov
+            let povName = povType + '_' + povIds[i];
+            // The mast
+            let mastName = 'mast_' + povType + '_' + povIds[i];
+            // IF the pov is shown
+            if (this.isObjectInGroup(scenarioName, povName)) {
+                // Remove the mast
+                if (this.isObjectInGroup(scenarioName, mastName)) {
+                    this.removeFromGroup(scenarioName, mastName, 'povs');
+                } else {
+                    let data = qcmPov[povType][povIds[i]];
+                    let material = new THREE.LineDashedMaterial({color: 0xffffff});
+                    let geometry = new THREE.Geometry();
+                    geometry.vertices.push(new THREE.Vector3(data.position[0], data.position[1], 0));
+                    geometry.vertices.push(new THREE.Vector3(data.position[0], data.position[1], data.position[2]));
+                    let mastObject = new THREE.Line(geometry, material);
+                    mastObject.name = mastName;
+                    this.data.groups[scenarioName].povs.add(mastObject);                    
+                }
+                // 
+            } else { // if the pov is not shown, we remove the mast
+                // Remove the mst
+                if (this.isObjectInGroup(scenarioName, mastName)) {
+                    this.removeFromGroup(scenarioName, mastName, 'povs');
+                }                
             }
         }
+
     }
 
     togglePov(scenarioName, povType, povId) {
