@@ -675,6 +675,7 @@ class CgVizJs extends ThreejsWrapper {
             tx: {}
         };
         let qcmKpis = this.getData(scenarioName).qcmKpis;
+        let kpiNames = qcmKpis.nfo.KPIS;
         // the coords are the same for all the tx
         let n_values = qcmKpis['Tx01'].length;
         for (let i=0; i<qcmKpis['Tx01'].length ; i++) {
@@ -692,65 +693,70 @@ class CgVizJs extends ThreejsWrapper {
             let txId = txIds[i].replace(/\D/g,''); // stripping the letters
             processedKpis.tx[txId] = {};
             // init the KPIs array
-            for (let j=0; j<qcmKpis.nfo.KPIS.length; j++) {
-                processedKpis.tx[txId][qcmKpis.nfo.KPIS[j]] = [];
+            for (let j=0; j<kpiNames.length; j++) {
+                processedKpis.tx[txId][kpiNames[j]] = [];
             }
             for (let k=0; k<qcmKpis[txIds[i]].length ; k++) {
                 let data = qcmKpis[txIds[i]][k].KPIS;
-                for (let m=0; m<qcmKpis.nfo.KPIS.length; m++) {
-                    let kpiName = qcmKpis.nfo.KPIS[m];
-                    processedKpis.tx[txId][kpiName].push(data[kpiName][0]);
+                for (let m=0; m<kpiNames.length; m++) {
+                    let kpiName = kpiNames[m];
+                    let value = data[kpiName][0];
+                    processedKpis.tx[txId][kpiName].push(value);
+                    // compare and aggregate
                 }
             }
         }
-        /*
+        log.info('Initializing the extras');
         // Add the extra categories: min, max, mean, sum
         let extras = ['Best', 'Worst', 'Mean', 'Sum'];
         for (let i=0; i<extras.length; i++) {
             processedKpis[extras[i]] = {};
-            for (let j=0; j<qcmKpis.nfo.KPIS.length; j++) {
+            for (let j=0; j<kpiNames.length; j++) {
                 //processedKpis[extras[i]][qcmKpis.nfo.KPIS[j]] = {id: [], val: []};
                 if (extras[i] === 'Worst') {
-                    processedKpis.Worst[qcmKpis.nfo.KPIS[j]] = {
+                    processedKpis.Worst[kpiNames[j]] = {
                         id: Array(n_values).fill(null),
                         val: Array(n_values).fill(Infinity)
                     };
                 }
                 if (extras[i] === 'Best') {
-                    processedKpis.Best[qcmKpis.nfo.KPIS[j]] = {
+                    processedKpis.Best[kpiNames[j]] = {
                         id: Array(n_values).fill(null),
                         val: Array(n_values).fill(-Infinity)
                     };
                 }
                 if (extras[i] === 'Mean') {
-                    processedKpis.Mean[qcmKpis.nfo.KPIS[j]] = [];
+                    processedKpis.Mean[kpiNames[j]] = Array(n_values).fill(0);
                 }
                 if (extras[i] === 'Sum') {
-                    processedKpis.Sum[qcmKpis.nfo.KPIS[j]] = [];
+                    processedKpis.Sum[kpiNames[j]] = Array(n_values).fill(0);
                 }
             }
         }
+        log.info('Populating the extras');
         // add te data to the extra categories
-        let kpiNames = qcmKpis.nfo.KPIS;
+        let nTx = txIds.length - 1;
         for (let i=0; i<kpiNames.length; i++) {
             for (let j=0; j<n_values; j++) {
                 for (let k=0; k<txIds.length; k++) {
                     if (txIds[k] === 'nfo') {continue;}
                     let txId = txIds[k].replace(/\D/g,'');
                     let val = processedKpis.tx[txId][kpiNames[i]][j];
-                    if (val > processedKpis.Best[kpiNames[i]].val) {
-                        processedKpis.Best[kpiNames[i]].val = val;
-                        processedKpis.Best[kpiNames[i]].id = txId;
+                    if (val > processedKpis.Best[kpiNames[i]].val[j]) {
+                        processedKpis.Best[kpiNames[i]].val[j] = val;
+                        processedKpis.Best[kpiNames[i]].id[j] = txId;
                     }
-                    if (val < processedKpis.Worst[kpiNames[i]].val) {
-                        processedKpis.Worst[kpiNames[i]].val = val;
-                        processedKpis.Worst[kpiNames[i]].id = txId;
+                    if (val < processedKpis.Worst[kpiNames[i]].val[j]) {
+                        processedKpis.Worst[kpiNames[i]].val[j] = val;
+                        processedKpis.Worst[kpiNames[i]].id[j] = txId;
                     }
+                    processedKpis.Mean[kpiNames[i]][j] += val/nTx;
+                    processedKpis.Sum[kpiNames[i]][j] += val;
 
                 }
             }
         }
-        */
+        
 
         // Save the post processed data
         this.data.scenarios[scenarioName].processedKpis = processedKpis;
@@ -793,7 +799,15 @@ class CgVizJs extends ThreejsWrapper {
                     this.removeFromGroup(scenarioName, heatMapName, 'kpis');
                 } else {
                     let xyz = qcmKpis.coords;
-                    let values = qcmKpis.tx[txPovIds[i]][kpiName];
+                    let values;
+                    if (['Best', 'Worst'].includes(txPovIds[i])) {
+                        values = qcmKpis[txPovIds[i]][kpiName].id;
+                    } else if (['Mean', 'Sum'].includes(txPovIds[i])) {
+                        values = qcmKpis[txPovIds[i]][kpiName];
+                    }
+                    else {
+                        values = qcmKpis.tx[txPovIds[i]][kpiName];
+                    }
                     let heatMap = new Heatmap();
                     heatMap.updateData({x: xyz.x, y: xyz.y, val: values, size: 5});
                     heatMap.mesh.name = heatMapName;
