@@ -266,7 +266,6 @@ class CgVizMenu {
             pov_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         }
         // TODO: general module to group the boxes by 50s for ex
-        //this.__populatePovContent(pov_content);
         
         // 2.3) The traces:
         console.info('  traces');
@@ -1245,10 +1244,10 @@ class CgVizMenu {
             console.groupEnd('Upload data');
             console.timeEnd('Upload data');
             let scenarioName = this.cgviz.data.selected;
-            this.cgviz.getRaysRange(scenarioName);
             this.cgviz.setupGroups(scenarioName);
             this.cgviz.getUniverseBounds(scenarioName);
             this.cgviz.processKpis(scenarioName);
+            this.cgviz.getRanges(scenarioName);
             this.__populateMenuScenariosContent();
             // Alert and then close
             alert('Finished uploading the files!')

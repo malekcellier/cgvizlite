@@ -156,16 +156,19 @@ class CgVizJs extends ThreejsWrapper {
         return this.getData(this.data.selected);
     }
 
-    getRanges() {
+    getRanges(scenarioName) {
         /**
          * The ranges of:
          *      povs: number of IDs combined with categories
          *      rays: from lowest to highest power
          *      kpis: for each kpi, the min and max values
          */
-        let data = this.getCurrentData();
-        let cdir = this.data.selected;
-        this.data.ranges[cdir] = {};
+        console.group('Get ranges');
+        this.data.ranges[scenarioName] = {};
+        this.getRaysRange(scenarioName);
+        this.getKpisRange(scenarioName);
+        this.getPovsRange(scenarioName);
+        console.groupEnd('Get ranges');
     }
 
     getUniverseBounds(scenarioName) {
@@ -289,29 +292,6 @@ class CgVizJs extends ThreejsWrapper {
             this.findCenter();
         }
     }
-
-    toggleGroundPlane_Old() {
-        /**
-         * NOT TO BE USED
-         * Add a ground place for the given scenario
-         */
-        const name = 'GroundPlane_' + this.data.selected;
-        if (this.isObjectInScene(name)) {
-            this.removeFromScene(name);
-            console.log(' > removed object: ', name);
-        } else {
-            let spans = this.getCurrentData().limits;
-            let x_span = spans.max.x - spans.min.x;
-            let y_span = spans.max.y - spans.min.y;
-            let geometry = new THREE.PlaneBufferGeometry(x_span, y_span);
-            // move the plane
-            geometry.translate(spans.min.x + x_span/2, spans.min.y + y_span/2, 0);
-            let material = new THREE.MeshPhongMaterial({color: 0x29323C, side: THREE.DoubleSide});
-            let plane = new THREE.Mesh(geometry, material);
-            plane.name = name;
-            this.scene.add(plane);
-        }        
-    }
   
     toggleGroundPlane(scenarioName) {     
         /**
@@ -358,34 +338,6 @@ class CgVizJs extends ThreejsWrapper {
             this.toggleUniverse(scenarioName, objects[i]);
         }
         this.toggleGroundPlane();
-    }
-
-    togglePovOld(povId) {
-        /**
-         * If already visible, remove, otherwise show in the scene
-         */
-        let pov_type = povId.replace(/[0-9]/g, '');
-        let pov_id = povId.replace(/\D/g,'');
-        const name = povId + ".pov";
-        if (this.isObjectInScene(name)) {
-            this.removeFromScene(name);
-            console.log(' > removed object: ', name);
-        } else {
-            //let data = this.getCurrentData().qcmPov[povId];
-            let data = this.getCurrentData().qcmPov[pov_type][pov_id];
-            // Use the reusables
-            //let povType = this.getPovCategory(povId);
-            let povType = this.getPovCategory(pov_type);
-            const geometry = this.reusables[povType].geometry;            
-            const material = this.reusables[povType].material;            
-            const povObject = new THREE.Mesh(geometry, material);
-            povObject.name = name;            
-            povObject.rotateY(-data.elevation); // BUG: not working due the order of the rotations?
-            povObject.rotateZ((data.azimuth) - (Math.PI / 2));
-            povObject.position.set(data.position[0]+this.reusables[povType].dy, data.position[1], data.position[2]);
-            this.scene.add(povObject);
-            console.log(' > added object: ', name);
-        }
     }
 
     togglePovTypeMast(scenarioName, povType) {
@@ -505,6 +457,20 @@ class CgVizJs extends ThreejsWrapper {
         return 'rx_pov';
     }
 
+    getPovsRange(scenarioName) {
+        /**
+         * For the passed scenarioName, find the number of Povs of each category
+         */
+        // Reset the ranges container
+        console.group('Get povs ranges');
+        console.time('Get povs ranges');
+        
+        this.data.ranges[scenarioName].qcmPovs = {'min': +Infinity, 'max': -Infinity};
+        
+        console.groupEnd('Get povs ranges');
+        console.timeEnd('Get povs ranges');
+    }
+
     toggleRays(txId, rxId) {
         /**
          * For the time being shows all rays
@@ -601,8 +567,10 @@ class CgVizJs extends ThreejsWrapper {
         /**
          * For the passed scenarioName, find the min/max values of the rays' rx power
          */
+        console.group('Get rays ranges');
+        console.time('Get rays ranges');
         // Reset the ranges container
-        this.data.ranges[scenarioName] = {'qcmTrace': {'min': +Infinity, 'max': -Infinity}};
+        this.data.ranges[scenarioName].qcmTrace = {'min': +Infinity, 'max': -Infinity};
         // check if there is data in that scenario
         let qcmTrace = this.data.scenarios[scenarioName].qcmTrace;
         let txPovs = Object.keys(qcmTrace);
@@ -619,6 +587,8 @@ class CgVizJs extends ThreejsWrapper {
                 }
             }
         }
+        console.groupEnd('Get rays ranges');
+        console.timeEnd('Get rays ranges');        
     }
 
     getOverallRaysRange() {
@@ -789,25 +759,6 @@ class CgVizJs extends ThreejsWrapper {
         console.timeEnd('Process the KPIs');
     }
 
-    toggleHeatmap_old(scenarioName, kpiName, txPovType, txPovId) {
-        /**
-         * TODO: when clicked away, all other heatmap have to be removed!!!
-         */
-        let qcmKpis = this.getData(scenarioName).processedKpis;
-        let heatMapName = kpiName + '_' + txPovType + '_' + txPovId;
-        if (this.isObjectInGroup(scenarioName, heatMapName)) {
-            this.removeFromGroup(scenarioName, heatMapName, 'kpis');
-        } else {
-            let xyz = qcmKpis.coords;
-            let values = qcmKpis.tx[txPovId][kpiName];
-            let heatMap = new Heatmap();
-            heatMap.updateData({x: xyz.x, y: xyz.y, val: values, size: 5});
-            heatMap.mesh.name = heatMapName;
-            this.data.groups[scenarioName].kpis.add(heatMap.mesh);
-            console.info(`Added object ${heatMapName} in ${scenarioName}`);
-        }
-    }
-
     toggleHeatmap(scenarioName, kpiName, txPovType, txPovIds, ids) {
         /**
          * TODO: when clicked away, all other heatmap have to be removed!!!
@@ -828,7 +779,7 @@ class CgVizJs extends ThreejsWrapper {
                     let xyz = qcmKpis.coords;
                     let values;
                     if (['Best', 'Worst'].includes(txPovIds[i])) {
-                        values = qcmKpis[txPovIds[i]][kpiName].id;
+                        values = qcmKpis[txPovIds[i]][kpiName].val;
                     } else if (['Mean', 'Sum'].includes(txPovIds[i])) {
                         values = qcmKpis[txPovIds[i]][kpiName];
                     }
@@ -836,6 +787,8 @@ class CgVizJs extends ThreejsWrapper {
                         values = qcmKpis.tx[txPovIds[i]][kpiName];
                     }
                     let heatMap = new Heatmap();
+                    let range = this.data.ranges[scenarioName].qcmKpis[kpiName];
+                    heatMap.forceColors(range.min, range.max, undefined, true);
                     heatMap.updateData({x: xyz.x, y: xyz.y, val: values, size: 5});
                     heatMap.mesh.name = heatMapName;
                     this.data.groups[scenarioName].kpis.add(heatMap.mesh);
@@ -843,6 +796,26 @@ class CgVizJs extends ThreejsWrapper {
                 }                
             }
         }
+    }
+
+    getKpisRange(scenarioName) {
+        console.group('Get kpis ranges');
+        console.time('Get kpis ranges');
+        // Reset the ranges container
+        this.data.ranges[scenarioName].qcmKpis = {};
+        // Each KPI has its own range obviously
+        let kpiNames = this.data.scenarios[scenarioName].qcmKpis.nfo.KPIS;
+        for (let i=0; i<kpiNames.length; i++) {
+            this.data.ranges[scenarioName].qcmKpis[kpiNames[i]] = {'min': +Infinity, 'max': -Infinity};
+        }
+        // Probably the above is not needed
+        for (let i=0; i<kpiNames.length; i++) {
+            this.data.ranges[scenarioName].qcmKpis[kpiNames[i]].min = Math.min.apply(Math, this.data.scenarios[scenarioName].processedKpis.Worst[kpiNames[i]].val)
+            this.data.ranges[scenarioName].qcmKpis[kpiNames[i]].max = Math.max.apply(Math, this.data.scenarios[scenarioName].processedKpis.Best[kpiNames[i]].val)
+        }
+
+        console.groupEnd('Get kpis ranges');
+        console.timeEnd('Get kpis ranges');
     }
 
     showYourself() {

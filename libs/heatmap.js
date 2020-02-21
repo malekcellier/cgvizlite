@@ -12,7 +12,7 @@ class Heatmap {
         this.x = undefined;
         this.y = undefined;
         this.val = undefined;
-        this.size = 10;
+        this.size = 10; // of the basic tile
         this.n = undefined;
         this.colormap = {  // TODO: better handling og n_colors and min/max
             name: 'Spectral',
@@ -84,6 +84,22 @@ class Heatmap {
         this.colormap.min = Math.min(...this.val);
         this.colormap.max = Math.max(...this.val);
         this.colors = chroma.scale(this.colormap.name).domain([this.colormap.min, this.colormap.max]);
+    }
+
+    forceColors(min, max, scheme, reverse) {
+        if (reverse === undefined) {
+            reverse = false;
+        }
+        scheme  = scheme || this.colormap.name;
+        
+        this.colormap.min = min;
+        this.colormap.max = max;
+        
+        let range = [min, max];
+        if (reverse === true) {
+            range = [max, min];
+        }
+        this.colors = chroma.scale(scheme).domain(range);
     }
 
     getColor(val) {
