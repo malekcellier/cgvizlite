@@ -296,6 +296,7 @@ div.current-tab {
 .header-text {
     flex: 1;
     padding-left: 12px;
+    overflow: hidden;
 }
 
 .header-svg {  
@@ -429,6 +430,10 @@ div.current-tab {
     display: flex;
     flex-wrap: wrap;
     margin-left: 25px;
+}
+
+.sub-menu-content.column {
+    flex-direction: column;
 }
 
 .sub-menu-content.hidden {

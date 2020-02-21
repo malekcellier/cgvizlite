@@ -1,16 +1,21 @@
 /**
- * Author: Malek Cellier
- * Email: malek.cellier@gmail.com
- * Creation Date: 2020-01-23
- * Context:
- *  Threejs Wrapper class, requires:
- *      three.js: that's the WebGL wrapper
- *      OrbitControls.js: that's a convenient function that allows to rotate the scene with the mouse
- *      chroma.js: that's a library that generates colors and colormaps
- *   allows the rapid creation of a threejs based scene
+ * ThreeJsWrapper Class
+ * 
+ * Wraps the Three.js library to ake it easier to use and create scenes
+ * 
+ * Dependencies:
+ *  - three.js: https://github.com/mrdoob/three.js it is actually a WebGL wrapper
+ *  - OrbitControls.js: library from three.js that allows to rotate the scene with the mouse
+ *  - chroma.js: library that generates colors and colormaps
  * 
  * To use this class, I suggest to inherit from it and then add your extra methods
+ * 
+ * # Author: Malek Cellier
+ * # 
+ * # Email: malek.cellier@gmail.com
+ * # Created: 2020-01-23
  */
+
 
 var log = {
     'error': (text) => {console.log('%c' + text, 'color: red')},
@@ -26,19 +31,20 @@ class ThreejsWrapper {
      *  all the required components are member variables of the class
      * 
      * OBS: remember to call the start() function once you have create your object.
+     * 
      * Usage:
      *  let my3d = ThreejsWrapper();
      *  my3d.start();
      * 
      */    
     constructor(canvas) {
+        this.data = null;  // data needed by the application
+        this.gui = null;  // gui object (dat.GUI library)
         this.scene = null;  // scene object required by three.js
         this.camera = null;  // camera object required by three.js
         this.renderer = null;  // renderer object required by three.js
         this.composer = null;  // optional composer object for effects in three.js
-        this.data = null;  // data needed by the application
-        this.gui = null;  // gui object (dat.GUI library)
-        this.params = this._getParams(); // parameters for all the objects. This is also used by the dat.GUI library for live changes
+        this.params = this._createParams(); // parameters for all the objects. This is also used by the dat.GUI library for live changes
         canvas = canvas || document.querySelector('canvas');  // tries to find existing canvas
         if (canvas == null) {
             // If canvas is not found, then create one
@@ -51,18 +57,18 @@ class ThreejsWrapper {
         this.colors = {};  // there can be several different color scales
     }
 
-    _getParams() {
+    _createParams() {
         /**
-         * all the parameters needed to configure the various objects and other aspects of this class
-         * are created here in order to reduce clutter in the constructor
+         * JSON data structure that holds all the parameters needed
+         * to configure the various objects and other aspects of this class
+         * They are created here in order to reduce clutter in the constructor
          * The categories:
-         *  - background
-         *  - camera
+         *  - background: color
+         *  - camera: fov, near, far, position, up, center...
          *  - light
-         *  - helpers
-         *  - helpers
-         *  - effects
-         *  - cube
+         *  - helpers: axes, grid, default cube, renderer info..
+         *  - effects: postprocessing
+         *  - cube: default mesh to illustrate
          */
         let params = {  
             background: {
@@ -148,8 +154,13 @@ class ThreejsWrapper {
     }
 
     start() {
-        // This function actually initialize and starts the render loop
-        // MUST be called manually after creating the ThreejsWrapper object
+        /**
+         * start
+         * 
+         * Initializes all the components required to create a scene
+         * Starts the render loop
+         * MUST be called after instanciating a ThreeJsWrapper object.
+         */
         this.createScene();
         this.createRenderer();
         this.createCamera();
@@ -173,6 +184,10 @@ class ThreejsWrapper {
     }
 
     createCamera() {
+        /**
+         * Destroys the current camera if any and creates a new one
+         * Uses the data in this.params to configure it
+         */
         let c = this.params.camera; // retrieve parameters
         // If the camera is in the scene, save the coordinates
         if (this.isObjectInScene('Camera')) {
@@ -186,19 +201,12 @@ class ThreejsWrapper {
         this.camera.position.set(c.x, c.y, c.z);
         this.camera.name = 'Camera';
         // Adjust the up direction
-        let up;
-        switch(c.up) {
-            case 'x':
-                up = new THREE.Vector3(1, 0, 0);
-                break;
-            case 'y':
-                up = new THREE.Vector3(0, 1, 0);
-                break;
-            case 'z':
-                up = new THREE.Vector3(0, 0, 1);
-                break;
-        }
-        this.camera.up = up;        
+        let directions = {
+            'x': new THREE.Vector3(1, 0, 0),
+            'y': new THREE.Vector3(0, 1, 0),
+            'z': new THREE.Vector3(0, 0, 1)
+        };
+        this.camera.up = directions[c.up];        
         this.scene.add(this.camera);
         this.createControls();
         this.createHelpers();
@@ -206,7 +214,7 @@ class ThreejsWrapper {
 
     centerOnScene() {
         /**
-         * Make the camera look at the approxiate center of the scene
+         * Make the camera look at the approximate center of the scene
          */
         let c = this.params.camera;
         if (c.center_on_scene) {
@@ -253,10 +261,13 @@ class ThreejsWrapper {
         this.camera.position.x = x;
         this.camera.position.y = y;
         this.camera.position.z = z;
-        //this.createCamera();
     }
 
     createRenderer() {
+        /**
+         * The renderer is WebGL
+         * The effects are handled too.
+         */
         this.renderer = new THREE.WebGLRenderer({canvas: this.canvas, antialias: true, preserveDrawingBuffer: true});
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         if (this.params.effects.composer == true) {
@@ -277,6 +288,11 @@ class ThreejsWrapper {
     }
 
     createControls() {
+        /**
+         * createControls
+         *  makes it possible to rotate the scene with the mouse
+         *  sets the center of such rotation
+         */
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.25;
@@ -286,7 +302,15 @@ class ThreejsWrapper {
         this.controls.target.set(c.x, c.y, c.z);
     }
 
-    createHelpers() {        
+    createHelpers() {
+        /**
+         * createHelpers
+         *  wrapper function that creates various categories of helpers:
+         *   - AxesHelper: axes for the coordinate system
+         *   - GridHelper: 2D grid on the XY plane
+         *   - CubeHelper: Outline of the cube
+         */
+
         this.removeFromScene('AxesHelper');
         let a = this.params.camera.lookAt;
         if (this.params.helpers.axes.show) {
@@ -402,37 +426,49 @@ class ThreejsWrapper {
     }
 
     createObjects() {
-        // Wrapper that executes all the functions prefixed with "create_"
+        /**
+         * createObjects
+         *  Wrapper that executes all the functions prefixed with "create_"
+         */
+
         let propertyNames = Object.getOwnPropertyNames(ThreejsWrapper.prototype);
         for (let i=0; i<propertyNames.length; i++) {
             let funcName = propertyNames[i];
             if (funcName.includes('create_')) {
-                console.log('executing:', funcName);
+                console.info(`CreateObjects: ${funcName}`);
                 this[funcName]();
             }
         }
     }
 
     createCube() {
-        // A cube to populate the scene a little
+        /**
+         * createCube
+         *  optional function that populates the scene with a simple cube, just to get started :-)
+         */
+
         this.removeFromScene('cube');
         
         let c = this.params.cube;
         let geometry = new THREE.BoxGeometry(c.width, c.height, c.depth, c.widthSegments, c.heightSegments, c.depthSegments);
         geometry.translate(c.x, c.y, c.z);
         let material = new THREE.MeshBasicMaterial({color: c.color, wireframe: c.wireframe});
-        //let material = new THREE.MeshNormalMaterial();
         let mesh = new THREE.Mesh(geometry, material);
         mesh.name = 'cube';
         this.scene.add(mesh);
     }    
 
     animateObjects() {
-        // Wrapper that executes all the functions prefixed with "animate_"
+        /**
+         * animateObjects
+         *  Wrapper that executes all the functions prefixed with "animate_"
+         */
+
         let propertyNames = Object.getOwnPropertyNames(ThreejsWrapper.prototype);
         for (let i=0; i<propertyNames.length; i++) {
             let funcName = propertyNames[i];
             if (funcName.includes('animate_')) {
+                console.info(`AnimateObjects: ${funcName}`);
                 this[funcName]();
             }
         }        
@@ -452,6 +488,7 @@ class ThreejsWrapper {
     createDatGui() {
         /**
          * A default GUI to control settings from the main elements: lights, camera, helpers...
+         *  disabled by default
          */
         this.gui = new dat.GUI();
         let g_background = this.gui.addFolder('Background');
@@ -509,7 +546,14 @@ class ThreejsWrapper {
     }
 
     removeFromScene(objectName, dispose) {
-        dispose = dispose || true;
+        /**
+         * removeFromScene
+         *  convenience function to remove a object from the scene based on its name
+         *  this assumes that the name is unique
+         */
+        if (dispose === undefined) {
+            dispose = true;
+        }
         if (this.isObjectInScene(objectName)) {
             let object = this.scene.getObjectByName(objectName);
             this.scene.remove(object);
@@ -533,10 +577,10 @@ class ThreejsWrapper {
             let group = this.scene.getObjectByName(groupName);
             let object = group.getObjectByName(objectName);
             group.remove(object);
-            log.info(`Removed ${objectName} from ${groupName}`);
+            console.info(`Remove ${objectName} from ${groupName}`);
             this.data.groups[groupName][groupType].remove(object);
             this.scene.remove(object);
-            log.info(`Removed ${objectName} from scene`);
+            console.info(`Remove ${objectName} from scene`);
         }
     }
 
@@ -546,11 +590,11 @@ class ThreejsWrapper {
             if (group.getObjectByName(objectName)) {
                 return true;
             } else {
-                log.error(`No object named ${objectName} in ${groupName}`);    
+                //console.error(`No object named ${objectName} in ${groupName}`);    
                 return false;
             }
         } else {
-            log.error(`No group named ${groupName}`);
+            //console.error(`No group named ${groupName}`);
             return false;
         }
     }
@@ -563,7 +607,6 @@ class ThreejsWrapper {
                 max: {x: -Infinity, y: -Infinity, z: -Infinity}
             };
             group.traverse( function ( child ) {   
-                log.info('child:', child.name);
                 if ( child instanceof THREE.Mesh ) {    
                     child.geometry.computeBoundingBox();
                     let bb = child.geometry.boundingBox;
@@ -582,7 +625,7 @@ class ThreejsWrapper {
             
             return limits;            
         } else {
-            log.warn('Passed object is not a Group');
+            console.warn('FindGroupCenter: Passed object is not a Group');
         }
     }
 
@@ -593,7 +636,7 @@ class ThreejsWrapper {
          */
         let groupToTraverse = this.scene;
         if (groupName === undefined || groupName === '' ) {
-            log.info('group not specified');
+            console.info('FindCenter: group not specified');
         } else {
             // if the group exists
             if (this.isObjectInScene(groupName)) {
@@ -610,7 +653,6 @@ class ThreejsWrapper {
                 max: {x: -Infinity, y: -Infinity, z: -Infinity}
             };
             groupToTraverse.traverse( function ( child ) {   
-                log.info('child:', child.name);
                 if ( child instanceof THREE.Mesh ) {    
                     child.geometry.computeBoundingBox();
                     let bb = child.geometry.boundingBox;

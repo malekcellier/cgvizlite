@@ -1,8 +1,8 @@
 /*
-cg-viz-lite
+CgVizJs Class 
 
 WEBGL based visualizer for QCM output
-Based off cg-viz from Markus Berglund
+Inspired from cg-viz from Markus Berglund
 
 # Author: Malek Cellier
 # 
@@ -10,53 +10,51 @@ Based off cg-viz from Markus Berglund
 # Created: 2020-01-26
 */
 
-// 1) Create the THREEjs environment
-
-// 2) Dynamic handling of json files
-// - button to load the files from directory
-// - save the files in a dict, using directory name as key
-// - present those categories in a gui
-// - allow the user to select the KPI to be shown through the heatmap
-// 3) Load the files
-// 4) Display the files through a heatmap object
-
 
 class CgVizJs extends ThreejsWrapper {
     /**
-     * Subclasses ThreejsWrapper
-     *  1) for better customization of the 3D part
+     * CgVizJs subclasses ThreejsWrapper:
+     *  - for better customization of the 3D part
      *      i.e adding methods to plot the pov, the rays, the kpis, etc..
-     *  color scales are created from chroma.js separately for pov, rays, kpis
-     *  2) for the menu interactivity part
+     *  - color scales are created from chroma.js separately for pov, rays, kpis
+     *  - for the menu interactivity part
      *      i.e. adding DOM elements to add/remove scenarios an
      */
     constructor({canvas: canvas, menu: menu}) {
         super(canvas);
-        this.data = {
+        this.showYourself();
+        this.data = { // Data structure that will hold the data from the json files
             'selected': null,
             'scenarios': {},
-            'ranges': {}, //{'qcmTrace': {'min': +Infinity, 'max': -Infinity,}}
+            'ranges': {},
             'groups': {}
-        }; // Data structure that will hold the data from the json files
+        };
         this.colors = {'qcmTrace': chroma.scale('Spectral')};
-        this.reusables = this.createReusables();
-        menu.cgviz = this;
+        this.reusables = this.createReusables(); // threejs objects
+        menu.cgviz = this; // reference to the cgviz available in the menu
         this.menu = menu;
     }
 
     setupGroups(scenarioName) {
         /**
-         * Setup groups in the scene:
-         *  group for the scenario, then subgroups
-         * 1 group per category: universe, pov, traces, kpis
+         * Setup groups in the scene
          * 
-         * if found, replace it
+         * Threejs Scene organization and Naming convention:
+         *   1 Group per scenario, then for each such Group create subgroups:
+         *      Helpers, a group for the helpers
+         *      Universe, a group for the universe
+         *      PoVs, a group for the povs
+         *      Kpis, a group for the kpis, then create subgroups:
+         *          1 Group per KPI..
          */
         scenarioName = scenarioName || this.data.selected;
         
+        console.group('Setup the Scene Graph');
+        console.time('Setup the Scene Graph');
         // Scenario group
         let grp_scenario = new THREE.Group();
         grp_scenario.name = scenarioName;
+        console.info(`add group for scenario: ${scenarioName}`);
         // Ref to groups are kept in order to save time afterwards
         this.data.groups[scenarioName] = {};
         this.data.groups[scenarioName]['main'] = grp_scenario;
@@ -65,32 +63,38 @@ class CgVizJs extends ThreejsWrapper {
         let grp_universe = new THREE.Group();
         grp_universe.name = 'Universe';
         grp_scenario.add(grp_universe);
+        console.info(`  add subgroup: ${grp_universe.name}`);
         this.data.groups[scenarioName]['universe'] = grp_universe;
         
         let grp_povs = new THREE.Group();
         grp_povs.name = 'PoVs';
         grp_scenario.add(grp_povs);
+        console.info(`  add subgroup: ${grp_povs.name}`);
         this.data.groups[scenarioName]['povs'] = grp_povs;
         
         let grp_traces = new THREE.Group();
         grp_traces.name = 'Traces';
         grp_scenario.add(grp_traces);
+        console.info(`  add subgroup:${grp_traces.name}`);
         this.data.groups[scenarioName]['traces'] = grp_traces;
         
         let grp_kpis = new THREE.Group();
         grp_kpis.name = 'Kpis';
+        console.info(`  add subgroup:${grp_kpis.name}`);
         // Adding one sub-group per kpi
         let kpis = this.data.scenarios[scenarioName].qcmKpis.nfo.KPIS;
         for (let i=0; i<kpis.length; i++) {
             let sg = new THREE.Group();
             sg.name = kpis[i];
             grp_kpis.add(sg);
-            log.info(`SetUpGroups: added group ${kpis[i]}`);
+            console.info(`      add subsubgroup: ${kpis[i]}`);
         }
         grp_scenario.add(grp_kpis);
         this.data.groups[scenarioName]['kpis'] = grp_kpis;
 
         this.scene.add(grp_scenario);
+        console.groupEnd('Setup the Scene Graph');
+        console.timeEnd('Setup the Scene Graph');
     }
 
     removeGroup(scenarioName) {
@@ -100,12 +104,12 @@ class CgVizJs extends ThreejsWrapper {
         if (!this.isObjectInScene(scenarioName)) {
             return;
         }
-        console.log('Removing group:', scenarioName);
+        console.info(`RemoveGroup: ${scenarioName}`);
         this.scene.getObjectByName(scenarioName).traverse((child) => {
             if (child.isGroup) {
                 this.removeGroup(child.name);
             } else {
-                console.log('Removing chid: ', child.name);
+                console.info(`Remove Child: ${child.name}`);
                 child.geometry.dispose();
                 child.material.dispose();
                 this.scene.remove(child);
@@ -117,15 +121,25 @@ class CgVizJs extends ThreejsWrapper {
         /**
          * Creates resuable materials and geometries to save on memory
          */
+        let alpha = 1;
+        let beta = 1;
+        let gamma = 0.8;
+        let diffuseColor = new THREE.Color().setHSL( alpha, 0.5, gamma * 0.5 + 0.1 )
+        let mat = new THREE.MeshStandardMaterial( {
+            color: diffuseColor,
+            metalness: beta,
+            roughness: 1.0 - alpha,
+        } );
+
         let reusables = {
             tx_pov: {
-                geometry: new THREE.CylinderGeometry(0.2, 1, 16, 32),
-                material: new THREE.MeshPhongMaterial({ color: 0x804820 }),
+                geometry: new THREE.CylinderGeometry(0.4, 2, 24, 32),
+                material: new THREE.MeshPhongMaterial({color: 0xEE0000, shininess: 100, emissive: 0x0 }),
                 dy: 8
             },
             rx_pov: {
-                geometry: new THREE.CylinderGeometry(0.2, 1, 8, 32),
-                material: new THREE.MeshPhongMaterial({ color: 0x702080 }),
+                geometry: new THREE.CylinderGeometry(0.4, 2, 16, 32),
+                material: new THREE.MeshPhongMaterial({color: 0x0000EE, shininess: 100, emissive: 0x0  }),
                 dy: 4
             },
         };
@@ -235,6 +249,7 @@ class CgVizJs extends ThreejsWrapper {
 
     toggleObj() {
         /**
+         * NOT TO BE USED
          * Adds the obj file with mtl
          */
         const name = this.data.selected;
@@ -277,6 +292,7 @@ class CgVizJs extends ThreejsWrapper {
 
     toggleGroundPlane_Old() {
         /**
+         * NOT TO BE USED
          * Add a ground place for the given scenario
          */
         const name = 'GroundPlane_' + this.data.selected;
@@ -297,17 +313,21 @@ class CgVizJs extends ThreejsWrapper {
         }        
     }
   
-    toggleGroundPlane(scenarioName) {        
+    toggleGroundPlane(scenarioName) {     
+        /**
+         * Toggle the ground plane which dimensions match the boundingbox of the group
+         */   
         let planeName = 'GroundPlane';
         if (this.isObjectInGroup(scenarioName, planeName)) {
+            console.info(`ToggleGroundPlane: remove ${planeName} from ${scenarioName}`);
             this.removeFromGroup(scenarioName, planeName, 'universe');
-            log.info(`Removed ground plane from ${scenarioName}`);
         } else {
+            console.info(`ToggleGroundPlane: add ${planeName} from ${scenarioName}`);
             let limits = this.getData(scenarioName).limits;
             let x_span = limits.max.x - limits.min.x;
             let y_span = limits.max.y - limits.min.y;
             let geometry = new THREE.PlaneBufferGeometry(x_span, y_span);
-            // move the plane
+            // Move the plane to the appropriate location
             geometry.translate(limits.min.x + x_span/2, limits.min.y + y_span/2, 0);
             let material = new THREE.MeshPhongMaterial({color: 0x29323C, side: THREE.DoubleSide});
             let plane = new THREE.Mesh(geometry, material); 
@@ -326,13 +346,14 @@ class CgVizJs extends ThreejsWrapper {
             let universeObject = qcmUniverse[objName];
             // Add the object to the correct subgroup, using the references
             this.data.groups[scenarioName].universe.add(universeObject);
-            log.info(`Added object ${objName} in ${scenarioName}`); 
+            console.info(`ToggleUniverse: object ${objName} in ${scenarioName}`); 
         }        
     } 
 
     toggleEntireUniverse(scenarioName) {
         let qcmUniverse = this.getData(scenarioName).qcmUniverse.objs;
         let objects = Object.keys(qcmUniverse);
+        console.info(`ToggleEntireUniverse: ${scenarioName}`); 
         for (let i=0; i<objects.length; i++) {
             this.toggleUniverse(scenarioName, objects[i]);
         }
@@ -432,7 +453,7 @@ class CgVizJs extends ThreejsWrapper {
             povObject.position.set(data.position[0]+this.reusables[povCat].dy, data.position[1], data.position[2]);
             // Add the object to the correct subgroup, using the references
             this.data.groups[scenarioName].povs.add(povObject);
-            log.info(`Added object ${povName} in ${scenarioName}`); 
+            console.info(`Added object ${povName} in ${scenarioName}`); 
         }
     }
 
@@ -550,7 +571,7 @@ class CgVizJs extends ThreejsWrapper {
                 raysObject.add(new THREE.Line(geometry, material));
             }
             this.data.groups[scenarioName].traces.add(raysObject);
-            log.info(`Added object ${traceName} in ${scenarioName}`);
+            console.info(`Added object ${traceName} in ${scenarioName}`);
         }
     }
 
@@ -670,6 +691,9 @@ class CgVizJs extends ThreejsWrapper {
          * process the kpis data
          */
         scenarioName = scenarioName || this.data.selected;
+
+        console.group('Process the KPIs');
+        console.time('Process the KPIs');
         let processedKpis = {
             coords: {x: [], y: [], z: []},
             tx: {}
@@ -677,6 +701,7 @@ class CgVizJs extends ThreejsWrapper {
         let qcmKpis = this.getData(scenarioName).qcmKpis;
         let kpiNames = qcmKpis.nfo.KPIS;
         // the coords are the same for all the tx
+        console.info('Copies the coordinates');
         let n_values = qcmKpis['Tx01'].length;
         for (let i=0; i<qcmKpis['Tx01'].length ; i++) {
             let xyz = qcmKpis['Tx01'][i].XYZ;
@@ -685,6 +710,7 @@ class CgVizJs extends ThreejsWrapper {
             processedKpis.coords.z.push(xyz[2]);
         }
         // Collect the data per TX
+        console.info('Copies the data');
         let txIds = Object.keys(qcmKpis);
         for (let i=0; i<txIds.length; i++) {
             if (txIds[i] === 'nfo') {
@@ -702,11 +728,10 @@ class CgVizJs extends ThreejsWrapper {
                     let kpiName = kpiNames[m];
                     let value = data[kpiName][0];
                     processedKpis.tx[txId][kpiName].push(value);
-                    // compare and aggregate
                 }
             }
         }
-        log.info('Initializing the extras');
+        console.info('Initializes the extras');
         // Add the extra categories: min, max, mean, sum
         let extras = ['Best', 'Worst', 'Mean', 'Sum'];
         for (let i=0; i<extras.length; i++) {
@@ -733,7 +758,7 @@ class CgVizJs extends ThreejsWrapper {
                 }
             }
         }
-        log.info('Populating the extras');
+        console.info('Populates the extras');
         // add te data to the extra categories
         let nTx = txIds.length - 1;
         for (let i=0; i<kpiNames.length; i++) {
@@ -760,6 +785,8 @@ class CgVizJs extends ThreejsWrapper {
 
         // Save the post processed data
         this.data.scenarios[scenarioName].processedKpis = processedKpis;
+        console.groupEnd('Process the KPIs');
+        console.timeEnd('Process the KPIs');
     }
 
     toggleHeatmap_old(scenarioName, kpiName, txPovType, txPovId) {
@@ -777,7 +804,7 @@ class CgVizJs extends ThreejsWrapper {
             heatMap.updateData({x: xyz.x, y: xyz.y, val: values, size: 5});
             heatMap.mesh.name = heatMapName;
             this.data.groups[scenarioName].kpis.add(heatMap.mesh);
-            log.info(`Added object ${heatMapName} in ${scenarioName}`);
+            console.info(`Added object ${heatMapName} in ${scenarioName}`);
         }
     }
 
@@ -812,10 +839,34 @@ class CgVizJs extends ThreejsWrapper {
                     heatMap.updateData({x: xyz.x, y: xyz.y, val: values, size: 5});
                     heatMap.mesh.name = heatMapName;
                     this.data.groups[scenarioName].kpis.add(heatMap.mesh);
-                    log.info(`Added object ${heatMapName} in ${scenarioName}`);
+                    console.info(`Added object ${heatMapName} in ${scenarioName}`);
                 }                
             }
         }
+    }
+
+    showYourself() {
+        /**
+         * Prints some info in the console
+         */
+        //console.group('cg-viz lite');
+        let text = `
+        ___________________________________________________________________________
+                                                                                   
+        ██████╗ ██████╗        ██╗   ██╗██╗███████╗    ██╗     ██╗████████╗███████╗
+        ██╔════╝██╔════╝       ██║   ██║██║╚══███╔╝    ██║     ██║╚══██╔══╝██╔════╝
+        ██║     ██║  ███╗█████╗██║   ██║██║  ███╔╝     ██║     ██║   ██║   █████╗
+        ██║     ██║   ██║╚════╝╚██╗ ██╔╝██║ ███╔╝      ██║     ██║   ██║   ██╔══╝
+        ╚██████╗╚██████╔╝       ╚████╔╝ ██║███████╗    ███████╗██║   ██║   ███████╗
+         ╚═════╝ ╚═════╝         ╚═══╝  ╚═╝╚══════╝    ╚══════╝╚═╝   ╚═╝   ╚══════╝
+         __________________________________________________________________________
+                                                                                   
+           by malek.cellier@gmail.com                                             
+           last updated: 2020-02-21                                                
+         __________________________________________________________________________`;
+
+        console.log(text);
+        //console.groupEnd('cg-viz lite');
     }
 
 }

@@ -217,7 +217,8 @@ class CgVizMenu {
          *      Kpis
          *          {...}
          */
-        console.log(' Populating scenarios content....');
+        console.group('Populate scenarios content');
+        console.time('Populate scenarios content');
 
         let div = _get('#div-scenarios');
 
@@ -239,6 +240,7 @@ class CgVizMenu {
         div.appendChild(sce_content);
         
         // 2.1) The universe
+        console.info('  universe');
         // 2.1.1) the header
         let obj_header = this.HeaderMenu('Universe', 'obj-header'); 
         obj_header.querySelector('.eye').addEventListener('click', (evt) => this._eventToggleEntireUniverse(evt));
@@ -251,6 +253,7 @@ class CgVizMenu {
         }
         
         // 2.2) The Point of Views
+        console.info('  point of views');
         // 2.2.1) the header
         let pov_header = this.HeaderMenu('PoV', 'pov-header'); 
         pov_header.querySelector('.eye').addEventListener('click', (evt) => this._eventToggleAllPovs(evt));
@@ -266,6 +269,7 @@ class CgVizMenu {
         //this.__populatePovContent(pov_content);
         
         // 2.3) The traces:
+        console.info('  traces');
         // 2.3.1) the header
         let trace_header = this.HeaderMenu('Traces', 'trace-header'); 
         trace_header.querySelector('.eye').addEventListener('click', (evt) => this._eventToggleAllRays(evt));
@@ -278,6 +282,7 @@ class CgVizMenu {
         }
       
         // 2.4) The kpis
+        console.info('  kpis');
         // 2.4.1) the header
         let kpis_header = this.HeaderMenu('Kpis', 'kpis-header'); 
         sce_content.appendChild(kpis_header);        
@@ -286,7 +291,10 @@ class CgVizMenu {
         if (kpis_content !== undefined) {
             sce_content.appendChild(kpis_content);
             kpis_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
-        }  
+        }
+
+        console.groupEnd('Populate scenarios content');
+        console.timeEnd('Populate scenarios content');
 
     }
 
@@ -297,7 +305,7 @@ class CgVizMenu {
         let qcmUniverse = this.cgviz.data.scenarios[this.cgviz.data.selected].qcmUniverse;
         let objects = Object.keys(qcmUniverse.objs);
         if (objects.length === 0) {
-            log.warn('no universe objects found');
+            console.warn('no universe objects found');
             return;
         }
         let obj_content = _el('div', '', ['obj-content', 'hidden']);
@@ -752,7 +760,7 @@ class CgVizMenu {
         let helpers_axes = this.HeaderMenu('Axes', 'obj-header', '', false, false, false);
         helpers_axes.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         helpers_content.appendChild(helpers_axes);
-        let axes_content = _el('div', '', ['sub-menu-content', 'hidden'], true);
+        let axes_content = _el('div', '', ['sub-menu-content', 'column', 'hidden'], true);
         helpers_content.appendChild(axes_content);
         
         let axes_visible = this.HeaderSwitch('Visible');
@@ -761,13 +769,13 @@ class CgVizMenu {
         let axes_arrows = this.HeaderSwitch('Use arrows');
         axes_arrows.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventToggleAxesArrows(evt));
         axes_content.appendChild(axes_arrows);
-        axes_content.appendChild(this.HeaderSwitch('Size'));
+        //axes_content.appendChild(this.HeaderSwitch('Size'));
         
         // 2.2) the grid: show/hide, size, divisions
         let helpers_grid = this.HeaderMenu('Grid', 'obj-header', '', false, false, false);
         helpers_grid.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         helpers_content.appendChild(helpers_grid);
-        let grid_content = _el('div', '', ['sub-menu-content', 'hidden'], true);
+        let grid_content = _el('div', '', ['sub-menu-content', 'column', 'hidden'], true);
         helpers_content.appendChild(grid_content);
         // Visibility
         let grid_visible = this.HeaderSwitch('Visible');
@@ -782,7 +790,7 @@ class CgVizMenu {
         let helpers_controls = this.HeaderMenu('Controls', 'obj-header', '', false, false, false);
         helpers_controls.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
         helpers_content.appendChild(helpers_controls);
-        let controls_content = _el('div', '', ['sub-menu-content', 'hidden'], true);
+        let controls_content = _el('div', '', ['sub-menu-content', 'column', 'hidden'], true);
         helpers_content.appendChild(controls_content);
         
         let controls_centered = this.HeaderSwitch('Center on scene', '', false);
@@ -973,12 +981,7 @@ class CgVizMenu {
 
         // The total loading progress
         let container_total = _el('div', 'progress-total');
-        /*
-        // title
-        let h = _el('h3');
-        h.innerText = 'List of files to be loaded';
-        container_total.appendChild(h);
-        */
+
         // Create the ul with the total
         let ul_total = _el('ul');
         // and add a single li item
@@ -997,6 +1000,7 @@ class CgVizMenu {
         let ul = _el('ul', 'ul-files');
         container.appendChild(ul);
 
+        console.groupCollapsed(`Selected directory`);
         let files = this._directory.files;
         if (this._directory.files.length > 0) {
             this.cgviz.data.selected = files[0].webkitRelativePath.split('/')[0];
@@ -1006,9 +1010,11 @@ class CgVizMenu {
                 'qcmTrace': {},
                 'qcmKpis': {}
             };
+            console.info(`Selected directory: ${this.cgviz.data.selected}`);
             let file_index = 0; // counts the files in the passed directory
             for (let i=0; i<files.length; i++) {
                 let file = files[i];
+                console.info(`File: ${file.name}`);
                 // ignoring the files in the subdirectories
                 let pathParts = file.webkitRelativePath.split('/');
                 if (pathParts.length > 2) {
@@ -1020,6 +1026,7 @@ class CgVizMenu {
                 file_index += 1;
             }
         }
+        console.groupEnd(`Selected directory`);
 
         div.appendChild(container);        
     }
@@ -1117,7 +1124,8 @@ class CgVizMenu {
          * TODO: use promises instead of this _finishedYet solution
          */
         let self = this;
-        console.log('loading data...');
+        console.groupCollapsed('Upload data');
+        console.time('Upload data');
         let files = this._directory.files;
         let threed = {'mtl': {}, 'objs': []}; // temporary structure to store the ref to obj files
         
@@ -1160,7 +1168,7 @@ class CgVizMenu {
                     li.getElementsByClassName('value')[0].innerText = '100%';
                     // update the total
                     i_files += 1;
-                    console.log(' from json: ', i_files);
+                    console.info(`Uploaded JSON #${i_files} named: ${url.name}`);
                     let pcValue = i_files/n_files*100;
                     totalProgressBar.style.width = pcValue + '%';
                     totalProgressVal.innerText = Math.round(pcValue*100)/100 + '%';
@@ -1193,7 +1201,7 @@ class CgVizMenu {
                 threed.mtl.li.getElementsByClassName('bar')[0].children[0].style.width = '100%';
                 threed.mtl.li.getElementsByClassName('value')[0].innerText = '100%';
                 i_files += 1;
-                console.log(' from mtl: ', i_files);
+                console.info(`Uploaded MTL #${i_files} named: ${threed.mtl.file.name}`);
                 let pcValue = i_files/n_files*100;
                 totalProgressBar.style.width = pcValue + '%';
                 totalProgressVal.innerText = Math.round(pcValue*100)/100 + '%';
@@ -1218,7 +1226,8 @@ class CgVizMenu {
                 threed.objs[i].li.getElementsByClassName('bar')[0].children[0].style.width = '100%';
                 threed.objs[i].li.getElementsByClassName('value')[0].innerText = '100%';
                 i_files += 1;
-                console.log(' from obj: ', i_files);
+                //console.log(' from obj: ', i_files);
+                console.info(`Uploaded OBJ #${i_files} named: ${threed.objs[i].file.name}`);
                 let pcValue = i_files/n_files*100;
                 totalProgressBar.style.width = pcValue + '%';
                 totalProgressVal.innerText = Math.round(pcValue*100)/100 + '%';
@@ -1232,7 +1241,9 @@ class CgVizMenu {
          * When all the loading is done, the menu and 3d structures can be created
          */
         if (i_files === n_files) {
-            console.log('done');
+            console.info('Done uploading data');
+            console.groupEnd('Upload data');
+            console.timeEnd('Upload data');
             let scenarioName = this.cgviz.data.selected;
             this.cgviz.getRaysRange(scenarioName);
             this.cgviz.setupGroups(scenarioName);
@@ -1335,7 +1346,7 @@ class CgVizMenu {
         evt.target.classList.toggle('clicked');
         let scenarioName = evt.target.parentNode.parentNode.previousSibling.id;
         this.cgviz.toggleEntireUniverse(scenarioName);
-        log.info(`ToggleEntireUniverse: Scenario: ${scenarioName}`);
+        console.info(`ToggleEntireUniverse: Scenario: ${scenarioName}`);
     }
 
     _eventToggleUniverse(evt) {
@@ -1343,7 +1354,7 @@ class CgVizMenu {
         let scenarioName = evt.target.parentNode.parentNode.parentNode.previousSibling.id;
         let objectName = evt.target.nextSibling.innerText;
         this.cgviz.toggleUniverse(scenarioName, objectName);
-        log.info(`ToggleUniverse: Scenario: ${scenarioName} - Object: ${objectName}`);
+        console.info(`ToggleUniverse: Scenario: ${scenarioName} - Object: ${objectName}`);
     }
 
     _eventToggleGroundPlane(evt) {
@@ -1351,7 +1362,7 @@ class CgVizMenu {
         let scenarioName = evt.target.parentNode.parentNode.parentNode.previousSibling.id;
         // Here we should find out the scenario name and pass it
         this.cgviz.toggleGroundPlane(scenarioName);
-        log.info(`Scenario: ${scenarioName} - GroundPlane`);
+        console.info(`Scenario: ${scenarioName} - GroundPlane`);
     }    
 
     _eventTogglePov(evt) {
@@ -1364,7 +1375,7 @@ class CgVizMenu {
         let povType = evt.target.parentNode.previousSibling.querySelector('.header-text').innerText;
         let povId = evt.target.querySelector('span').innerText;
         this.cgviz.togglePov(scenario, povType, povId);
-        log.info(`Scenario: ${scenario} - PoV type: ${povType} - PoV Id: ${povId}`);
+        console.info(`Scenario: ${scenario} - PoV type: ${povType} - PoV Id: ${povId}`);
     }
 
     _eventTogglePovs(evt) {
@@ -1407,7 +1418,7 @@ class CgVizMenu {
         let scenario = evt.target.parentNode.parentNode.parentNode.previousSibling.id;
         let povType = evt.target.parentNode.previousSibling.querySelector('.header-text').innerText;
         this.cgviz.togglePovTypeMast(scenario, povType);
-        log.info(`TogglePovTypeMast - Scenario: ${scenario} - PoV type: ${povType}`);
+        console.info(`TogglePovTypeMast - Scenario: ${scenario} - PoV type: ${povType}`);
     }
 
     _eventToggleTrace(evt) {
@@ -1492,7 +1503,7 @@ class CgVizMenu {
         }
         //this.cgviz.toggleHeatmap_old(scenarioName, kpiName, txPovType, txPovId);
         this.cgviz.toggleHeatmap(scenarioName, kpiName, txPovType, txPovIds, ids);
-        log.info(`ToggleHeatmap - Scenario: ${scenarioName} - PoV type: ${txPovType} - PoV ID: ${txPovId} - KPI: ${kpiName}`);
+        console.info(`ToggleHeatmap - Scenario: ${scenarioName} - PoV type: ${txPovType} - PoV ID: ${txPovId} - KPI: ${kpiName}`);
     }
 
     _eventCaptureScreen() {
@@ -1626,7 +1637,7 @@ class CgVizMenu {
         this._eventToggleSwitch(evt);
         // Adjust the size of the grid such that its footprint is 10% bigger than that of the group
         this.cgviz.fitGridToScenario();
-        log.info('Fit the grid to the scene');
+        console.info('Fit the grid to the scene');
     }
 
     _eventToggleCenteredControls(evt) {
