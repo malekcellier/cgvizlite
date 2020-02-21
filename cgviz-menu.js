@@ -187,7 +187,7 @@ class CgVizMenu {
         scenarios.appendChild(_el('div', 'div-scenarios'));
 
         // A button to laod a scenario
-        let btn = _el('div', '', ['div-button']);
+        let btn = _el('div', '', ['div-button', 'scenario']);
         btn.appendChild(this.createSvg('add'));
         let txt = _el('p', '', ['menu-text']);
         txt.innerText = 'Add Scenario';
@@ -1046,7 +1046,7 @@ class CgVizMenu {
         div.appendChild(btn);
         
         // A button to upload a scenario
-        let upload = _el('div', '', ['div-button']);
+        let upload = _el('div', '', ['div-button', 'upload']);
         let txt_ul = _el('p', '', ['menu-text']);
         txt_ul.innerText = 'Upload';
         upload.addEventListener('click', () => this._eventUploadData());
@@ -1250,6 +1250,9 @@ class CgVizMenu {
             this.cgviz.getUniverseBounds(scenarioName);
             this.cgviz.processKpis(scenarioName);
             this.__populateMenuScenariosContent();
+            // Alert and then close
+            alert('Finished uploading the files!')
+            this._eventCloseModal();
         }
     }
 

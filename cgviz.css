@@ -189,6 +189,8 @@ div.current-tab {
 
 #menu-main-body {
     padding: 12px;
+    height: calc(100% - 165px);
+    overflow-y: auto;
 }
 
 .menu-title {
@@ -251,11 +253,25 @@ div.current-tab {
     opacity: 1;    
     pointer-events: all;    
     margin-top: 10px;
+    right: 20px;
 }
 
 .div-button.cancel {
     background-color: rgb(192, 108, 132);
     margin-right: 20px;
+    position: absolute;
+    left: 20px;
+}
+
+.div-button.upload {
+    position: absolute;
+    right: 20px;
+}
+
+.div-button.scenario {
+    position: absolute;
+    bottom: 45px;
+    left: 35px;
 }
 
 .div-button:hover {
@@ -642,11 +658,11 @@ div.current-tab {
 
 .modal-content {
     background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
+    margin: 50px auto; /* 15% from the top and centered */
     /*padding: 20px;*/
     border: 1px solid #888;
-    width: 75%; /* Could be more or less, depending on screen size */
-    height: 70%;
+    width: 700px;
+    height: 700px;
     box-shadow: 0 5px 8px 0 rgba(0,0,0,0.2), 0 7px 20px 0 rgba(0,0,0,0.2);
     /*
     display: flex;
@@ -659,6 +675,7 @@ div.current-tab {
 .modal-header {
     /*background: #29323C;*/
     padding: 20px;
+    height: 175px;
     /*color: rgb(106, 116, 133);*/
     /*min-height: 40px;*/
     /*height: 15%;*/
@@ -671,7 +688,7 @@ div.current-tab {
     padding: 0px;
     margin: 20px;
     /*flex: 1;*/
-    height: 65%;
+    height: 400px;
     overflow: auto;
     background: #29323c22;
 }
@@ -682,9 +699,12 @@ div.current-tab {
     /*height: 35px;*/
     padding: 20px;
     color: rgb(106, 116, 133);
+    position: relative;
+    /*
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    */
 }
 
 #progress-group, #progress-total {
