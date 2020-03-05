@@ -17,6 +17,8 @@
  */
 
 
+// Helper function to print with colors in the console
+// nice but the default console has more options
 var log = {
     'error': (text) => {console.log('%c' + text, 'color: red')},
     'warn': (text) => {console.log('%c' + text, 'color: orange')},
