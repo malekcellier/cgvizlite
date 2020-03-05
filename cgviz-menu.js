@@ -1102,15 +1102,18 @@ class CgVizMenu {
          *      => shows as many sublegends as are used in the main view
          */
 
-        let canvas_container = _el('div', 'canvas-container');
+        //let canvas_container = _el('div', 'canvas-container');
 
         let canvas = _el('canvas');
-        canvas_container.appendChild(canvas);
-
+        //canvas_container.appendChild(canvas);
+        document.body.appendChild(canvas);
+        
         let labels = _el('div', 'labels-container');
-        canvas_container.appendChild(labels);
+        labels.classList.toggle('hidden');
+        //canvas_container.appendChild(labels);
+        document.body.appendChild(labels);
 
-        document.body.appendChild(canvas_container);
+        //document.body.appendChild(canvas_container);
 
     }
 
@@ -1718,6 +1721,14 @@ class CgVizMenu {
         // change the svg
         this._eventToggleSwitch(evt);
 
+    }
+
+    _eventTogglePovLabels(evt) {
+        // change the svg
+        this._eventToggleSwitch(evt);
+        // toggle the div
+        let d = _get('#labels-container');
+        d.classList.toggle('hidden');
     }
 
     // SVG and ICONS

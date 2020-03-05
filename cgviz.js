@@ -871,18 +871,6 @@ class CgVizJs extends ThreejsWrapper {
         //console.groupEnd('cg-viz lite');
     }
 
-    removeLabel(scenarioName, elementName) {
-        let name = scenarioName + '_' + elementName;
-        let labelsContainer = document.querySelector('#labels-container');
-        let labelToRemove = labelsContainer.querySelector('#' + name);
-        if (labelToRemove === undefined) {
-            console.warn(`Element ${elementName} not found!`);
-        } else {
-            labelsContainer.removeChild(labelToRemove);
-            console.info(`Element ${elementName} removed successfully!`);
-        }
-    }
-
     addLabel(scenarioName, elementName) {
         /**
          * For each eligible element (PoV) of the 3d scene,
@@ -892,16 +880,62 @@ class CgVizJs extends ThreejsWrapper {
          * Ex: dummy_Tx03 is a possible ID for the label
          * Then those labels are placed and moved during the rendering process
          */
-        let name = scenarioName + '_' + elementName;
+        let name = scenarioName + '__' + elementName;
         let labelsContainer = document.querySelector('#labels-container');
         let label = document.createElement('div');
-        label.textContent = name;
+        label.textContent = elementName;
+        label.id = name;
         labelsContainer.appendChild(label);
+    }
+
+    removeLabel(scenarioName, elementName) {
+        let name = scenarioName + '__' + elementName;
+        let labelsContainer = document.querySelector('#labels-container');
+        let labelToRemove = labelsContainer.querySelector('#' + name);
+        if (labelToRemove === undefined) {
+            console.warn(`Element ${elementName} not found!`);
+        } else {
+            labelsContainer.removeChild(labelToRemove);
+            console.info(`Element ${elementName} removed successfully!`);
+        }
+    }    
+
+    animate_labels() {
+        /**
+         * moves the labels together with the underlying object
+         */
+        // Get the list of objects from the div
+        let labels_list = document.querySelector('#labels-container');
+        if (labels_list.classList.contains('hidden')) {
+            return;
+        }
+        const tempV = new THREE.Vector3();
+        const canvas = document.querySelector('canvas');
+        for (let i=0; i<labels_list.childElementCount; i++) {
+            let [scenarioName, elementName] = labels_list.childNodes[i].id.split('__');
+            let pov = this.scene.getObjectByName(scenarioName).getObjectByName('PoVs').getObjectByName(elementName);
+            // get the position of the center of the pov
+            pov.updateWorldMatrix(true, false);
+            pov.getWorldPosition(tempV);
+            
+            // get the normalized screen coordinate of that position
+            // x and y will be in the -1 to +1 range with x = -1 being
+            // on the left and y = -1 being on the bottom
+            tempV.project(this.camera);
+            
+            // convert the normalized position to CSS coordinates
+            const x = (tempV.x *  .5 + .5) * canvas.clientWidth;
+            const y = (tempV.y * -.5 + .5) * canvas.clientHeight;
+            
+            // move the elem to that position
+            labels_list.childNodes[i].style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
+        }
     }
 
 }
 
 // 1) Create the THREEjs environment
 var cgviz = new CgVizJs({menu: new CgVizMenu()});
+ThreejsWrapper.prototype.animate_labels = CgVizJs.animate_labels;
 cgviz.start();
 cgviz.updateBackgroundColor(0x102030);
