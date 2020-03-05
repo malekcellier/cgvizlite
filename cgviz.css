@@ -20,6 +20,39 @@ body {
     line-height: 1.71429;    
 }
 
+#canvas-container {
+    position: relative;  /* makes this the origin of its children */
+    /*width: 100vw;
+    height: 100vh;*/
+    overflow: hidden;
+  }
+  #labels-container {
+    position: absolute;  /* let us position ourself inside the container */
+    left: 0;             /* make our position the top left of the container */
+    top: 0;
+    color: white;
+  }
+  #labels-container>div {
+    position: absolute;  /* let us position them inside the container */
+    left: 0;             /* make their default position the top left of the container */
+    top: 0;
+    cursor: pointer;     /* change the cursor to a hand when over us */
+    font-size: large;
+    user-select: none;   /* don't let the text get selected */
+    text-shadow:         /* create a black outline */
+      -1px -1px 0 #000,
+       0   -1px 0 #000,
+       1px -1px 0 #000,
+       1px  0   0 #000,
+       1px  1px 0 #000,
+       0    1px 0 #000,
+      -1px  1px 0 #000,
+      -1px  0   0 #000;
+  }
+  #labels-container>div:hover {
+    color: red;
+  }
+
 div {
     box-sizing: border-box;
 }
@@ -462,7 +495,8 @@ div.current-tab {
     color: rgb(240,240,240);
     float: left;
     text-align: center;  
-    width: 40px;  
+    width: 38px;
+    margin: 1px;  
     border: 1px solid #333333;   
     background: rgb(41, 50, 60);
     /*padding-left: 5px;*/
@@ -473,8 +507,14 @@ div.current-tab {
   }
   
   .sub-menu-content-pov.option {
-      width: 50px;
-  }
+      width: 48px;
+      margin: 1px;
+    }
+    
+.sub-menu-content-pov.option.large {
+    width: 98px;
+    margin: 1px;
+}
 
   .sub-menu-content-pov span, .sub-menu-content-trace span  {
       pointer-events: none;

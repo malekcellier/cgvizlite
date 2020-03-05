@@ -28,6 +28,7 @@ class CgVizMenu {
         this.createMenu();
         this.createPanel();
         this.createModal();
+        this.createCanvas();
     }
 
     createMenu() {
@@ -283,7 +284,7 @@ class CgVizMenu {
         // 2.4) The kpis
         console.info('  kpis');
         // 2.4.1) the header
-        let kpis_header = this.HeaderMenu('Kpis', 'kpis-header'); 
+        let kpis_header = this.HeaderMenu('Kpis', 'kpis-header', '', false, false, false); 
         sce_content.appendChild(kpis_header);        
         // 2.4.2) the content
         let kpis_content = this.__populateKpisContent();
@@ -428,7 +429,7 @@ class CgVizMenu {
 
         let kpiList = qcmKpis.nfo.KPIS;
         for (let i=0; i<kpiList.length; i++) {
-            let submenu = this.HeaderSubMenu(kpiList[i], '',  true);
+            let submenu = this.HeaderSubMenu(kpiList[i], '',  true, false);
             kpis_content.appendChild(submenu);
             // show/hide the submenu content
             submenu.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
@@ -454,7 +455,7 @@ class CgVizMenu {
                 // Add the TX part
                 if (subsubmenus[i] === 'tx') {
                     let subsubmenu_content = _el('div', '', ['subsub-menu-content', 'hidden']);
-                    let tx_options = ['Best', 'Worst', 'Mean', 'Sum'];
+                    let tx_options = ['Coverage', 'Acoverage', 'Best', 'Worst', 'Mean', 'Sum'];
                     let tx_ids = qcmKpis.nfo.TXPOVIDS;
                     let tx_all = [...tx_options, ...tx_ids]
                     // loop on the elements
@@ -463,6 +464,9 @@ class CgVizMenu {
                         let item = _el('div', '', ['sub-menu-content-pov']);
                         if (tx_options.includes(tx_all[j])) {
                             item.classList.add('option');
+                            if (tx_all[j].includes('overage')) {
+                                item.classList.add('large');
+                            }
                         } else {
                             // HACK to add a 0 in front of the name
                             tx_all[j] = '0' + tx_all[j];
@@ -538,21 +542,28 @@ class CgVizMenu {
         return div;
     }
 
-    HeaderSubMenu(innerText, id_, expand) {
+    HeaderSubMenu(innerText, id_, expand, eye) {
         /**
          * A simpler Header
          * Contains a title and an eye
          */
-        expand = expand || false;
+        if (expand === undefined) {
+            expand = true;
+        }
+        if (eye === undefined) {
+            eye = true;
+        }
         if (id_ === '') {
             id_ = null;
         }
 
         let div = _el('div', id_, ['sub-menu']);
 
-        let eye = _el('div', '', ['header-svg', 'eye']);
-        eye.appendChild(this.createSvg('eye_open'));
-        div.appendChild(eye);
+        if (eye === true) {
+            let eye = _el('div', '', ['header-svg', 'eye']);
+            eye.appendChild(this.createSvg('eye_open'));
+            div.appendChild(eye);
+        }
         
         let name = _el('div', '', ['header-text']);
         name.innerText = innerText;
@@ -747,6 +758,28 @@ class CgVizMenu {
         }
         //view_content.appendChild(view_xyz);
         
+        // 1 1/2) Labels
+        // Header
+        let labels_header = this.HeaderMenu('Labels', 'scenario-header', '', false, false, false);
+        labels_header.getElementsByClassName('expand')[0].addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+        settings.appendChild(labels_header);
+        // Content
+        let labels_content = _el('div', '', ['obj-content', 'hidden']);
+        let labels_povs = this.HeaderMenu('Point of views', 'obj-header', '', false, false, false);
+        labels_povs.querySelector('.expand').addEventListener('click', (evt) => this._eventToggleNextSibling(evt));
+        labels_content.appendChild(labels_povs);
+        let labels_pov_content = _el('div', '', ['sub-menu-content', 'column', 'hidden'], true);
+        labels_content.appendChild(labels_pov_content);
+        
+        let povs_visible = this.HeaderSwitch('Visible', '', false);
+        povs_visible.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventTogglePovLabels(evt));
+        labels_pov_content.appendChild(povs_visible);
+        let povs_detailed = this.HeaderSwitch('Detailed', '', false);
+        povs_detailed.querySelector('.switch-svg').addEventListener('click', (evt) => this._eventTogglePovLabels(evt));
+        labels_pov_content.appendChild(povs_detailed);
+
+        settings.appendChild(labels_content);
+
         // 2) Helpers
         // Header
         let helpers_header = this.HeaderMenu('Helpers', 'scenario-header', '', false, false, false);
@@ -1053,6 +1086,31 @@ class CgVizMenu {
         div.appendChild(upload);
 
         return div;
+
+    }
+
+    createCanvas() {
+        /**
+         * The canvas is put inside a container in order to have a labels div too:
+         *  the info icon 
+         *      => provides desciption about the current scene
+         *      => should be updated each time a new scenario is selected
+         *  the dual screen icon
+         *      => splits the screen in 2
+         *      => one scenario per screen
+         *  the legend icon
+         *      => shows as many sublegends as are used in the main view
+         */
+
+        let canvas_container = _el('div', 'canvas-container');
+
+        let canvas = _el('canvas');
+        canvas_container.appendChild(canvas);
+
+        let labels = _el('div', 'labels-container');
+        canvas_container.appendChild(labels);
+
+        document.body.appendChild(canvas_container);
 
     }
 

@@ -22,7 +22,7 @@ class CgVizJs extends ThreejsWrapper {
      */
     constructor({canvas: canvas, menu: menu}) {
         super(canvas);
-        this.showYourself();
+        this.consoleWelcome();
         this.data = { // Data structure that will hold the data from the json files
             'selected': null,
             'scenarios': {},
@@ -37,7 +37,7 @@ class CgVizJs extends ThreejsWrapper {
 
     setupGroups(scenarioName) {
         /**
-         * Setup groups in the scene
+         * Setup groups in the scene. Group in this context is meant as a threejs concept.
          * 
          * Threejs Scene organization and Naming convention:
          *   1 Group per scenario, then for each such Group create subgroups:
@@ -99,7 +99,7 @@ class CgVizJs extends ThreejsWrapper {
 
     removeGroup(scenarioName) {
         /**
-         * Remove a scenarion group and all its content
+         * Remove a scenario group and all its content
          */
         if (!this.isObjectInScene(scenarioName)) {
             return;
@@ -412,7 +412,8 @@ class CgVizJs extends ThreejsWrapper {
         let qcmPov = this.getData(scenarioName).qcmPov;
         let povName = povType + '_' + povId;
         if (this.isObjectInGroup(scenarioName, povName)) {
-            this.removeFromGroup(scenarioName, povName, 'povs');            
+            this.removeFromGroup(scenarioName, povName, 'povs');
+            this.removeLabel(scenarioName, povName);
         } else {
             let data = qcmPov[povType][povId];
             let povCat = this.getPovCategory(povType);
@@ -423,6 +424,7 @@ class CgVizJs extends ThreejsWrapper {
             povObject.position.set(data.position[0], data.position[1], data.position[2]);
             // Add the object to the correct subgroup, using the references
             this.data.groups[scenarioName].povs.add(povObject);
+            this.addLabel(scenarioName, povName);
             console.info(`Added object ${povName} in ${scenarioName}`); 
         }
     }
@@ -845,7 +847,7 @@ class CgVizJs extends ThreejsWrapper {
         console.timeEnd('Get kpis ranges');
     }
 
-    showYourself() {
+    consoleWelcome() {
         /**
          * Prints some info in the console
          */
@@ -867,6 +869,34 @@ class CgVizJs extends ThreejsWrapper {
 
         console.log(text);
         //console.groupEnd('cg-viz lite');
+    }
+
+    removeLabel(scenarioName, elementName) {
+        let name = scenarioName + '_' + elementName;
+        let labelsContainer = document.querySelector('#labels-container');
+        let labelToRemove = labelsContainer.querySelector('#' + name);
+        if (labelToRemove === undefined) {
+            console.warn(`Element ${elementName} not found!`);
+        } else {
+            labelsContainer.removeChild(labelToRemove);
+            console.info(`Element ${elementName} removed successfully!`);
+        }
+    }
+
+    addLabel(scenarioName, elementName) {
+        /**
+         * For each eligible element (PoV) of the 3d scene,
+         * adds a label to be updated later on in the rendering process
+         * Each element is named afet the group (scenario name) and the actual name
+         * which in case of the pov is a pov_type and a pov_id
+         * Ex: dummy_Tx03 is a possible ID for the label
+         * Then those labels are placed and moved during the rendering process
+         */
+        let name = scenarioName + '_' + elementName;
+        let labelsContainer = document.querySelector('#labels-container');
+        let label = document.createElement('div');
+        label.textContent = name;
+        labelsContainer.appendChild(label);
     }
 
 }
