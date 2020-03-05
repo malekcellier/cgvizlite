@@ -120,6 +120,8 @@ class CgVizJs extends ThreejsWrapper {
     createReusables() {        
         /**
          * Creates resuable materials and geometries to save on memory
+         * The PoV are represented by cone-like cylinders
+         * an alternative would be a rectangle for the array together with an arrow for the bearing in space
          */
         let alpha = 1;
         let beta = 1;
@@ -131,18 +133,36 @@ class CgVizJs extends ThreejsWrapper {
             roughness: 1.0 - alpha,
         } );
 
+        // specify the size of the antenna direction
+        let params = {
+            tx: {
+                radiusTop : 0.4,
+                radiusBottom : 2, 
+                height: 24,
+                radialSegments: 32
+            },
+            rx: {
+                radiusTop : 0.4,
+                radiusBottom : 2, 
+                height: 16,
+                radialSegments: 32
+            }
+        };
+
         let reusables = {
             tx_pov: {
-                geometry: new THREE.CylinderGeometry(0.4, 2, 24, 32),
-                material: new THREE.MeshPhongMaterial({color: 0xEE0000, shininess: 100, emissive: 0x0 }),
-                dy: 8
+                geometry: new THREE.CylinderGeometry(params.tx.radiusTop, params.tx.radiusBottom, params.tx.height, params.tx.radialSegments),
+                material: new THREE.MeshPhongMaterial({color: 0xEE0000, shininess: 100, emissive: 0x0 })
             },
             rx_pov: {
-                geometry: new THREE.CylinderGeometry(0.4, 2, 16, 32),
-                material: new THREE.MeshPhongMaterial({color: 0x0000EE, shininess: 100, emissive: 0x0  }),
-                dy: 4
+                geometry: new THREE.CylinderGeometry(params.rx.radiusTop, params.rx.radiusBottom, params.rx.height, params.rx.radialSegments),
+                material: new THREE.MeshPhongMaterial({color: 0x0000EE, shininess: 100, emissive: 0x0  })
             },
         };
+
+        // Modify the position so that the rotation gives the right result
+        reusables.tx_pov.geometry.translate(0, params.tx.height/2, 0);
+        reusables.rx_pov.geometry.translate(0, params.rx.height/2, 0);
 
         return reusables;
     }
@@ -396,13 +416,11 @@ class CgVizJs extends ThreejsWrapper {
         } else {
             let data = qcmPov[povType][povId];
             let povCat = this.getPovCategory(povType);
-            const geometry = this.reusables[povCat].geometry;            
-            const material = this.reusables[povCat].material;            
-            const povObject = new THREE.Mesh(geometry, material);
+            const povObject = new THREE.Mesh(this.reusables[povCat].geometry, this.reusables[povCat].material);
             povObject.name = povName;            
             povObject.rotateY(-data.elevation); // BUG: not working due the order of the rotations?
             povObject.rotateZ((data.azimuth) - (Math.PI / 2));
-            povObject.position.set(data.position[0]+this.reusables[povCat].dy, data.position[1], data.position[2]);
+            povObject.position.set(data.position[0], data.position[1], data.position[2]);
             // Add the object to the correct subgroup, using the references
             this.data.groups[scenarioName].povs.add(povObject);
             console.info(`Added object ${povName} in ${scenarioName}`); 
