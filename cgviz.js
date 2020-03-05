@@ -755,11 +755,11 @@ class CgVizJs extends ThreejsWrapper {
                     if (txIds[k] === 'nfo') {continue;}
                     let txId = txIds[k].replace(/\D/g,'');
                     let val = processedKpis.tx[txId][kpiNames[i]][j];
-                    if (val > processedKpis.Best[kpiNames[i]].val[j]) {
+                    if ((val > processedKpis.Best[kpiNames[i]].val[j]) && (val !== null)) {
                         processedKpis.Best[kpiNames[i]].val[j] = val;
                         processedKpis.Best[kpiNames[i]].id[j] = txId;
                     }
-                    if (val < processedKpis.Worst[kpiNames[i]].val[j]) {
+                    if ((val < processedKpis.Worst[kpiNames[i]].val[j]) && (val !== null)) {
                         processedKpis.Worst[kpiNames[i]].val[j] = val;
                         processedKpis.Worst[kpiNames[i]].id[j] = txId;
                     }
@@ -800,6 +800,14 @@ class CgVizJs extends ThreejsWrapper {
                         values = qcmKpis[txPovIds[i]][kpiName].val;
                     } else if (['Mean', 'Sum'].includes(txPovIds[i])) {
                         values = qcmKpis[txPovIds[i]][kpiName];
+                    } else if (['Coverage', 'Acoverage'].includes(txPovIds[i])) {
+                        // coverage and anti-coverage are just nick names for the best/worst id
+                        let x = {
+                            'Coverage': 'Best', 
+                            'Acoverage': 'Worst' 
+                        };
+                        let cat = x[txPovIds[i]];
+                        values = qcmKpis[cat][kpiName].id;
                     }
                     else {
                         values = qcmKpis.tx[txPovIds[i]][kpiName];
@@ -807,6 +815,7 @@ class CgVizJs extends ThreejsWrapper {
                     let heatMap = new Heatmap();
                     let range = this.data.ranges[scenarioName].qcmKpis[kpiName];
                     heatMap.forceColors(range.min, range.max, undefined, true);
+                    console.info(`Range: [${range.min} to ${range.max}] - Values: [${Math.min(...values)} to ${Math.max(...values)}]`);
                     heatMap.updateData({x: xyz.x, y: xyz.y, val: values, size: 5});
                     heatMap.mesh.name = heatMapName;
                     this.data.groups[scenarioName].kpis.add(heatMap.mesh);
