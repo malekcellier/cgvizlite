@@ -86,11 +86,16 @@ class Heatmap {
         this.colors = chroma.scale(this.colormap.name).domain([this.colormap.min, this.colormap.max]);
     }
 
-    forceColors(min, max, scheme, reverse) {
+    forceColors(min, max, n_colors, scheme, reverse) {
+        if (n_colors === undefined) {
+            n_colors = -1;
+        }
+
+        scheme = scheme || this.colormap.name;
+
         if (reverse === undefined) {
             reverse = false;
         }
-        scheme  = scheme || this.colormap.name;
         
         this.colormap.min = min;
         this.colormap.max = max;
@@ -99,7 +104,13 @@ class Heatmap {
         if (reverse === true) {
             range = [max, min];
         }
-        this.colors = chroma.scale(scheme).domain(range);
+        if (n_colors > 0) {
+            // QUantizing the colors
+            this.colors = chroma.scale(scheme).domain(range).classes(n_colors);
+        } else {
+            this.colors = chroma.scale(scheme).domain(range);
+        }
+        
     }
 
     getColor(val) {

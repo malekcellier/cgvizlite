@@ -779,7 +779,7 @@ class CgVizJs extends ThreejsWrapper {
         console.timeEnd('Process the KPIs');
     }
 
-    toggleHeatmap(scenarioName, kpiName, txPovType, txPovIds, ids) {
+    toggleHeatmap(scenarioName, kpiName, txPovType, txPovIds, ids, n_colors, scheme, reverse) {
         /**
          * TODO: when clicked away, all other heatmap have to be removed!!!
          */
@@ -816,7 +816,7 @@ class CgVizJs extends ThreejsWrapper {
                     }
                     let heatMap = new Heatmap();
                     let range = this.data.ranges[scenarioName].qcmKpis[kpiName];
-                    heatMap.forceColors(range.min, range.max, undefined, true);
+                    heatMap.forceColors(range.min, range.max, n_colors, scheme, reverse);
                     console.info(`Range: [${range.min} to ${range.max}] - Values: [${Math.min(...values)} to ${Math.max(...values)}]`);
                     heatMap.updateData({x: xyz.x, y: xyz.y, val: values, size: 5});
                     heatMap.mesh.name = heatMapName;
