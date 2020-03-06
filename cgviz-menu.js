@@ -890,17 +890,18 @@ class CgVizMenu {
         container.appendChild(head);
 
         let body = _el('div', 'legend-body');
+
         // For each colormap, a title and a legendset. A loop here is in order :-)
-        let title = _el('div','', ['title']);
-        title.innerText = 'Body';
-        body.appendChild(title);
-        let clr_map = this._createLegendSet();
+        //let title = _el('div','', ['title']);
+        //title.innerText = 'Body';
+        //body.appendChild(title);
+        //let clr_map = this._createLegendSet();
         /*
         let clr_map = _el('div', '', ['clrmap']);
         //clr_map.appendChild(this._SvgColormap());
         clr_map.appendChild(this._logoColorBox());
         */
-        body.appendChild(clr_map);
+        //body.appendChild(clr_map);
 
 
         container.appendChild(body);
@@ -908,8 +909,66 @@ class CgVizMenu {
         return container;
     }    
 
+    _addLegendSet(scenarioName, kpiName, n_colors, scheme) {
+        /**
+         * REPLACES _createLegendSet
+         * Adds a legend set to the legend menu, depending on:
+         *  - the scenario name
+         *  - the kpi name
+         *  - the number of colors
+         *  - the color scheme
+         *  - the range of the values (of the kpi)
+         * 
+         * Note: the id of the Tx does not impact the legend set
+         */
+        let container = document.querySelector('#legend-body');
+
+        // The id of the div is a combination of the scenario name and the kpi name
+        let name = scenarioName + '__' + kpiName;
+        // Create the set of colors using the n_colors, scheme and name of the kpi
+        let clrmap = _el('div', name, ['clrmap']);
+        let clrmap_head = _el('div', '', ['clrmap-head']);
+        clrmap.appendChild(clrmap_head);
+        let clrmap_body = _el('div', '', ['clrmap-body']);
+        clrmap.appendChild(clrmap_body);
+        // the range to map
+        let range = this.cgviz.data.ranges[scenarioName].qcmKpis[kpiName];
+        // NOTE The colorbar is meant to be discrete in this context...but maybe adjustable nonetheles..TODO
+        let colors = chroma.scale(scheme).domain([range.min, range.max]).classes(n_colors);
+        let values = chroma.limits([range.min, range.max], 'e', n_colors);
+        for (let i=0; i<n_colors; i++) {
+            let item = _el('div', '', ['clrmap-item-div']);
+            let [r, g, b] = colors(values[i]).rgb();
+            let svg = this._logoColorBox(r, g, b);
+            item.appendChild(svg);
+            
+            let text = _el('div', '', ['clrmap-text']);
+            text.innerText = `${values[i].toPrecision(4)} to ${values[i+1].toPrecision(4)}`;
+            item.appendChild(text);
+    
+            clrmap_body.appendChild(item);
+        }
+
+        // Finally, the legend div is pushed to the list
+        // The legend set will be replacing an existing one or adding it at the end of the list in case it does not exist
+        let this_legendSet = container.querySelector('#' + name);
+        if (this_legendSet === null) {
+            container.appendChild(clrmap);
+        } else {
+            this_legendSet = clrmap;
+        }
+
+    }
+
+    _removeLegendSet(scenarioName, kpiName) {
+        let container = document.querySelector('#legend-body');
+
+        container.removeChild(container.querySelector('#' + scenarioName + '__' + kpiName));
+    }
+
     _createLegendSet() {
         /**
+         * DEPRECATED
          * Inputs:
          *      - a color scheme 
          *      - a number of colors: n_colors 
@@ -1565,8 +1624,24 @@ class CgVizMenu {
             }
         }
         //this.cgviz.toggleHeatmap_old(scenarioName, kpiName, txPovType, txPovId);
-        this.cgviz.toggleHeatmap(scenarioName, kpiName, txPovType, txPovIds, ids);
+        let n_colors = 10; // TODO: make parameter
+        let scheme = 'Spectral';  // TODO: make parameter
+        let reverse = false;  // TODO: make parameter
+        this.cgviz.toggleHeatmap(scenarioName, kpiName, txPovType, txPovIds, ids, n_colors, scheme, reverse);
         console.info(`ToggleHeatmap - Scenario: ${scenarioName} - PoV type: ${txPovType} - PoV ID: ${txPovId} - KPI: ${kpiName}`);
+
+        // Updating the legend
+        // For any given KPI, the legend has to be shown if there is at least one 
+        // the trick is to know where to place that function given that:
+        // - cgviz.js should not know anything about the legend part
+        // - the color data is figured out in the toggleHeatMap function
+        // the state of each heatmap from this KPI is known through ids
+        // If all are false, remove the legend
+        if (ids.every((v) => {v===false})) {
+            this._removeLegendSet(scenarioName, kpiName);
+        } else {
+            this._addLegendSet(scenarioName, kpiName, n_colors, scheme);
+        }
     }
 
     _eventCaptureScreen() {
@@ -2253,7 +2328,8 @@ class CgVizMenu {
         rect.setAttribute('y', 0);
         rect.setAttribute('width', 40);
         rect.setAttribute('height', 20);            
-        rect.setAttribute('style', 'fill: rgb(' + r + ' ,' + g + ',' + b + ')');   
+        //rect.setAttribute('style', 'fill: rgb(' + r + ' ,' + g + ',' + b + ')');
+        rect.setAttribute('style', `fill: rgb(${r}, ${g}, ${b})`);
 
         /**
          * COnsider:
