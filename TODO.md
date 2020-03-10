@@ -4,7 +4,7 @@
 - [X] div for rays
     - [X] tx: collapsible
         - [ ] rx: group somehow
-- [ ] div for kpis
+- [X] div for kpis
 - [ ] load material and apply to obj file
 
 2020-02-10
@@ -57,7 +57,7 @@ Scene organization and Naming convention:
 ----------
 - [X] add option to show/hide a vertical line from ground to center of PoV
 - [X] add autosize option to the grid settings
-- [ ] fix the modal window size (appearant when not in big screen)
+- [X] fix the modal window size (appearant when not in big screen)
 - [ ] replace finished_yet with promises
 - [X] remove the output from the json loading
 - [ ] bug toggle plane does not remove the plane
@@ -65,7 +65,7 @@ Scene organization and Naming convention:
 - [ ] toggle eyes in subcategories of scenario
 - [ ] bug: antenna position (probably due to rotations)
 - [ ] feature: create buttons that depend on the state of other buttons
-- [ ] feature: kpi
+- [X] feature: kpi
 - [ ] cleanup the names in the css. Make them more logical
 - [X] XY, YZ, ZX views
 
@@ -119,3 +119,20 @@ Scene organization and Naming convention:
 - [ ] when clicking on eye: remove all if at least one is shown. Otherwise hide all
         which also implies that the state of the eye has to be changed as soon as 1 subelement is shown
 - [X] add the container div + canvas when creating cgvizjs
+- [ ] add the count of meshes, vertices, MB etc..
+- [X] remove colorbar when all are unclicked
+- [ ] group colorbars by title => expand on-click
+- [ ] colorbar for the traces
+- [ ] category for KPI: composite/ID
+- [ ] do not populate the kpis, instead provide a menu to add/remove
+- [ ] alternative label implementation: https://github.com/jrtashjian/demo-threejs-object-labels
+
+2020-03-08
+-----------
+- [ ] decouple view from model (for ex, the css contains references to pov and other model elements. INstead, a set of widgets should be defined and used for the relevant parts. That's the same idea I have had for a while: defining a hierarchy of component. This will simplify the css as well as the building of the spa)
+- [ ] labels rendering seems slow (higher than normal CUP usage even in the absence of interaction)
+- [ ] make legend and legend settings height relative to the window height 
+
+2020-03-09
+----------
+- [ ] add the name of the currently visible heatmap somewhere visible on the canvas
