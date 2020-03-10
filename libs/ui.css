@@ -111,6 +111,8 @@ body {
 /* svg icon */
 .svg-icon {
   cursor: pointer;
+  height: 22px;
+  width: 22px;
 }
 
 .svg-icon svg{

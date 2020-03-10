@@ -1,39 +1,89 @@
-.tooltip {
+/*
+
+tip.css
+
+Styling of the tips (contextual piece of information)
+
+# Author: Malek Cellier
+# 
+# Email: malek.cellier@gmail.com
+# Created: 2020-03-10
+*/
+
+.tip-left,
+.tip-right,
+.tip-top,
+.tip-bottom
+{
     display: inline;
     position: relative;
 }
 
-.tooltip:hover {
-    color: #c00;
-    text-decoration: none;
-}
-
-.tooltip:hover:after {
-    background: #111;
+.tip-left:hover:after,
+.tip-right:hover:after,
+.tip-top:hover:after,
+.tip-bottom:hover:after
+{
+    position: absolute;
+    display: block;
     background: rgba(0,0,0,.8);
     border-radius: .5em;
-    bottom: 1.35em;
     color: #fff;
-    content: attr(title);
-    display: block;
-    left: 1em;
     padding: .3em 1em;
-    position: absolute;
     text-shadow: 0 1px 0 #000;
     white-space: nowrap;
     z-index: 98;
+    content: attr(tip-text);
 }
 
+.tip-left:hover:after {
+    bottom: -6px; /* since the icon is normally 32x32 */
+    /*left: -32px;*/
+    right: 42px;
+}
+.tip-right:hover:after {
+    bottom: -6px; /* since the icon is normally 32x32 */
+    left: 32px;
+}
+.tip-top:hover:after {
+    bottom: 32px; /* since the icon is normally 32x32 */
+    left: -16px;
+}
+.tip-bottom:hover:after {
+    bottom: -40px; /* since the icon is normally 32x32 */
+    left: -16px;
+}
 
-.tooltip:hover:before {
-    border: solid;
-    border-color: #111 transparent;
-    border-color: rgba(0,0,0,.8) transparent;
-    border-width: .4em .4em 0 .4em;
-    bottom: 1em;
-    content: "";
-    display: block;
-    left: 2em;
+.tip-left:hover:before,
+.tip-right:hover:before,
+.tip-top:hover:before,
+.tip-bottom:hover:before
+{
     position: absolute;
+    display: block;
+    border: 12px solid transparent;    
     z-index: 99;
+    content: "";
+}
+
+.tip-left:hover:before {
+    border-left: 12px solid rgba(0,0,0,.8); /* top right bottom left*/
+    bottom: -2px;
+    /*left: 14px;*/
+    right: 24px;
+}
+.tip-right:hover:before {
+    border-right: 12px solid rgba(0,0,0,.8);
+    bottom: -2px;
+    left: 14px;
+}
+.tip-top:hover:before {
+    border-top: 12px solid rgba(0,0,0,.8);
+    bottom: 14px;
+    left: 0px;
+}
+.tip-bottom:hover:before {
+    border-bottom: 12px solid rgba(0,0,0,.8);
+    bottom: -14px;
+    left: 0px;
 }

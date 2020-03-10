@@ -95,9 +95,11 @@ function Panel(opts) {
     
     // 1.2.1) the close button is OPTIONAL
     if (closable === true) {
-        let close = _el({type: 'div', classes: ['panel-close']});
+        //let close = _el({type: 'div', classes: ['panel-close']});
+        // New version with the new svg handling
+        let close = SvgIcon.new({icon: 'close'});
         controls.appendChild(close);
-        close.appendChild(createSvg('close'));
+        //close.appendChild(SvgIcon.new({icon: 'close'}));
         close.onclick = (evt) => {
             evt.target.parentElement.parentElement.nextElementSibling.classList.toggle('hidden');
         };
@@ -118,8 +120,8 @@ function IconsShowCase() {
     div.style['flex-direction'] = 'row';
     div.style['flex-wrap'] = 'wrap';
     div.style['justify-content'] = 'space-evenly';
-    div.style.width = '600px';
-    div.style.height = '600px';
+    //div.style.width = '600px';
+    //div.style.height = '600px';
     div.style.padding = '20px';
     div.style.position = 'absolute';
     div.style.top = '100px';
@@ -130,13 +132,12 @@ function IconsShowCase() {
     let icons = SvgIcon.getList();;
 
     for (let i=0; i<icons.length; i++) {
-        let icon_name = icons[i];
-        let span = document.createElement('span');
-        span.innerText = icon_name;
-        
-        let svgIcon = SvgIcon.new({icon: icon_name});
-        svgIcon.appendChild(span);
+        // Shuffle the positions just to test
+        let pos = ['top', 'bottom', 'left', 'right'];
+        let j = Math.round(Math.random() * (pos.length-1));
 
+        let svgIcon = SvgIcon.new({icon: icons[i], tip_pos: `tip-${pos[j]}`});
+        svgIcon.style['padding-right'] = '10px';
         div.appendChild(svgIcon);
     }
     

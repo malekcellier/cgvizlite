@@ -43,14 +43,16 @@ SvgIcon.new = function (opts) {
      * Creates a new div containing a SVG Icon
      * 
      * opts: json object with fields:
-     *  - icon: string with the name of the icon
-     *  - attr: json object containing {attribute: value} for the SVG customization
+     *  - icon: string, the name of the icon
+     *  - attrs: json object containing {attribute: value} for the SVG customization
+     *  - tip_pos: string, position of the tooltip
      * 
      */
     // Default values handling
     opts = opts || {};
     opts.icon = opts.icon || 'close';
     opts.attrs = opts.attrs || {};
+    opts.tip_pos = opts.tip_pos || 'bottom';
 
     let svgIcon = document.createElement('div');
     svgIcon.classList.add('svg-icon');
@@ -65,6 +67,10 @@ SvgIcon.new = function (opts) {
             svg.setAttribute(attr, value);
         }
     }
+    // add tooltip
+    svgIcon.classList.add(opts.tip_pos);
+
+    svgIcon.setAttribute('tip-text', opts.icon);
 
     return svgIcon;
 };
