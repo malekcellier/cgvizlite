@@ -704,8 +704,7 @@ div.current-tab {
 
 .modal-content {
     background-color: #fefefe;
-    margin: 50px auto; /* 15% from the top and centered */
-    /*padding: 20px;*/
+    margin: 50px auto;
     border: 1px solid #888;
     width: 700px;
     height: 700px;
@@ -716,6 +715,18 @@ div.current-tab {
     justify-content: space-between;
     align-items: stretch;
     */
+}
+
+.modal-legend-content {
+    position: absolute;
+    /*background-color: #fefefe;*/
+    right: 220px;
+    top: 143px;
+    /*padding: 20px;
+    border: 1px solid #888;*/
+    width: 300px;
+    height: 500px;
+    box-shadow: 0 5px 8px 0 rgba(0,0,0,0.2), 0 7px 20px 0 rgba(0,0,0,0.2);    
 }
 
 .modal-header {
@@ -829,6 +840,10 @@ ul {
     float: right;
     font-size: 28px;
     font-weight: bold;
+}
+
+.close-button.small {
+    font-size: 12px;
 }
 
 .close-button:hover, .close-button:focus {
@@ -1004,17 +1019,25 @@ ul {
     font-weight: 500;
 }
 
-#legend-head {
+#legend-head, #legend-settings .head {
     background-color: #29323c;
     height: 42px;
     padding: 12px;
-    color:rgb(240, 240, 240);    
     color:rgb(106, 116, 133);    
+    color:rgb(240, 240, 240);    
     font-size: 14px;    
-    font-weight: 400;    
+    font-weight: 900;
 }
 
-#legend-body {
+#legend-settings .head {
+    color:rgb(190, 190, 190);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 60px;
+}
+
+#legend-body, #legend-settings .body {
     padding: 12px;
     background-color: #242730;
 }
@@ -1031,7 +1054,47 @@ ul {
 .clrmap-item-div {
     display: flex;
     flex-direction: row;
+}
 
+.clrmap-item-div svg {
+    margin: 0px;    
+    margin-top: 5px;    
+}
+
+.clrmap-body.hidden {
+    display: none;
+}
+
+.clrmap-head {
+    color: rgb(240, 240, 240);
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    justify-content: space-between;
+}
+
+.clrmap-head-text {
+    /*width: 80px;*/
+    padding-top: 2px;
+}
+
+.clrmap-head-icons {
+    margin: 0px;
+    padding: 0px;
+    display: flex;
+}
+
+.clrmap-head-icons svg {
+    color:rgb(160, 167, 180);  
+    color:rgb(190, 190, 190);  
+}
+
+.clrmap-text {
+    color: rgb(200, 200, 200);
+    font-size: 11px;
+    font-weight: 900;
+    height: 15px;
+    padding-left: 10px;
 }
 
 /* Preparing the tooltips*/

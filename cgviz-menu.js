@@ -837,7 +837,7 @@ class CgVizMenu {
 
     createPanel() {
         /**
-         * The Panel has container which in turn has:
+         * The Panel has a container which in turn has:
          *  the info icon 
          *      => provides desciption about the current scene
          *      => should be updated each time a new scenario is selected
@@ -864,13 +864,23 @@ class CgVizMenu {
         svg_dual.setAttribute('width', '20px');
         dual.appendChild(svg_dual);
         panel.appendChild(dual);
+        
+        let threed = _el('div', 'panel-3d-toggle', ['panel-icon']);
+        let svg_threed = this.createSvg('cube-3d');
+        svg_threed.setAttribute('height', '20px');
+        svg_threed.setAttribute('width', '20px');
+        threed.appendChild(svg_threed);
+        panel.appendChild(threed);
 
         let legend = _el('div', 'panel-legend', ['panel-icon']);
         let svg_legend = this.createSvg('legend');
         svg_legend.setAttribute('height', '22px');
         svg_legend.setAttribute('width', '22px');        
         legend.appendChild(svg_legend);
-        legend.addEventListener('click', (evt) => {evt.target.classList.toggle('clicked');evt.target.querySelector('#legend-container').classList.toggle('hidden');});
+        legend.addEventListener('click', (evt) => {
+            evt.target.classList.toggle('clicked');
+            evt.target.querySelector('#legend-container').classList.toggle('hidden');
+        });
         legend.appendChild(this.createLegend());
         panel.appendChild(legend);
 
@@ -886,7 +896,7 @@ class CgVizMenu {
         let container = _el('div', 'legend-container', ['hidden']);
 
         let head = _el('div', 'legend-head');
-        head.innerText = 'Legend';
+        head.innerText = 'Legends';
         container.appendChild(head);
 
         let body = _el('div', 'legend-body');
@@ -912,6 +922,7 @@ class CgVizMenu {
     _addLegendSet(scenarioName, kpiName, n_colors, scheme) {
         /**
          * REPLACES _createLegendSet
+         * NOTE: should be renamed to DiscreteColorBar
          * Adds a legend set to the legend menu, depending on:
          *  - the scenario name
          *  - the kpi name
@@ -921,14 +932,84 @@ class CgVizMenu {
          * 
          * Note: the id of the Tx does not impact the legend set
          */
+
+        let units = {
+            Nr: '#',
+            Delay: 'ns',
+            Doppler: 'ns',
+            P: 'dB',
+            Kfactor: 'dB',
+            Rank: '#',
+            AoA0: 'deg',
+            EoA0: 'deg',
+            AoA1: 'deg',
+            EoA1: 'deg'
+        };
+
         let container = document.querySelector('#legend-body');
 
         // The id of the div is a combination of the scenario name and the kpi name
         let name = scenarioName + '__' + kpiName;
-        // Create the set of colors using the n_colors, scheme and name of the kpi
+        // The container for the header and the body (which contains all the colors of the color map (aka discrete colorbar))
         let clrmap = _el('div', name, ['clrmap']);
-        let clrmap_head = _el('div', '', ['clrmap-head']);
+        
+        // HEAD
+        // The head should include:
+        // > An arrow that changes from right to bottom
+        // > A label for the kpi name
+        // > A settings wheel to open a submenu with:
+        //      - the colorscheme: possibly with dropdown with the actual colors
+        //      - the number of colors: up to 20 depending on the colorscheme
+        //      - the order of colors: reverse or note        
+        //      - the range to be displayed. This is contained within [min, max]        
+        // Create the set of colors using the n_colors, scheme and name of the kpi
+        let clrmap_head = _el('div', '', ['clrmap-head']);        
+        
+        // The text
+        let cmh_text = _el('div', '', ['clrmap-head-text']);
+        clrmap_head.appendChild(cmh_text);
+        cmh_text.innerText = `${kpiName} [${units[kpiName]}]`;
+        cmh_text.addEventListener('click', (evt) => {
+            evt.stopPropagation();
+            evt.target.parentNode.nextSibling.classList.toggle('hidden');
+        });
+        // The settings icons inside a div
+        let cmh_icons = _el('div', '', ['clrmap-head-icons']);
+        clrmap_head.appendChild(cmh_icons);
+        let cmh_settings = _el('div', '', ['header-svg']);
+        cmh_icons.appendChild(cmh_settings);
+        let svg_settings = this.createSvg('settings');
+        svg_settings.setAttribute('width', '18px');
+        svg_settings.setAttribute('height', '18px');
+        cmh_settings.appendChild(svg_settings);
+        cmh_settings.addEventListener('click', (evt) => {
+            evt.stopPropagation(); // to make sure the parent is not catching the click
+            // Popup a modal with color settings
+            // Note that those should be saved somewhere (init with Spectral and 10 for ex)
+            // then read and modified
+            // needs to be scenario/KPI specific
+            let settings = this.createLegendSettingsPopUp();
+            settings.style.display = 'block';
+            document.body.appendChild(settings);
+        });
+        // The expand icon, dots
+        /*
+        let cmh_dots = _el('div', '', ['header-svg', 'dots']);
+        cmh_icons.appendChild(cmh_dots);
+        cmh_dots.appendChild(this.createSvg('dots'));
+        */
+
+        /*
+        clrmap_head.innerText = `${kpiName} [${units[kpiName]}]`;
+        clrmap_head.addEventListener('click', (evt) => {
+            evt.stopPropagation();
+            evt.target.nextSibling.classList.toggle('hidden');
+        });
+        */        
         clrmap.appendChild(clrmap_head);
+        
+        // BODY
+        // The body with the legends
         let clrmap_body = _el('div', '', ['clrmap-body']);
         clrmap.appendChild(clrmap_body);
         // the range to map
@@ -936,14 +1017,23 @@ class CgVizMenu {
         // NOTE The colorbar is meant to be discrete in this context...but maybe adjustable nonetheles..TODO
         let colors = chroma.scale(scheme).domain([range.min, range.max]).classes(n_colors);
         let values = chroma.limits([range.min, range.max], 'e', n_colors);
-        for (let i=0; i<n_colors; i++) {
+        // In case the values are delays/doppler, convert to ns
+        let scaled_values = []; // to make the values more readable (only for the legend)
+        let scale = 1;
+        if (['Delay', 'Doppler'].includes(kpiName)) {
+            scale = 1e-9;
+        }
+        for (let i=0; i<values.length; i++) {
+            scaled_values[i] = values[i]/scale;
+        }
+        for (let i=n_colors-1; i>=0; i--) {
             let item = _el('div', '', ['clrmap-item-div']);
-            let [r, g, b] = colors(values[i]).rgb();
+            let [r, g, b] = colors(values[i+1]).rgb();
             let svg = this._logoColorBox(r, g, b);
             item.appendChild(svg);
             
             let text = _el('div', '', ['clrmap-text']);
-            text.innerText = `${values[i].toPrecision(4)} to ${values[i+1].toPrecision(4)}`;
+            text.innerText = `${scaled_values[i].toPrecision(4)} to ${scaled_values[i+1].toPrecision(4)}`;
             item.appendChild(text);
     
             clrmap_body.appendChild(item);
@@ -998,6 +1088,93 @@ class CgVizMenu {
         return clrmap;
     }
 
+    createLegendSettingsPopUp() {
+        /**
+         * some input parameters are needed:
+         *  which target was clicked => current color scheme, n_colors, order, range..
+         */
+        let div = _el('div', 'legend-settings', ['modal']);
+
+        // replace by reading the name
+        let kpiName = 'Some KPI';
+
+        let content =  _el('div', '', ['modal-legend-content']);
+        content.appendChild(this._createLegendSettingsHead(kpiName));
+        content.appendChild(this._createLegendSettingsBody());
+        div.appendChild(content);
+        
+
+        return div;
+    }
+
+    _createLegendSettingsHead(kpiName) {
+        let div = _el('div', '', ['head']);
+        
+        // Label
+        let label = _el('div');        
+        label.innerText = `${kpiName}`;
+        div.appendChild(label);
+        let sublabel = _el('div');
+        sublabel.innerText = 'Colorbar settings';
+        sublabel.style = 'font-size: 10px;font-weight: 900;';
+        label.appendChild(sublabel);
+
+        // Close button
+        let close = _el('div');
+        div.appendChild(close);
+        let span = _el('span', '', ['close-button', 'small']);
+        close.appendChild(span);
+        let svg = this.createSvg('close');
+        svg.setAttribute('viewBox', '0 0 64 64');
+        svg.setAttribute('width', '16px');
+        svg.setAttribute('height', '16px');
+        span.appendChild(svg);        
+        span.addEventListener('click', (evt) => {
+            document.body.removeChild(document.querySelector('#legend-settings'));
+        });
+
+        return div;
+    }
+    
+    _createLegendSettingsBody() {        
+        /**
+         * colormap picker: shows current combination
+         *  - color scheme
+         *  - n_colors =>
+         *  - order => switch
+         * range: shows double ended slider with current values
+         *  - min/max slider ()
+         */
+        let div = _el('div', '', ['body']);
+        
+        let csp = this.ColorSchemePicker();
+        div.appendChild(csp);
+        
+        let ds = this.DoubleSlider();
+        div.appendChild(ds);
+
+        return div;
+    }
+
+    ColorSchemePicker() {
+        /**
+         * The colormap picker
+         *  - color scheme
+         *  - n_colors =>
+         *  - order => switch
+         */
+        let div = _el('div');
+        div.innerText = 'ColorPicker';
+        return div;
+    }
+
+    DoubleSlider() {
+        let div = _el('div');
+        div.innerText = 'DoubleSlider';
+
+        return div;
+    }
+
     createModal() {
         /**
          * Handles loading the files and populating the menu-body
@@ -1020,7 +1197,7 @@ class CgVizMenu {
         let div = _el('div', '', ['modal-header']);
         // Close button
         let span = _el('span', '', ['close-button']);
-        let svg = this.createSvg('close');        
+        let svg = this.createSvg('close');
         svg.setAttribute('viewBox', '0 0 64 64');
         svg.setAttribute('width', '32px');
         svg.setAttribute('height', '32px');
@@ -1637,7 +1814,7 @@ class CgVizMenu {
         // - the color data is figured out in the toggleHeatMap function
         // the state of each heatmap from this KPI is known through ids
         // If all are false, remove the legend
-        if (ids.every((v) => {v===false})) {
+        if (ids.every((v) => v===false)) {
             this._removeLegendSet(scenarioName, kpiName);
         } else {
             this._addLegendSet(scenarioName, kpiName, n_colors, scheme);
@@ -1888,6 +2065,9 @@ class CgVizMenu {
                 break;
             case 'switch-off':
                 svg = this._logoSwitchOff();
+                break;
+            case 'cube-3d':
+                svg = this._logoCube3d();
                 break;
         }
 
@@ -2320,19 +2500,35 @@ class CgVizMenu {
         return svg;
     }
 
+    _logoCube3d() {
+        let svg = this._svgTemplate({'width': '22px', 'height': '22px'});
+
+        let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+        path.setAttribute('d', 'M29.2,29.57,9.52,40.93V20a2.81,2.81,0,0,1,1.4-2.43L29.2,7.06Z');
+        svg.appendChild(path);
+        let path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+        path1.setAttribute('d', 'M32.08,34.38l21,10.82L33.4,56.56a2.78,2.78,0,0,1-2.8,0L12.12,45.91Z');
+        svg.appendChild(path1);
+        let path2 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+        path2.setAttribute('d', 'M54.48,20v19.6L34.8,29.49V7.06L53.09,17.61A2.81,2.81,0,0,1,54.48,20Z');
+        svg.appendChild(path2);
+
+        return svg;
+    }
+
     _logoColorBox(r, g, b) {
-        let svg = this._svgTemplate({'view_box': '0 0 40 20', 'width': '40px', 'height': '20px'});  
+        let svg = this._svgTemplate({'view_box': '0 0 30 15', 'width': '30px', 'height': '15px'});  
 
         let rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');            
         rect.setAttribute('x', 0);
         rect.setAttribute('y', 0);
-        rect.setAttribute('width', 40);
-        rect.setAttribute('height', 20);            
+        rect.setAttribute('width', 30);
+        rect.setAttribute('height', 15);            
         //rect.setAttribute('style', 'fill: rgb(' + r + ' ,' + g + ',' + b + ')');
         rect.setAttribute('style', `fill: rgb(${r}, ${g}, ${b})`);
 
         /**
-         * COnsider:
+         * Consider using those tricks:
          *  const r = 192;
             const g = 255;
             const b = 64;

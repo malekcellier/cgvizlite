@@ -864,7 +864,7 @@ class CgVizJs extends ThreejsWrapper {
          __________________________________________________________________________
                                                                                    
            by malek.cellier@gmail.com                                             
-           last updated: 2020-02-21                                                
+           last updated: 2020-03-08                                                
          __________________________________________________________________________`;
 
         console.log(text);
