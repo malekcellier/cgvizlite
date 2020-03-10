@@ -191,8 +191,8 @@ SvgIcon._svgTemplate = function (opts) {
     opts = opts || {};  
     opts.id = opts.id || '';
     opts.view_box = opts.view_box || '0 0 64 64';
-    opts.width = opts.width || '20px';
-    opts.height = opts.height || '20px';
+    //opts.width = opts.width || '100%';
+    opts.height = opts.height || '100%';
     opts.style = opts.style || 'fill: currentcolor';
   
     let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -201,7 +201,7 @@ SvgIcon._svgTemplate = function (opts) {
       svg.setAttribute('id', opts.id);
     }
     svg.setAttribute('viewBox', opts.view_box);
-    svg.setAttribute('width', opts.width);
+    //svg.setAttribute('width', opts.width);
     svg.setAttribute('height', opts.height);
     svg.setAttribute('style', opts.style);
   
@@ -224,7 +224,7 @@ SvgIcon._createInvisibleRect = function () {
 };
 
 SvgIcon._icon_cgviz = function() {    
-    let svg = this._svgTemplate({'width': '32px', 'height': '32px'});
+    let svg = this._svgTemplate();
 
     let circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
     svg.appendChild(circle);
@@ -328,7 +328,7 @@ SvgIcon._icon_share = function() {
   
 SvgIcon._icon_camera = function() {
     // Looks bad...
-    let svg = this._svgTemplate({viewBox: '0 0 96 96'});
+    let svg = this._svgTemplate({view_box: '0 0 96 96'});
     
     let circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
     svg.appendChild(circle);
@@ -376,7 +376,7 @@ SvgIcon._icon_info = function() {
 };
   
 SvgIcon._icon_legend = function() {
-    let svg = this._svgTemplate({'width': '22px', 'height': '22px'});
+    let svg = this._svgTemplate();
         
     let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
     svg.appendChild(path);
@@ -386,7 +386,7 @@ SvgIcon._icon_legend = function() {
 };
   
 SvgIcon._icon_dual = function() {
-    let svg = this._svgTemplate({'width': '18px', 'height': '18px'});
+    let svg = this._svgTemplate();
 
     let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
     svg.appendChild(g);
@@ -434,7 +434,7 @@ SvgIcon._icon_dual = function() {
 };
   
 SvgIcon._icon_add = function() {
-    let svg = this._svgTemplate({'width': '12px', 'height': '12px'});
+    let svg = this._svgTemplate();
     svg.setAttribute('margin-right', '8px');
         
     let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
@@ -445,7 +445,7 @@ SvgIcon._icon_add = function() {
 };
   
 SvgIcon._icon_delete = function() {
-    let svg = this._svgTemplate({'width': '18px', 'height': '18px'});       
+    let svg = this._svgTemplate();
 
     let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
     svg.appendChild(path);
@@ -475,18 +475,8 @@ SvgIcon._icon_close = function () {
     return svg;
 };
 
-SvgIcon._icon_close_bis = function() {
-    let svg = this._svgTemplate();       
-
-    let path = document.createElementNS("http://www.w3.org/2000/svg", 'path'); 
-    svg.appendChild(path);        
-    path.setAttribute('d', 'M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z');
-    
-    return svg;
-};
-  
 SvgIcon._icon_reduce = function() {
-    let svg = this._svgTemplate({'width': '16px', 'height': '16px'});  
+    let svg = this._svgTemplate();
 
     let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
     svg.appendChild(g);
@@ -505,7 +495,7 @@ SvgIcon._icon_reduce = function() {
 };
   
 SvgIcon._icon_down = function() {
-    let svg = this._svgTemplate({'width': '18px', 'height': '18px'});       
+    let svg = this._svgTemplate();
 
     let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
     svg.appendChild(path)        
@@ -515,7 +505,7 @@ SvgIcon._icon_down = function() {
 };
   
 SvgIcon._icon_dots = function() {
-    let svg = this._svgTemplate({'width': '18px', 'height': '18px'});       
+    let svg = this._svgTemplate();
 
     let rect1 = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
     svg.appendChild(rect1);
@@ -542,7 +532,7 @@ SvgIcon._icon_dots = function() {
 };
   
 SvgIcon._icon_folder = function() {
-    let svg = this._svgTemplate({'viewBox': '0 0 128 128', 'width': '32px', 'height': '32px'});       
+    let svg = this._svgTemplate({'view_box': '0 0 1024 1024'});       
 
     let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
     svg.appendChild(path)        
@@ -552,8 +542,8 @@ SvgIcon._icon_folder = function() {
 };
   
 SvgIcon._icon_show_hide = function() {
-    let svg = this._svgTemplate({'width': '18px', 'height': '12px'});       
-    svg.setAttribute('style', 'transform: rotate(0deg)'); // if starts closed
+    let svg = this._svgTemplate();
+    svg.setAttribute('style', 'transform: rotate(0deg); fill: currentColor'); // if starts closed
 
     let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
     svg.appendChild(path);        
@@ -563,7 +553,7 @@ SvgIcon._icon_show_hide = function() {
 };
   
 SvgIcon._icon_eye_open = function() {
-    let svg = this._svgTemplate({'width': '18px', 'height': '18px'});       
+    let svg = this._svgTemplate();
 
     let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
     svg.appendChild(path);
@@ -577,7 +567,7 @@ SvgIcon._icon_eye_open = function() {
 };
   
 SvgIcon._icon_eye_closed = function() {
-    let svg = this._svgTemplate({'width': '18px', 'height': '18px'});       
+    let svg = this._svgTemplate();
 
     let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
     svg.appendChild(path);
@@ -624,8 +614,8 @@ SvgIcon._icon_grab = function() {
 };
   
 SvgIcon._icon_switch_on = function() {
-    let svg = this._svgTemplate({'width': '32px', 'height': '32px', 'view_box': '0 0 330 330'});
-    svg.setAttribute('style', 'enable-background:new 0 0 60 60');
+    let svg = this._svgTemplate({'view_box': '0 0 330 330'});
+    //svg.setAttribute('style', 'enable-background:new 0 0 60 60');
     svg.setAttribute('class', 'ON');
 
     let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -639,8 +629,8 @@ SvgIcon._icon_switch_on = function() {
 };
   
 SvgIcon._icon_switch_off = function() {
-    let svg = this._svgTemplate({'width': '32px', 'height': '32px', 'view_box': '0 0 483.5 483.5'});
-    svg.setAttribute('style', 'enable-background:new 0 0 60 60');
+    let svg = this._svgTemplate({'view_box': '0 0 483.5 483.5'});
+    //svg.setAttribute('style', 'enable-background:new 0 0 60 60');
     svg.setAttribute('class', 'OFF');
 
     let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -654,7 +644,7 @@ SvgIcon._icon_switch_off = function() {
 };
   
 SvgIcon._icon_cube_3d = function() {
-    let svg = this._svgTemplate({'width': '22px', 'height': '22px'});
+    let svg = this._svgTemplate();
 
     let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
     svg.appendChild(path);
