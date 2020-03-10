@@ -1,0 +1,123 @@
+/*
+
+ui.css
+
+Styling of the ui.js component suite
+
+# Author: Malek Cellier
+# 
+# Email: malek.cellier@gmail.com
+# Created: 2020-03-08
+*/
+
+/* CSS Variables */
+:root {
+    /* Surfaces */
+    --color-bg-button: #6a7485; /* buttons */
+    --color-bg-head: #3a4552; /* panel header top - hierarchy L1*/
+    --color-bg-head-darker: #29323c; /* panel header - hierarchy L2 */
+    --color-bg-body: #242730; /* panel body - backgrounds*/
+    --color-bg-lighter: #3a414c; /* ? */
+    --color-bg-darker: #1f2129; /*  */
+    /* Text */
+    --color-txt-bright: rgb(255, 255, 255); /* Title - used with --color-bg-body */
+    --color-txt: rgb(240, 240, 240);  /* Label:hover - used with head/body/lighter */
+    --color-txt-label: rgb(160, 167, 180);   /* label - used with --color-bg-body */
+    --color-txt-sublabel: rgb(106, 116, 133);  /* sublabel - used with --color-bg-head-darker */
+    --color-txt-link: rgb(31, 186, 214);      /* logo - used with --color-bg-head-darker */
+    --color-svg: #6a7485;
+    --color-svg-hover: #fff;
+    /* Specific colors */
+    --color-purple: rgb(143, 47, 191);
+    --color-orange: rgb(192, 108, 132);
+    --color-green: rgb( 84, 122, 130);
+    --color-blue: rgb(  0, 92, 255);
+    --color-melon: rgb(248, 177, 149);
+    --color-cyan: rgb( 62, 172, 168);    
+    /* Colors for some boxes */
+    --color-box-yellow: rgb(248,194,28);
+    --color-box-green: rgb(140,210,205);
+    --color-box-blue: rgb(106, 160, 206);
+    --color-icon: rgb(144, 152, 167);
+  }
+
+
+body {
+    background: var(--color-bg-darker);  
+    padding: 0;
+    margin: 0;
+    font-family: 'Maven Pro', Consolas, Roboto, serif;
+    font-weight: 400;    
+    font-size: 0.875em;    
+    line-height: 1.71429;
+  }
+  
+  /* Panel */
+  
+  .panel {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 200px;
+    padding: 0px;
+    /*border: 1px white solid;*/
+  }
+  
+  .panel.hidden {
+    display: none;
+  }
+  
+  .panel-head {
+    background-color: var(--color-bg-head);
+  }
+  
+  .panel-head .description {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .panel-head .controls {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  .panel-close svg {
+    pointer-events: none;
+  }
+  
+  .panel-close:hover {
+    color: #000;
+    cursor: pointer;
+  }
+  
+  .title {
+    font-size: 14px;
+    color: var(--color-txt-label);
+  }
+  
+  .subtitle {
+    font-size: 10px;
+    color: var(--color-txt-sublabel);
+  }
+  
+  .panel-body {
+    background-color: var(--color-bg-body);
+  }
+  
+  .panel-body.hidden {
+    display: none;
+  }
+  
+/* svg icon */
+.svg-icon {
+  cursor: pointer;
+}
+
+.svg-icon svg{
+  color: var(--color-icon);
+  pointer-events: none;
+}
+
+.svg-icon:hover svg{
+  color: var(--color-txt);
+}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>    	
+    <meta name='viewport' content='initial-scale=1, maximum-scale=1'>
+    <title>ui.js</title>
+    <link rel='shortcut icon' type='image/x-icon' href='misc/favicon_white.ico' />
+    <link  type="text/css" href="vendors/kepler.css" rel="stylesheet"> 
+    <link  type="text/css" href="libs/ui.css" rel="stylesheet"> 
+    <link  type="text/css" href="libs/tooltip.css" rel="stylesheet"> 
+    <script type='text/javascript' src='libs/svgIcon.js'></script>
+    <script type='text/javascript' src='libs/ui.js'></script>
+</head>
+<body>
+    <script type='text/javascript'>
+    // Panel
+        let panel = new Panel({subtitle: 'subtitle'});
+        document.body.appendChild(panel);
+        panel.style.position = 'relative';
+        let body = panel.querySelector('.panel-body');
+        for (let i=0; i<15; i++) {
+            let div = _el({style: 'div'});
+            div.innerText = `Some text ${i}`;
+            body.appendChild(div);
+        }
+    // Panel 2
+        let panel2 = new Panel({subtitle: 'subtitle'});        
+        document.body.appendChild(panel2);
+        panel2.style.position = 'relative';
+        panel2.id = 'panel2';
+        let body2 = panel2.querySelector('.panel-body');
+        for (let i=0; i<11; i++) {
+            let div = _el({style: 'div'});
+            div.innerText = `Some text ${i}`;
+            body2.appendChild(div);
+        }
+    // Icons
+        let icons = new IconsShowCase();
+        document.body.appendChild(icons);
+    </script>
+</body>
+</html>
