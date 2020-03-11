@@ -123,3 +123,7 @@ body {
 .svg-icon:hover svg{
   color: var(--color-txt);
 }
+
+.svg-icon.clicked svg{
+  color: var(--color-txt-bright);
+}

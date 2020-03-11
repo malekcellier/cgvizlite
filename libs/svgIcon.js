@@ -52,7 +52,7 @@ SvgIcon.new = function (opts) {
     opts = opts || {};
     opts.icon = opts.icon || 'close';
     opts.attrs = opts.attrs || {};
-    opts.tip_pos = opts.tip_pos || 'bottom';
+    opts.tip_pos = opts.tip_pos || 'tip-bottom';
 
     let svgIcon = document.createElement('div');
     svgIcon.classList.add('svg-icon');
@@ -69,8 +69,63 @@ SvgIcon.new = function (opts) {
     }
     // add tooltip
     svgIcon.classList.add(opts.tip_pos);
-
+    // add tooltip text
     svgIcon.setAttribute('tip-text', opts.icon);
+    // add click event
+    svgIcon.onclick = (evt) => {
+        evt.target.classList.toggle('clicked');
+        /**
+         * Some icons have special behavior
+         *  - down: becomes up with a 180deg rotation
+         *  - right: becomes down with a 90deg rotation
+         *  - eye-open <-> eye-closed
+         *  - switch-open <-> switch-closed
+         */
+        // NOTE: this function will have to be extended in order to add extra behaviors
+        // See https://stackoverflow.com/questions/9134686/adding-code-to-a-javascript-function-programmatically/54379923#54379923
+        let icon_name = evt.target.attributes['tip-text'].value;
+        if (icon_name === 'down') {
+            if (evt.target.classList.contains('rotated')) {
+                evt.target.classList.remove('rotated');
+                evt.target.querySelector('svg').style.transform = '';
+            } else {
+                evt.target.classList.add('rotated');
+                evt.target.querySelector('svg').style.transform = 'rotate(180deg)';
+            }
+        } else if (icon_name === 'show_hide') {
+            if (evt.target.classList.contains('rotated')) {
+                evt.target.classList.remove('rotated');
+                evt.target.querySelector('svg').style.transform = '';
+            } else {
+                evt.target.classList.add('rotated');
+                evt.target.querySelector('svg').style.transform = 'rotate(180deg)';
+            }
+        } else if (icon_name === 'eye_open') {
+            evt.target.removeChild(evt.target.querySelector('svg'));
+            evt.target.appendChild(this._get('eye_closed'));
+            evt.target.setAttribute('tip-text', 'eye_closed');
+        } else if (icon_name === 'eye_closed') {
+            evt.target.removeChild(evt.target.querySelector('svg'));
+            evt.target.appendChild(this._get('eye_open'));
+            evt.target.setAttribute('tip-text', 'eye_open');
+        } else if (icon_name === 'switch_on') {
+            evt.target.removeChild(evt.target.querySelector('svg'));
+            evt.target.appendChild(this._get('switch_off'));
+            evt.target.setAttribute('tip-text', 'switch_off');
+        } else if (icon_name === 'switch_off') {
+            evt.target.removeChild(evt.target.querySelector('svg'));
+            evt.target.appendChild(this._get('switch_on'));
+            evt.target.setAttribute('tip-text', 'switch_on');
+        } else if (icon_name === '2d') {
+            evt.target.removeChild(evt.target.querySelector('svg'));
+            evt.target.appendChild(this._get('3d'));
+            evt.target.setAttribute('tip-text', '3d');
+        } else if (icon_name === '3d') {
+            evt.target.removeChild(evt.target.querySelector('svg'));
+            evt.target.appendChild(this._get('2d'));
+            evt.target.setAttribute('tip-text', '2d');
+        }
+    };
 
     return svgIcon;
 };
@@ -543,7 +598,7 @@ SvgIcon._icon_folder = function() {
   
 SvgIcon._icon_show_hide = function() {
     let svg = this._svgTemplate();
-    svg.setAttribute('style', 'transform: rotate(0deg); fill: currentColor'); // if starts closed
+    svg.setAttribute('style', 'fill: currentColor'); // if starts closed
 
     let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
     svg.appendChild(path);        
@@ -660,3 +715,35 @@ SvgIcon._icon_cube_3d = function() {
 
     return svg;
 };
+
+SvgIcon._icon_2d = function () {
+    /**
+     * sizing the font is tough: http://xahlee.info/js/svg_font_size.html
+     */
+    let svg = this._svgTemplate({'view_box': '0 0 32 16'});
+
+    let txt = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+    svg.appendChild(txt);
+    txt.setAttribute('x', '0');
+    txt.setAttribute('y', '12');
+    txt.setAttribute('style','font-family: Consolas; font-weight: 900; fill: currentColor;');
+    txt.textContent = '2D';
+
+    return svg;
+}
+
+SvgIcon._icon_3d = function () {
+    /**
+     * sizing the font is tough: http://xahlee.info/js/svg_font_size.html
+     */
+    let svg = this._svgTemplate({'view_box': '0 0 32 16'});
+
+    let txt = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+    svg.appendChild(txt);
+    txt.setAttribute('x', '0');
+    txt.setAttribute('y', '12');
+    txt.setAttribute('style','font-family: Consolas; font-weight: 900; fill: currentColor;');
+    txt.textContent = '3D';
+
+    return svg;
+}
