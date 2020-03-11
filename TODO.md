@@ -129,10 +129,26 @@ Scene organization and Naming convention:
 
 2020-03-08
 -----------
-- [ ] decouple view from model (for ex, the css contains references to pov and other model elements. INstead, a set of widgets should be defined and used for the relevant parts. That's the same idea I have had for a while: defining a hierarchy of component. This will simplify the css as well as the building of the spa)
+- [ ] decouple view from model (for ex, the css contains references to pov and other model elements. Instead, a set of widgets should be defined and used for the relevant parts. That's the same idea I have had for a while: defining a hierarchy of component. This will simplify the css as well as the building of the spa)
 - [ ] labels rendering seems slow (higher than normal CUP usage even in the absence of interaction)
 - [ ] make legend and legend settings height relative to the window height 
 
 2020-03-09
 ----------
 - [ ] add the name of the currently visible heatmap somewhere visible on the canvas
+
+2020-03-10
+----------
+- [X] create test home page to show and test the ui components
+- [X] refactor svg icon code to make it independent
+- [X] implement tooltips for icons
+
+2020-03-11
+----------
+- [X] make icon change color on click 
+- [X] make icon change shape on click 
+    - [X] down/up
+    - [X] switch-on/switch-off
+    - [X] 3d/2d
+- [ ] implement method to extend any function (to be used to avoid repeating code in the eventListeners)
+- [X] create a demo page to showcase and test the ui components

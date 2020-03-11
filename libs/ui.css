@@ -52,61 +52,57 @@ body {
     line-height: 1.71429;
   }
   
-  /* Panel */
-  
-  .panel {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 200px;
-    padding: 0px;
-    /*border: 1px white solid;*/
-  }
-  
-  .panel.hidden {
-    display: none;
-  }
-  
-  .panel-head {
-    background-color: var(--color-bg-head);
-  }
-  
-  .panel-head .description {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .panel-head .controls {
-    display: flex;
-    flex-direction: row;
-  }
-  
-  .panel-close svg {
-    pointer-events: none;
-  }
-  
-  .panel-close:hover {
-    color: #000;
-    cursor: pointer;
-  }
-  
-  .title {
-    font-size: 14px;
-    color: var(--color-txt-label);
-  }
-  
-  .subtitle {
-    font-size: 10px;
-    color: var(--color-txt-sublabel);
-  }
-  
-  .panel-body {
-    background-color: var(--color-bg-body);
-  }
-  
-  .panel-body.hidden {
-    display: none;
-  }
+/* Panel */
+
+.panel {
+  position: relative; /*absolute;*/
+  top: 0px;
+  left: 0px;
+  width: 200px;
+  padding: 0px;
+  /*border: 1px white solid;*/
+}
+
+.panel.hidden {
+  display: none;
+}
+
+.panel-head {
+  background-color: var(--color-bg-head);
+  flex-wrap: wrap; /* to make sure the .controls.before stays at 0 when empty*/
+}
+
+.panel-head .description {
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-head .controls {
+  display: flex;
+  flex-direction: row;
+}
+
+.controls.before {
+  flex-basis: 100%; /* to make sure the .controls.before stays at 0 when empty*/
+}
+
+.title {
+  font-size: 14px;
+  color: var(--color-txt-label);
+}
+
+.subtitle {
+  font-size: 10px;
+  color: var(--color-txt-sublabel);
+}
+
+.panel-body {
+  background-color: var(--color-bg-body);
+}
+
+.panel-body.hidden {
+  display: none;
+}
   
 /* svg icon */
 .svg-icon {
