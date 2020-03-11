@@ -10,24 +10,12 @@ Html menu items and widgets
 # Created: 2020-03-08
 */
 
-// Base class
-// does seem like an overkill. Maybe use as a container. IE all objects are methods of the class.
-/*
-class UI {
-    constructor(opts) {
-        this.opts = opts || {};
-
-    }
-
-    Panel(opts) {}
-
-}
-*/
+let UI = {};
 
 // Widgets
 
 // Panel
-function Panel(opts) {
+UI.Panel = function (opts) {
     /**
      * Creates a Panel component with optional elements
      * 
@@ -51,22 +39,22 @@ function Panel(opts) {
      */
     // Default values handling
     opts = opts || {};
-    let id = opts.id || '';
-    let classes = opts.id || [];
-    let title = opts.title || 'Panel Title';
-    let subtitle = opts.subtitle || 'Panel subtitle';
-    let closable = opts.closable || false;
+    opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
+    opts.title = opts.title || 'Panel Title';
+    opts.subtitle = opts.subtitle || 'Panel subtitle';
+    opts.closable = opts.closable || false;
 
     // The Panel is a div
     let panel = _el({type: 'div', classes: ['panel']});
     // ID is OPTIONAL
-    if (id !== '') {
-        panel.id = id;
+    if (opts.id !== '') {
+        panel.id = opts.id;
     }
     // Classes array is OPTIONAL
-    if (classes.length > 0) {
-        for (let i=0; i<classes.length; i++) {
-            panel.classList.add(classes[i]);
+    if (opts.classes.length > 0) {
+        for (let i=0; i<opts.classes.length; i++) {
+            panel.classList.add(opts.classes[i]);
         }
     }
 
@@ -86,25 +74,31 @@ function Panel(opts) {
     let desc = _el({type: 'div', classes: ['description']});
     head.appendChild(desc);
     // 1.1.1) the title
-    let title_ = _el({type: 'div', classes: ['title']});
-    title_.innerText = title;
-    desc.appendChild(title_);
+    let title = _el({type: 'div', classes: ['title']});
+    desc.appendChild(title);
+    title.innerText = opts.title;
+    title.onclick = (evt) => {
+        evt.target.parentElement.parentElement.nextElementSibling.classList.toggle('hidden');
+    };
     // 1.1.2) the sublabel is OPTIONAL
-    if (subtitle !== '') {
-        let subtitle_ = _el({type: 'div', classes: ['subtitle']});
-        subtitle_.innerText = subtitle;
-        desc.appendChild(subtitle_);
+    if (opts.subtitle !== '') {
+        let subtitle = _el({type: 'div', classes: ['subtitle']});
+        subtitle.innerText = opts.subtitle;
+        desc.appendChild(subtitle);
     }
 
     // 1.2) the controls (on the right hand side)
     let controls = _el({type: 'div', classes: ['controls', 'after']});
     head.appendChild(controls);    
     // 1.2.1) the close button is OPTIONAL
-    if (closable === true) {
+    // TODO: should it be hidden or removed when the x is clicked?
+    if (opts.closable === true) {
         let close = SvgIcon.new({icon: 'close'});
         controls.appendChild(close);
         close.onclick = (evt) => {
-            evt.target.parentElement.parentElement.nextElementSibling.classList.toggle('hidden');
+            //evt.target.parentElement.parentElement.nextElementSibling.classList.toggle('hidden');
+            let panel = evt.target.parentElement.parentElement.parentElement;
+            panel.parentElement.removeChild(panel);
         };
     }
     
@@ -117,14 +111,15 @@ function Panel(opts) {
     return panel;
 }
 
-function Demo() {
+UI.Demo = function () {
     /**
      * Simple component to demo the ui
      * 
      * Structure:
      *  - lefthand side for the list of components
-     *  - righthan side for the components
+     *  - righthand side for the components
      * 
+     * Components
      *  - Panels:
      *      - simple
      *      - level_1
@@ -148,24 +143,16 @@ function Demo() {
     return demo;
 }
 
-function IconsShowCase() {
+UI.IconsShowCase = function () {
     /**
-     * Just to see them
+     * Shows all the implemented icons
      */
     let div = _el({type: 'div', id: 'icon-demo', classes: ['icons']});
     div.style.display = 'flex';
     div.style['flex-direction'] = 'row';
     div.style['flex-wrap'] = 'wrap';
-    div.style['justify-content'] = 'space-evenly';
     div.style['justify-content'] = 'flex-start';
-    //div.style.width = '600px';
-    //div.style.height = '600px';
     div.style.padding = '20px';
-    /*
-    div.style.position = 'absolute';
-    div.style.top = '100px';
-    div.style.left = '400px';
-    */
     div.style['background-color'] = 'var(--color-bg-body)';
     div.style.border = '1px white solid';
 
@@ -184,9 +171,8 @@ function IconsShowCase() {
     return div;
 }
 
-
 // Header
-function Header(opts) {
+UI.Header = function (opts) {
     /**
      * Creates a header menu with options
      * 

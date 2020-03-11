@@ -60,7 +60,7 @@
 <body>
     <script type='text/javascript'>
         // 0) Menu to show/hide the elements of the demo
-        let demo = new Demo();
+        let demo = new UI.Demo();
         document.body.appendChild(demo);
 
         // shorthand for the parts
@@ -69,13 +69,13 @@
 
         // 1) Simple Panel
         let s_panel = _el({type: 'div', classes: ['demo-item']});
-        s_panel.innerText = 'Panel';
+        s_panel.innerText = 'panel';
         menu.appendChild(s_panel);
         s_panel.onclick = (evt) => {
             evt.target.classList.toggle('clicked');
             let el_panel = components.querySelector('#panel_1');
             if (el_panel === null) {
-                el_panel = new Panel({id: 'panel_1', subtitle: 'subtitle', closable: true});
+                el_panel = new UI.Panel({id: 'panel_1', subtitle: 'subtitle', closable: true});
                 // Add data to the panel
                 let body = el_panel.querySelector('.panel-body');
                 for (let i=0; i<15; i++) {
@@ -97,40 +97,13 @@
             evt.target.classList.toggle('clicked');
             let el_icons = components.querySelector('#icon-demo');
             if (el_icons === null) {
-                el_icons = new IconsShowCase();
+                el_icons = new UI.IconsShowCase();
                 components.appendChild(el_icons);
             } else {
                 components.removeChild(el_icons);
             }
         };
 
-        /*
-        // Panel
-        let panel = new Panel({subtitle: 'subtitle', closable: true});
-        document.body.appendChild(panel);
-        panel.style.position = 'relative';
-        let body = panel.querySelector('.panel-body');
-        for (let i=0; i<15; i++) {
-            let div = _el({style: 'div'});
-            div.innerText = `Some text ${i}`;
-            body.appendChild(div);
-        }
-        
-        // Panel 2
-        let panel2 = new Panel({id: 'panel2', subtitle: 'subtitle'});        
-        document.body.appendChild(panel2);
-        panel2.style.position = 'relative';
-        let body2 = panel2.querySelector('.panel-body');
-        for (let i=0; i<11; i++) {
-            let div = _el({style: 'div'});
-            div.innerText = `Some text ${i}`;
-            body2.appendChild(div);
-        }
-        
-        // Icons
-        let icons = new IconsShowCase();
-        document.body.appendChild(icons);
-        */
     </script>
 </body>
 </html>
