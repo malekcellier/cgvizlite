@@ -9,6 +9,7 @@
     <link  type="text/css" href="vendors/kepler.css" rel="stylesheet"> 
     <link  type="text/css" href="libs/ui.css" rel="stylesheet"> 
     <link  type="text/css" href="libs/tooltip.css" rel="stylesheet"> 
+    <script type='text/javascript' src='vendors/chroma.min.js'></script>
     <script type='text/javascript' src='libs/utils.js'></script>
     <script type='text/javascript' src='libs/svgIcon.js'></script>
     <script type='text/javascript' src='libs/ui.js'></script>
@@ -75,7 +76,7 @@
             evt.target.classList.toggle('clicked');
             let el_panel = components.querySelector('#panel_1');
             if (el_panel === null) {
-                el_panel = new UI.Panel({id: 'panel_1', subtitle: 'subtitle', closable: true});
+                el_panel = new UI.Panel({id: 'panel_1', closable: true});
                 // Add data to the panel
                 let body = el_panel.querySelector('.panel-body');
                 for (let i=0; i<15; i++) {
@@ -103,6 +104,29 @@
                 components.removeChild(el_icons);
             }
         };
+
+        // 3) Colorbar
+        let s_cbar = _el({type: 'div', classes: ['demo-item']});
+        s_cbar.innerText = 'colorbar';
+        menu.appendChild(s_cbar);
+        s_cbar.onclick = (evt) => {
+            evt.target.classList.toggle('clicked');
+            let el_cbar = components.querySelector('.colorbar');
+            if (el_cbar === null) {
+                el_cbar = new UI.DiscreteColorBar({
+                    title: 'Quantity [unit]',
+                    scheme: 'Spectral',
+                    n_colors: 7,
+                    min: -10,
+                    max: 31,
+                    reverse: true
+                });
+                components.appendChild(el_cbar);
+            } else {
+                components.removeChild(el_cbar);
+            }
+        };
+
 
     </script>
 </body>

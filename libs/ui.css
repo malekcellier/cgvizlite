@@ -22,6 +22,7 @@ Styling of the ui.js component suite
     /* Text */
     --color-txt-bright: rgb(255, 255, 255); /* Title - used with --color-bg-body */
     --color-txt: rgb(240, 240, 240);  /* Label:hover - used with head/body/lighter */
+    --color-txt-colormap: rgb(200, 200, 200);  /* legend item */
     --color-txt-label: rgb(160, 167, 180);   /* label - used with --color-bg-body */
     --color-txt-sublabel: rgb(106, 116, 133);  /* sublabel - used with --color-bg-head-darker */
     --color-txt-link: rgb(31, 186, 214);      /* logo - used with --color-bg-head-darker */
@@ -128,4 +129,31 @@ body {
 
 .svg-icon.clicked svg{
   color: var(--color-txt-bright);
+}
+
+.panel.colorbar .panel-head {
+  color: var(--color-txt);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.colormap-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.colormap-item svg {
+  pointer-events: none;
+  padding-top: 6px;
+}
+
+.colormap-item-desc {
+  color: var(--color-txt-colormap);
+  font-size: 11px;
+  font-weight: 900;
+  height: 15px;
+  padding-left: 10px;
+  padding-top: 4px;
 }
