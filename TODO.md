@@ -152,12 +152,14 @@ Scene organization and Naming convention:
     - [X] 3d/2d
 - [ ] implement method to extend any function (to be used to avoid repeating code in the eventListeners)
 - [X] create a demo page to showcase and test the ui components
-- [ ] create ui component: discrete legend (based on colormap)
-- [ ] create ui component: colormap editor
+- [X] create ui component: discrete legend (based on colormap)
+- [X] create ui component: switch (square)?
+- [X] create ui component: checkbox (= label + square_switch)
+    - [X] make switches only one svg + rotation + label update
+- [ ] create ui component: dropdown
 - [ ] create ui component: slider
 - [ ] create ui component: double slider
-- [ ] create ui component: dropdown
-- [ ] create ui component: switch (square)?
-- [ ] create ui component: checkbox
+- [ ] create ui component: colormap editor
+    - [X] create ui component: color-palette
 - [ ] rebuild cgviz-menu using ui.js instead
     - [ ]

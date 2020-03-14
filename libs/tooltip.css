@@ -17,16 +17,18 @@ Styling of the tips (contextual piece of information)
 .tip-left,
 .tip-right,
 .tip-top,
-.tip-bottom
+.tip-bottom,
+.tip-colormap
 {
-    display: inline;
+    /*display: inline;*/
     position: relative;
 }
 
 .tip-left:hover:after,
 .tip-right:hover:after,
 .tip-top:hover:after,
-.tip-bottom:hover:after
+.tip-bottom:hover:after,
+.tip-colormap:hover:after
 {
     position: absolute;
     display: block;
@@ -55,6 +57,10 @@ Styling of the tips (contextual piece of information)
 .tip-bottom:hover:after {
     bottom: -40px; /* since the icon is normally 32x32 */
     left: -16px;
+}
+.tip-colormap:hover:after {
+    bottom: -36px; /* since the icon is normally 32x32 */
+    right: 42px;
 }
 
 .tip-left:hover:before,

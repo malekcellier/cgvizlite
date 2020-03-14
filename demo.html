@@ -14,25 +14,47 @@
     <script type='text/javascript' src='libs/svgIcon.js'></script>
     <script type='text/javascript' src='libs/ui.js'></script>
     <style>
-        #demo {
+        body, div {
+            box-sizing: border-box;
+        }
+
+        #demo-head {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #demo-title, #demo-subtitle {
+            background-color: var(--color-bg-head);
+            font-size: 24px;
+            color: var(--color-txt-label);
+            /*border: 1px solid var(--color-txt-label);*/
+            margin: 12px 12px 0 12px;
+            text-align: center;
+        }
+
+        #demo-subtitle {
+            font-size: 10px;
+            font-weight: 200;
+            margin-top: 0;
+        }
+
+        #demo-content {
             display: flex;
             flex-direction: row;
             height: 100%;
             width: 95%;
-            padding: 10px
+            /*padding: 12px*/
         }
 
         #demo-menu {
             display: flex;
             flex-direction: column;
             height: 80%;
-            /*width: 100px;*/
-            padding: 10px;
+            padding: 12px;
             flex-grow: 0;
         }
         
         #demo-components {
-            /*flex-grow: 1;*/
             margin: 12px;
         }
 
@@ -41,10 +63,10 @@
         }
 
         .demo-item {
-            color: rgb(180, 180, 180);
-            margin: 5px;
-            padding: 5px;
             border: 1px solid grey;
+            color: rgb(180, 180, 180);
+            margin-bottom: 10px;
+            padding: 5px 5px 5px 15px;
         }
         .demo-item:hover {
             color: rgb(255, 255, 255);
@@ -60,6 +82,7 @@
 </head>
 <body>
     <script type='text/javascript'>
+    // Move all this to UI.Demo
         // 0) Menu to show/hide the elements of the demo
         let demo = new UI.Demo();
         document.body.appendChild(demo);
@@ -111,9 +134,10 @@
         menu.appendChild(s_cbar);
         s_cbar.onclick = (evt) => {
             evt.target.classList.toggle('clicked');
-            let el_cbar = components.querySelector('.colorbar');
+            let el_cbar = components.querySelector('#colorbar-demo');
             if (el_cbar === null) {
                 el_cbar = new UI.DiscreteColorBar({
+                    id: 'colorbar-demo',
                     title: 'Quantity [unit]',
                     scheme: 'Spectral',
                     n_colors: 7,
@@ -127,6 +151,96 @@
             }
         };
 
+        // 4 DropDown
+        let s_ddown = _el({type: 'div', classes: ['demo-item']}); 
+        s_ddown.innerText = 'dropdown';
+        menu.appendChild(s_ddown);
+        s_ddown.onclick = (evt) => {
+            evt.target.classList.toggle('clicked');
+            let el_ddown = components.querySelector('#dropdown-demo');
+            if (el_ddown === null) {
+                el_ddown = new UI.DropDown({id: 'dropdown-demo'});
+                components.appendChild(el_ddown);
+            } else {
+                components.removeChild(el_ddown);
+            }
+        };
+
+        // 4b DropDownBis
+        let s_ddownb = _el({type: 'div', classes: ['demo-item']}); 
+        s_ddownb.innerText = 'dropdown bis';
+        menu.appendChild(s_ddownb);
+        s_ddownb.onclick = (evt) => {
+            evt.target.classList.toggle('clicked');
+            let el_ddownb = components.querySelector('#dropdownbis-demo');
+            if (el_ddownb === null) {
+                el_ddownb = new UI.DropDownBis({id: 'dropdownbis-demo'});
+                components.appendChild(el_ddownb);
+            } else {
+                components.removeChild(el_ddownb);
+            }
+        };
+
+        // 5) Checkbox
+        let s_checkbox = _el({type: 'div', classes: ['demo-item']}); 
+        s_checkbox.innerText = 'checkbox round';
+        menu.appendChild(s_checkbox);
+        s_checkbox.onclick = (evt) => {
+            evt.target.classList.toggle('clicked');
+            let el_cb = components.querySelector('#checkbox-demo');
+            if (el_cb === null) {
+                el_cb = new UI.CheckBox({id: 'checkbox-demo', square: false});
+                components.appendChild(el_cb);
+            } else {
+                components.removeChild(el_cb);
+            }            
+        }
+
+        // 5) Checkbox
+        let s_checkbox_square = _el({type: 'div', classes: ['demo-item']}); 
+        s_checkbox_square.innerText = 'checkbox square';
+        menu.appendChild(s_checkbox_square);
+        s_checkbox_square.onclick = (evt) => {
+            evt.target.classList.toggle('clicked');
+            let el_cbsq = components.querySelector('#checkbox_square-demo');
+            if (el_cbsq === null) {
+                el_cbsq = new UI.CheckBox({id: 'checkbox_square-demo', square: true});
+                components.appendChild(el_cbsq);
+            } else {
+                components.removeChild(el_cbsq);
+            }            
+        }
+
+        // 6) Slider
+        let s_slider = _el({type: 'div', classes: ['demo-item']}); 
+        s_slider.innerText = 'slider';
+        menu.appendChild(s_slider);
+        s_slider.onclick = (evt) => {
+            evt.target.classList.toggle('clicked');
+            let el_slider = components.querySelector('#slider-demo');
+            if (el_slider === null) {
+                el_slider = new UI.Slider({id: 'slider-demo', value: 33});
+                components.appendChild(el_slider);
+            } else {
+                components.removeChild(el_slider);
+            }              
+        }
+
+        // 7) Double Slider
+        let s_dslider = _el({type: 'div', classes: ['demo-item']}); 
+        s_dslider.innerText = 'double slider';
+        menu.appendChild(s_dslider);
+        s_dslider.onclick = (evt) => {
+            alert(`${evt.target.innerText}: not implemented yet`);
+        }
+
+        // 8) Header
+        let s_header = _el({type: 'div', classes: ['demo-item']}); 
+        s_header.innerText = 'header';
+        menu.appendChild(s_header);
+        s_header.onclick = (evt) => {
+            alert(`${evt.target.innerText}: not implemented yet`);
+        }
 
     </script>
 </body>

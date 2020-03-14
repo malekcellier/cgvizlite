@@ -17,7 +17,7 @@ Styling of the ui.js component suite
     --color-bg-head: #3a4552; /* panel header top - hierarchy L1*/
     --color-bg-head-darker: #29323c; /* panel header - hierarchy L2 */
     --color-bg-body: #242730; /* panel body - backgrounds*/
-    --color-bg-lighter: #3a414c; /* ? */
+    --color-bg-lighter: #3a414c; /* Dropdown focused - used with  --color-txt-label*/
     --color-bg-darker: #1f2129; /*  */
     /* Text */
     --color-txt-bright: rgb(255, 255, 255); /* Title - used with --color-bg-body */
@@ -50,9 +50,13 @@ body {
     font-family: Consolas, 'Maven Pro', Consolas, Roboto, serif;
     font-weight: 400;    
     font-size: 0.875em;    
-    line-height: 1.71429;
+    line-height: 1.71429;    
   }
   
+  body, div {
+    box-sizing: border-box;
+  }
+
 /* Panel */
 
 .panel {
@@ -113,6 +117,7 @@ body {
   
 /* svg icon */
 .svg-icon {
+  box-sizing: content-box;
   cursor: pointer;
   height: 22px;
   width: 22px;
@@ -137,23 +142,151 @@ body {
   font-weight: 900;
 }
 
-.colormap-item {
+.colorbar-item {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
 }
 
-.colormap-item svg {
+.colorbar-item svg {
   pointer-events: none;
   padding-top: 6px;
 }
 
-.colormap-item-desc {
+.colorbar-item-desc {
   color: var(--color-txt-colormap);
   font-size: 11px;
   font-weight: 900;
   height: 15px;
   padding-left: 10px;
   padding-top: 4px;
+}
+
+.colorbar-settings .panel-head{
+  background-color: var(--color-bg-body);
+}
+
+.colorbar-settings .panel-body{
+  background-color: var(--color-bg-head-darker);
+}
+
+.dropdown, .dropdown_bis {
+  display: flex;
+  flex-direction: row;  
+  width: 200px;  
+  justify-content: space-between;  
+  background-color: var(--color-bg-head-darker);
+}
+
+.dropdown .subtitle {  
+  padding: 12px;
+  font-size: 14px;
+}
+
+.dropdown-list {
+  padding: 12px;
+  color: var(--color-txt-label);
+  background-color: var(--color-bg-body);
+  cursor: pointer;
+}
+
+.dropdown-list-items.hidden {
+  display: none;
+}
+
+.dropdown-list-selected {
+  background-color: var(--color-bg-body);
+  pointer-events: none;
+}
+
+.dropdown-list:hover {
+  background-color: var(--color-bg-lighter);
+  transition: all 0.4s ease 0s;
+}
+
+.dropdown_bis .label{
+  color: var(--color-txt-sublabel);
+  padding: 12px;
+  font-size: 14px;
+}
+
+.checkbox, .slider {
+  background-color: var(--color-bg-head-darker);
+  width: 200px;
+  width: 100%; /* TODO: all should inherit form a type with a fixed size*/ 
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  color: var(--color-txt-label);
+  font-size: 14px;
+}
+
+.checkbox .label, .checkbox .svg-icon {
+  padding: 12px;
+}
+
+.checkbox .svg-icon.clicked svg{
+  color: var(--color-txt-link);
+  color: var(--color-box-green);
+}
+
+.slider {
+  flex-direction: column;
+}
+
+.slider .top{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 12px;
+  display: flex;
+}
+
+.slider .bottom {
+  padding: 12px;
+}
+
+.color-palette {
+  /*padding: 0px 8px;*/
+}
+
+.colormap {
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  border: 1px solid transparent;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.colormap div[class*='tip-'] {
+  display: block;
+}
+
+.colormap:hover {
+  background-color: var(--color-bg-head);
+  cursor: pointer;
+}
+
+.colormap.selected {
+  border-color: white;
+}
+
+.colormap-inner {
+  height: 10px;
+  border-radius: 2px;
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  justify-content: space-between;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.colormap-item {
+  flex-grow: 1;
+  pointer-events: none;
 }

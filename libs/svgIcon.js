@@ -11,15 +11,13 @@ The flow:
         > creates a div and puts a svg inside
         > the svg is created by calling _getSvg('icon_name')
 
-
-
 # Author: Malek Cellier
 # 
 # Email: malek.cellier@gmail.com
 # Created: 2020-03-10
 */
 
-// Instead of creating a class, we create a namespace
+// We create a namespace instead of a class
 let SvgIcon = {};
 
 SvgIcon.getList = function () {
@@ -84,7 +82,8 @@ SvgIcon.new = function (opts) {
         // NOTE: this function will have to be extended in order to add extra behaviors
         // See https://stackoverflow.com/questions/9134686/adding-code-to-a-javascript-function-programmatically/54379923#54379923
         let icon_name = evt.target.attributes['tip-text'].value;
-        if (icon_name === 'down') {
+        //if (icon_name === 'down' || icon_name === 'switch_square' || icon_name === 'switch_square_rev') {
+        if (['down', 'switch_square', 'switch_square_rev', 'square_switch', 'round_switch'].includes(icon_name)) {
             if (evt.target.classList.contains('rotated')) {
                 evt.target.classList.remove('rotated');
                 evt.target.querySelector('svg').style.transform = '';
@@ -144,99 +143,6 @@ SvgIcon._get = function(name) {
     }
     return svg;
 }
-
-SvgIcon._getSvg_ = function(name) {
-    let svg;
-
-    switch (name) {
-        case 'cgviz':
-            svg = this._icon_CgViz();
-            break;
-        case 'scenarios': 
-            svg = this._icon_Scenarios();
-            svg.classList.add('svg-logo');                
-            break;
-        case 'filters': 
-            svg = this._icon_Filters();
-            svg.classList.add('svg-logo');
-            break;
-        case 'interactions': 
-            svg = this._icon_Interactions();
-            svg.classList.add('svg-logo');
-            break;
-        case 'settings': 
-            svg = this._icon_Settings();
-            svg.classList.add('svg-logo');
-            break;
-        case 'bug': 
-            svg = this._icon_Bug();
-            break;
-        case 'share': 
-            svg = this._icon_Share();
-            break;
-        case 'camera': 
-            svg = this._icon_Camera();
-            break;
-        case 'info': 
-            svg = this._icon_Info();
-            break;
-        case 'legend': 
-            svg = this._icon_Legend();
-            break;
-        case 'dual': 
-            svg = this._icon_Dual();
-            break;
-        case 'add': 
-            svg = this._icon_Add();
-            break;
-        case 'delete': 
-            svg = this._icon_Delete();
-            break;
-        case 'close':
-            svg = this._icon_Close();
-            break;            
-        case 'close-bis': 
-            svg = this._icon_Close_bis();
-            break;
-        case 'reduce': 
-            svg = this._icon_Reduce();
-            break;
-        case 'down': 
-            svg = this._icon_Down();
-            break;
-        case 'dots': 
-            svg = this._icon_Dots();
-            break;
-        case 'folder': 
-            svg = this._icon_Folder();
-            break;
-        case 'show_hide': 
-            svg = this._icon_Show_Hide();
-            svg.setAttribute('id', 'svg-mc');
-            break;
-        case 'eye_open': 
-            svg = this._icon_Eye_Open();
-            break;
-        case 'eye_closed': 
-            svg = this._icon_Eye_Closed();
-            break;
-        case 'grab': 
-            svg = this._icon_Grab();
-            break;
-        case 'switch_on': 
-            svg = this._icon_Switch_On();
-            break;
-        case 'switch_off':
-            svg = this._icon_Switch_Off();
-            break;
-        case 'cube_3d':
-            svg = this._icon_Cube_3d();
-            break;            
-    }
-    svg.appendChild(this._createInvisibleRect());
-
-    return svg;
-};
 
 SvgIcon._svgTemplate = function (opts) {
     /**
@@ -381,19 +287,40 @@ SvgIcon._icon_share = function() {
     return svg;
 };
   
-SvgIcon._icon_camera = function() {
-    // Looks bad...
-    let svg = this._svgTemplate({view_box: '0 0 96 96'});
+SvgIcon._icon_screenshot = function() {    
+    let svg = this._svgTemplate({view_box: '0 0 512 512'});
     
-    let circle = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
-    svg.appendChild(circle);
-    circle.setAttribute('cx', '48');
-    circle.setAttribute('cy', '50.8');
-    circle.setAttribute('r', '38');
-
     let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
     svg.appendChild(path);
-    path.setAttribute('d', 'M39.8,23.3l-5,5.5H26c-3,0-5.5,2.5-5.5,5.5v33c0,3,2.5,5.5,5.5,5.5h44c3,0,5.5-2.5,5.5-5.5v-33c0-3-2.5-5.5-5.5-5.5h-8.7l-5-5.5H39.8z M48,64.5c-7.6,0-13.8-6.2-13.8-13.8S40.4,37,48,37s13.8,6.2,13.8,13.8S55.6,64.5,48,64.5z');        
+    path.setAttribute('d', 'M60,150.5c0,11.046,8.954,20,20,20s20-8.954,20-20v-50h49c11.046,0,20-8.954,20-20s-8.954-20-20-20h-49v-40c0-11.046-8.954-20-20-20s-20,8.954-20,20v40H20c-11.046,0-20,8.954-20,20s8.954,20,20,20h40V150.5z');
+    
+    let path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+    svg.appendChild(path1);
+    path1.setAttribute('d', 'M432,210.5c-11.046,0-20,8.954-20,20v52c0,11.046,8.954,20,20,20c11.046,0,20-8.954,20-20v-52C452,219.454,443.046,210.5,432,210.5z');
+    
+    let path2 = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+    svg.appendChild(path2);
+    path2.setAttribute('d', 'M362,100.5h10c22.056,0,40,17.944,40,40v10c0,11.046,8.954,20,20,20c11.046,0,20-8.954,20-20v-10c0-44.112-35.888-80-80-80h-10c-11.046,0-20,8.954-20,20S350.954,100.5,362,100.5z');
+    
+    let path3 = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+    svg.appendChild(path3);
+    path3.setAttribute('d', 'M80,210.5c-11.046,0-20,8.954-20,20v52c0,11.046,8.954,20,20,20s20-8.954,20-20v-52C100,219.454,91.046,210.5,80,210.5z');
+    
+    let path4 = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+    svg.appendChild(path4);
+    path4.setAttribute('d', 'M150,411.5h-10c-22.056,0-40-17.944-40-40v-9c0-11.046-8.954-20-20-20s-20,8.954-20,20v9c0,44.112,35.888,80,80,80h10c11.046,0,20-8.954,20-20C170,420.454,161.046,411.5,150,411.5z');
+    
+    let path5 = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+    svg.appendChild(path5);
+    path5.setAttribute('d', 'M492,411.5h-40v-49c0-11.046-8.954-20-20-20c-11.046,0-20,8.954-20,20v49h-50c-11.046,0-20,8.954-20,20c0,11.046,8.954,20,20,20h50v40c0,11.046,8.954,20,20,20c11.046,0,20-8.954,20-20v-40h40c11.046,0,20-8.954,20-20C512,420.454,503.046,411.5,492,411.5z');
+    
+    let path6 = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+    svg.appendChild(path6);
+    path6.setAttribute('d', 'M282,60.5h-52c-11.046,0-20,8.954-20,20s8.954,20,20,20h52c11.046,0,20-8.954,20-20S293.046,60.5,282,60.5z');
+    
+    let path7 = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+    svg.appendChild(path7);
+    path7.setAttribute('d', 'M282,411.5h-52c-11.046,0-20,8.954-20,20c0,11.046,8.954,20,20,20h52c11.046,0,20-8.954,20-20C302,420.454,293.046,411.5,282,411.5z');
 
     return svg;
 };
@@ -440,7 +367,7 @@ SvgIcon._icon_legend = function() {
     return svg;
 };
   
-SvgIcon._icon_dual = function() {
+SvgIcon._icon_dual_canvas = function() {
     let svg = this._svgTemplate();
 
     let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -670,7 +597,6 @@ SvgIcon._icon_grab = function() {
   
 SvgIcon._icon_switch_on = function() {
     let svg = this._svgTemplate({'view_box': '0 0 330 330'});
-    //svg.setAttribute('style', 'enable-background:new 0 0 60 60');
     svg.setAttribute('class', 'ON');
 
     let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -698,6 +624,97 @@ SvgIcon._icon_switch_off = function() {
     return svg;
 };
   
+SvgIcon._icon_round_switch = function() {
+    let svg = this._svgTemplate({'view_box': '0 0 483.5 483.5'});
+
+    let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    svg.appendChild(g);
+    
+    let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+    g.appendChild(path);
+    path.setAttribute('d', 'M354.75,113h-227.5C56.946,113.827,0,171.258,0,241.75s56.946,127.923,127.25,128.731c0,0.019,227.5,0.019,227.5,0.019c70.993,0,128.75-57.757,128.75-128.75S425.743,113,354.75,113z M128.75,340.5C74.299,340.5,30,296.201,30,241.75S74.299,143,128.75,143s98.75,44.299,98.75,98.75S183.201,340.5,128.75,340.5z');
+
+    return svg;
+};
+
+SvgIcon._icon_square_switch = function() {
+    let svg = this._svgTemplate({'view_box': '0 0 1000 1000'});
+
+    let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    svg.appendChild(g);
+    
+    let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+    g.appendChild(path);
+    path.setAttribute('d', 'M928.8,224.4H71.3c-33.8,0-61.3,27.4-61.3,61.3v428.8c0,33.8,27.4,61.3,61.3,61.3h857.5c33.8,0,61.3-27.4,61.3-61.3V285.6C990,251.8,962.6,224.4,928.8,224.4z M944.1,683.8c0,33.8-12.1,45.9-45.9,45.9H101.9c-33.8,0-45.9-12.1-45.9-45.9V316.3c0-33.8,12.1-45.9,45.9-45.9h796.3c33.8,0,45.9,12.1,45.9,45.9V683.8z');
+    
+    let path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+    g.appendChild(path1);
+    path1.setAttribute('d', 'M423.4,300.9H147.8c-33.8,0-61.3,27.4-61.3,61.3v275.6c0,33.8,27.4,61.3,61.3,61.3h275.6c33.8,0,61.3-27.4,61.3-61.3V362.2C484.7,328.4,457.3,300.9,423.4,300.9z');
+
+    return svg;   
+};
+
+SvgIcon._icon_switch_square = function() {
+    let svg = this._svgTemplate({'view_box': '0 0 1000 1000'});
+
+    let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    svg.appendChild(g);
+    
+    let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+    g.appendChild(path);
+    path.setAttribute('d', 'M928.8,224.4H71.3c-33.8,0-61.3,27.4-61.3,61.3v428.8c0,33.8,27.4,61.3,61.3,61.3h857.5c33.8,0,61.3-27.4,61.3-61.3V285.6C990,251.8,962.6,224.4,928.8,224.4z M944.1,683.8c0,33.8-12.1,45.9-45.9,45.9H101.9c-33.8,0-45.9-12.1-45.9-45.9V316.3c0-33.8,12.1-45.9,45.9-45.9h796.3c33.8,0,45.9,12.1,45.9,45.9V683.8z');
+    
+    let path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+    g.appendChild(path1);
+    path1.setAttribute('d', 'M423.4,300.9H147.8c-33.8,0-61.3,27.4-61.3,61.3v275.6c0,33.8,27.4,61.3,61.3,61.3h275.6c33.8,0,61.3-27.4,61.3-61.3V362.2C484.7,328.4,457.3,300.9,423.4,300.9z');
+
+    return svg;   
+};
+
+SvgIcon._icon_switch_square_rev = function() {
+    /**
+     * Reverse the switch_square
+     * 
+     * Embed the paths within a mask, whihc is used in defs
+     * Then overlay a rect using the defined mask
+     */
+    let svg = this._svgTemplate({'view_box': '0 0 1000 1000'});
+
+    let defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    svg.appendChild(defs);
+    
+    let mask = document.createElementNS("http://www.w3.org/2000/svg", "mask");
+    defs.appendChild(mask);
+    mask.setAttribute('id', "SwitchMask");
+    mask.setAttribute('x', "0");
+    mask.setAttribute('y', "0");
+    mask.setAttribute('width', "1000");
+    mask.setAttribute('height', "1000");
+    
+    let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    mask.appendChild(g);
+    
+    let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+    g.appendChild(path);
+    path.setAttribute('d', 'M928.8,224.4H71.3c-33.8,0-61.3,27.4-61.3,61.3v428.8c0,33.8,27.4,61.3,61.3,61.3h857.5c33.8,0,61.3-27.4,61.3-61.3V285.6C990,251.8,962.6,224.4,928.8,224.4z M944.1,683.8c0,33.8-12.1,45.9-45.9,45.9H101.9c-33.8,0-45.9-12.1-45.9-45.9V316.3c0-33.8,12.1-45.9,45.9-45.9h796.3c33.8,0,45.9,12.1,45.9,45.9V683.8z');
+    
+    let path1 = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+    g.appendChild(path1);
+    path1.setAttribute('d', 'M423.4,300.9H147.8c-33.8,0-61.3,27.4-61.3,61.3v275.6c0,33.8,27.4,61.3,61.3,61.3h275.6c33.8,0,61.3-27.4,61.3-61.3V362.2C484.7,328.4,457.3,300.9,423.4,300.9z');
+
+    let rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+    svg.appendChild(rect);
+    rect.setAttribute('x', "0");
+    rect.setAttribute('y', "0");
+    rect.setAttribute('width', "1000");
+    rect.setAttribute('height', "1000");
+    rect.setAttribute('fill', "currentColor");
+    rect.setAttribute('mask', "url(#SwitchMask)");
+
+    return svg;   
+};
+
+
 SvgIcon._icon_cube_3d = function() {
     let svg = this._svgTemplate();
 
@@ -747,3 +764,19 @@ SvgIcon._icon_3d = function () {
 
     return svg;
 }
+
+SvgIcon._color_box = function(rgb) {
+    let svg = this._svgTemplate({'view_box': '0 0 30 15', 'width': '30px', 'height': '15px'});  
+
+    let rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');            
+    svg.appendChild(rect);
+    rect.setAttribute('x', 0);
+    rect.setAttribute('y', 0);
+    rect.setAttribute('width', 30);
+    rect.setAttribute('height', 15);            
+    rect.setAttribute('style', `fill: rgb(${rgb.join(',')})`);
+
+    svg.appendChild(this._createInvisibleRect());
+
+    return svg;
+};
