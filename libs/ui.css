@@ -172,11 +172,14 @@ body {
 }
 
 .dropdown, .dropdown_bis {
+  box-sizing: content-box;
   display: flex;
   flex-direction: row;  
-  width: 200px;  
+  max-width: 200px;
+  width: 100%;
   justify-content: space-between;  
-  background-color: var(--color-bg-head-darker);
+  align-items: center;
+  /*background-color: var(--color-bg-head-darker);*/
 }
 
 .dropdown .subtitle {  
@@ -213,7 +216,7 @@ body {
 
 .checkbox, .slider {
   background-color: var(--color-bg-head-darker);
-  width: 200px;
+  max-width: 200px;
   width: 100%; /* TODO: all should inherit form a type with a fixed size*/ 
   display: flex;
   flex-direction: row;
@@ -224,6 +227,7 @@ body {
 
 .checkbox .label, .checkbox .svg-icon {
   padding: 12px;
+  text-transform: capitalize;
 }
 
 .checkbox .svg-icon.clicked svg{

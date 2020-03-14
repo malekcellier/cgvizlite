@@ -139,7 +139,9 @@ UI.DropDown = function (opts) {
     let list = _el({type: 'div', classes: ['dropdown-list']});
     div.appendChild(list);
     list.onclick = (evt) => {
-        evt.target.querySelector('.dropdown-list-items').classList.toggle('hidden');
+        if (evt.target.classList.contains('dropdown-list')) {
+            evt.target.querySelector('.dropdown-list-items').classList.toggle('hidden');
+        }
     };
     let selected = _el({type: 'div', classes: ['dropdown-list-selected']});
     list.appendChild(selected);
@@ -147,6 +149,13 @@ UI.DropDown = function (opts) {
     // populate the list
     let items = _el({type: 'div', classes: ['dropdown-list-items', 'hidden']});
     list.appendChild(items);
+    items.onclick = (evt) => {
+        if (evt.target.classList.contains('dropdown-list-item')) {
+            // toggle hidden and change the dropdown-list-selected
+            evt.target.parentElement.classList.toggle('hidden');
+            evt.target.parentElement.previousElementSibling.innerText = evt.target.innerText;            
+        }
+    };
     for (let i=0; i<opts.items.length; i++) {
         let item = _el({type: 'div', classes: ['dropdown-list-item']});
         item.innerText = opts.items[i];
@@ -392,64 +401,65 @@ UI.ColorPalette = function (opts) {
     opts.id = opts.id || '';
     opts.category = opts.category || 'diverging';
     opts.n_colors = opts.n_colors || 4;
+    opts.min_n_colors = opts.min_n_colors || 3;
 
-    let div = _el({type: 'div', classes: ['color-palette']});
+    let palette = _el({type: 'div', classes: ['color-palette']});
     if (opts.id !== '') {
-        div.id = opts.id;
+        palette.id = opts.id;
     }
-    div.onclick = (evt) => {
+    palette.onclick = (evt) => {
         /**
          * The click is only for the colormap
          */
         if (evt.target.classList.contains('colormap')) {
             console.info('Clicked on colormap');
-            let colormaps = document.querySelector('.color-palette').querySelectorAll('.colormap');
+            let self = document.querySelector('.color-palette');
+            let colormaps = self.querySelectorAll('.colormap');
             for (let i=0; i<colormaps.length; i++) {
                 colormaps[i].classList.remove('selected');            
             }
             evt.target.classList.add('selected');
+            self.setAttribute('scheme', evt.target.getAttribute('tip-text'));
         }
     };
-    // loop the schemes in that category
-    // for each scheme, loop the colors
+    // loop the schemes in that category (sequential, diverging, singlehue, qualitative...)
+    // and then for each scheme, loop the colors
     let brewer = {
         sequential: ["BuGn","BuPu","GnBu","OrRd","PuBu","PuBuGn","PuRd","RdPu","YlGn","YlGnBu","YlOrBr","YlOrRd"],
 		diverging: ["BrBG","PiYG","PRGn","PuOr","RdBu","RdGy","RdYlBu","RdYlGn","Spectral"],
 		singlehue:["Blues","Greens","Greys","Oranges","Purples","Reds"],
         qualitative: ["Accent","Dark2","Paired","Pastel1","Pastel2","Set1","Set2","Set3"] 
     };
-    // For each colormap, there is a max number of possible colors
-    let nColors = {};
-    let categories = Object.keys(brewer);
-    for (let i=0; i<categories.length; i++) {
-        let category = categories[i];
-        for (let j=0; j<brewer[category].length; j++) {
-            let scheme = brewer[category][j];
-            nColors[scheme] = chroma.brewer[scheme].length;
-        }
-    }
 
+    // Cap the number of colors to the min the scheme supports
+    let n_colors = Math.max(opts.min_n_colors, opts.n_colors);
     let schemes = brewer[opts.category];
     for (let i=0; i<schemes.length; i++) {
+        let scheme = schemes[i];
+        // The colormap
         let clrmap = _el({type: 'div', classes: ['colormap', 'tip-colormap']});
-        div.appendChild(clrmap);
-        clrmap.setAttribute('tip-text', schemes[i]);
+        palette.appendChild(clrmap);
+        clrmap.setAttribute('tip-text', scheme);
         // first in the list is the default
-        if (i === 0) { clrmap.classList.add('selected');};
-        div.id = schemes[i];
+        if (i === 0) {
+            clrmap.classList.add('selected');
+            palette.setAttribute('scheme', scheme);
+        };
+        
         // Innercontainer for the flex to work
         let clrmap_inner = _el({type: 'div', classes: ['colormap-inner']});
         clrmap.appendChild(clrmap_inner);
-        // cap the number of colors to the scheme
-        let n_colors = Math.max(opts.n_colors, nColors[schemes[i]]);
+        // Cap the number of colors to the max the scheme supports
+        n_colors = Math.max(n_colors, chroma.brewer[scheme].length);
+        // All the colors
         for (let j=0; j<n_colors; j++) {
             let clrel = _el({type: 'div', classes: ['colormap-item']});
-            clrel.style['background-color'] = chroma.brewer[schemes[i]][j];
+            clrel.style['background-color'] = chroma.brewer[scheme][j];
             clrmap_inner.appendChild(clrel);
         }
     }
 
-    return div;
+    return palette;
 };
 
 UI.ColorbarSettings = function (opts) {
@@ -495,10 +505,32 @@ UI.ColorbarSettings = function (opts) {
     color_settings.appendChild(color_title);
     color_title.innerText = 'Color';
     // 2.2) scheme category
+    let categories = UI.DropDown({
+        label: 'category',
+        items: ['sequential', 'diverging', 'singlehue', 'qualitative']        
+    });
+    color_settings.appendChild(categories);
+    categories.onclick = (evt) => {
+        // each time the category is changed:
+        //   n_colors items needs to be changed
+        //   the palette needs to be changed
+    };
     // 2.3) n_colors
+    let n_colors = UI.DropDown({
+        label: 'steps',
+        items: range(3, 9)
+    });
+    color_settings.appendChild(n_colors);
+    n_colors.onclick = (evt) => {
+        // Each time the n_colors is changed:
+        // the palette needs to be redrawn
+    };
     // 2.4) reversed
     let rev = UI.CheckBox({label: 'reversed'});
     color_settings.appendChild(rev);
+    rev.onclick = (evt) => {
+
+    };
     // 2.5) colormaps (result of category + n_colors) + picker
     let palette = UI.ColorPalette();
     color_settings.appendChild(palette);

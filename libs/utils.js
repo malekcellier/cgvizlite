@@ -32,3 +32,11 @@ function extendFunc(container, func, before, after) {
     })();
 
 }
+
+function range(start, end, step = 1) {
+    /**
+     * Range of numbers from start till end, both included, with step of step
+     */
+    const len = Math.floor((end - start) / step) + 1
+    return Array(len).fill().map((_, idx) => start + (idx * step))
+  }
