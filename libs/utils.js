@@ -40,3 +40,18 @@ function range(start, end, step = 1) {
     const len = Math.floor((end - start) / step) + 1
     return Array(len).fill().map((_, idx) => start + (idx * step))
   }
+
+function randRGB() {
+    let r = randInt(0, 255);
+    let g = randInt(0, 255);
+    let b = randInt(0, 255);
+
+    return [r, g, b];
+}
+
+function randInt(min, max) {
+    /**
+     * randInt: generate one value between min and max
+     */
+    return Math.round(Math.random()*(max-min) + min);
+}
