@@ -16,6 +16,18 @@ function randInt(min, max) {
     return Math.round(Math.random()*(max-min) + min);
 }
 
+function extendFunction(func, before, after) {
+    /**
+     * simpler function
+     */
+    return function(){
+        if (before) before.apply(this, arguments);
+      //func(evt);
+      func.apply(this, arguments);
+      if (after) after.apply(this, arguments);
+    };
+  }
+
 function extendFunc(container, func, before, after) {
     /**
      * extendFunc: modifies an existing function with extra steps before and/or after

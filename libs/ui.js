@@ -163,6 +163,7 @@ UI.DropDown = function (opts) {
     data.appendChild(items);
     // event for the selection of the items
     items.onclick = (evt) => {
+        console.log('dropdown-items event');
         if (evt.target.classList.contains('dropdown-item')) {
             evt.target.parentElement.previousElementSibling.innerText = evt.target.innerText;
             evt.target.parentElement.previousElementSibling.classList.toggle('active');
@@ -396,6 +397,7 @@ UI.ColorPalette = function (opts) {
             self.setAttribute('scheme', evt.target.getAttribute('tip-text'));
         }
     };
+    // TODO: put the color definition in a separate file, to make it easier to refer to it
     // loop the schemes in that category (sequential, diverging, singlehue, qualitative...)
     // and then for each scheme, loop the colors
     let brewer = {
@@ -404,6 +406,7 @@ UI.ColorPalette = function (opts) {
 		singlehue:["Blues","Greens","Greys","Oranges","Purples","Reds"],
         qualitative: ["Accent","Dark2","Paired","Pastel1","Pastel2","Set1","Set2","Set3"] 
     };
+    brewer.all = [...brewer.sequential, ...brewer.diverging, ...brewer.singlehue, ...brewer.qualitative];
 
     // Cap the number of colors to the min the scheme supports
     let n_colors = Math.max(opts.min_n_colors, opts.n_colors);
@@ -447,9 +450,10 @@ UI.ColorbarSettings = function (opts) {
      *  - min, max: double-slider
      *  - precision: dropdown
      * Color related
+     *  - scheme category: dropdown
+     *  - n_colors (steps): dropdown
      *  - reverse: checkbox
-     *  - n_colors: dropdown
-     *  - scheme: colorpicker
+     *  - scheme: colorpalette
      */
     opts = opts || {};
     opts.title = 'Settings';
@@ -470,6 +474,11 @@ UI.ColorbarSettings = function (opts) {
     range_title.innerText = 'Range';
     // 1.2) min, max: double-slider
     // 1.3) precision: dropdown
+    let precision = UI.DropDown({
+        label: 'precision',
+        items: range(0, 6)
+    });
+    range_settings.appendChild(precision);
     
     // 2) Color related settings
     let color_settings = _el({type: 'div', classes: ['category']});
@@ -478,18 +487,39 @@ UI.ColorbarSettings = function (opts) {
     let color_title = _el({type: 'div', classes: ['title']});
     color_settings.appendChild(color_title);
     color_title.innerText = 'Color';
-    // 2.2) scheme category
+    // 2.2) scheme category TODO: read that from the color definition
     let categories = UI.DropDown({
         label: 'category',
-        items: ['sequential', 'diverging', 'singlehue', 'qualitative']        
+        items: ['sequential', 'diverging', 'singlehue', 'qualitative', 'all']        
     });
     color_settings.appendChild(categories);
-    categories.onclick = (evt) => {
-        // each time the category is changed:
-        //   n_colors items needs to be changed
-        //   the palette needs to be changed
+    // each time the category is changed (i.e. an item of items):
+    //   n_colors items needs to be changed
+    //   the palette needs to be changed
+    // Extend the onclick function which was already defined    
+    /*
+    categories.querySelector('.dropdown-items').onclick = extendFunction(
+        categories.querySelector('.dropdown-items').onclick,
+        before,
+        after
+    );
+    
+    function before(evt) {
+        console.log(' > before');
+        console.log(evt.target);
+    }
 
-    };
+    function after(evt) {        
+        console.log(' > after');
+        console.log(evt.target);
+    }
+    */
+    categories.querySelector('.dropdown-items').onclick = extendFunction(
+        categories.querySelector('.dropdown-items').onclick,
+        null,
+        UI.UpdateColorPalette
+    );
+
     // 2.3) n_colors
     let n_colors = UI.DropDown({
         label: 'steps',
@@ -511,6 +541,20 @@ UI.ColorbarSettings = function (opts) {
     color_settings.appendChild(palette);
 
     return div;
+};
+
+UI.UpdateColorPalette = function (evt) {
+    /**
+     * Recreates the ColorPalette based on the inputs
+     */
+    console.log('Updating color palette');
+    console.log(evt);
+    let opts = {};
+    opts.category = evt.target.parentElement.previousElementSibling.innerText;
+    let palette = new UI.ColorPalette(opts);
+    let container = evt.target.parentElement.parentElement.parentElement.parentElement;
+    container.removeChild(container.querySelector('.color-palette'));
+    container.appendChild(palette);
 };
 
 // Demo
