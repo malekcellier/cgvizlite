@@ -161,6 +161,9 @@
             if (el_ddown === null) {
                 el_ddown = new UI.DropDown({id: 'dropdown-demo'});
                 components.appendChild(el_ddown);
+                // In case the widget is not included in a panel
+                el_ddown.style.padding = '12px';
+                el_ddown.style['min-width'] = '150px';
             } else {
                 components.removeChild(el_ddown);
             }
@@ -176,6 +179,9 @@
             if (el_cb === null) {
                 el_cb = new UI.CheckBox({id: 'checkbox-demo', square: false});
                 components.appendChild(el_cb);
+                // In case the widget is not included in a panel
+                el_cb.style.padding = '10px';
+                el_cb.style['min-width'] = '150px';
             } else {
                 components.removeChild(el_cb);
             }            
@@ -191,6 +197,9 @@
             if (el_cbsq === null) {
                 el_cbsq = new UI.CheckBox({id: 'checkbox_square-demo', square: true});
                 components.appendChild(el_cbsq);
+                // In case the widget is not included in a panel
+                //el_cbsq.style.padding = '10px';
+                el_cbsq.style['min-width'] = '150px';
             } else {
                 components.removeChild(el_cbsq);
             }            

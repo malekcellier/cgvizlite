@@ -222,7 +222,8 @@ body {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  padding: 10px;
+  /*padding: 10px;*/
+  padding-bottom: 12px;
 }
 
 .dropdown-label {
@@ -312,7 +313,8 @@ body {
 }
 
 .checkbox .label, .checkbox .svg-icon {
-  padding: 12px;
+  /*padding: 12px;*/
+  padding-bottom: 12px;
   text-transform: capitalize;
 }
 
@@ -379,4 +381,10 @@ body {
 .colormap-item {
   flex-grow: 1;
   pointer-events: none;
+}
+
+.category .title {
+  border-bottom: 1px solid var(--color-txt-sublabel);
+  margin-bottom: 10px;
+  padding-bottom: 5px;
 }
