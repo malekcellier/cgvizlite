@@ -170,7 +170,7 @@ body {
 .colorbar-settings .panel-body{
   background-color: var(--color-bg-head-darker);
 }
-
+/*
 .dropdown, .dropdown_bis {
   box-sizing: content-box;
   display: flex;
@@ -180,7 +180,7 @@ body {
   justify-content: space-between;  
   align-items: center;
   /*background-color: var(--color-bg-head-darker);*/
-}
+/*} /*
 
 .dropdown .subtitle {  
   padding: 12px;
@@ -212,6 +212,92 @@ body {
   color: var(--color-txt-sublabel);
   padding: 12px;
   font-size: 14px;
+}
+*/
+
+.dropdown {
+  box-sizing: border-box;
+  max-width: 200px;
+  background-color: #29323c;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.dropdown-label {
+  flex-grow: 1;
+  box-sizing: border-box;
+  color: rgb(106, 116, 133);
+  /*display: inline-block;*/
+  font-size: 11px;
+  font-weight: 400;
+  margin-bottom: 4px;
+  margin: auto;
+  text-transform: capitalize;
+}
+
+.dropdown-data {
+  flex-grow: 1;
+  box-sizing: border-box;
+  position: relative;
+  color: rgb(160, 167, 180);
+  font-size: 12px;
+  /*margin: auto;*/
+}
+
+.dropdown-selected {
+  box-sizing: border-box;
+  margin: auto;
+  width: 100%;
+  align-items: center;
+  cursor: pointer;
+  background-color: rgb(36, 39, 48);
+  height: 34px;
+  text-overflow: ellipsis;
+  border: 1px solid rgb(36, 39, 48);
+  border-radius: 2px;  
+  padding: 6px;
+  /*padding-left: 12px;  */
+}
+
+.dropdown-selected.active {
+  background-color: rgb(58, 65, 76);
+  border-color: white;
+}
+
+.dropdown-items {
+  /*box-sizing: border-box;*/
+  width: 100%;  
+  position: absolute;
+  left: 0px;
+  bottom: auto;
+  display: flex;
+  flex-direction: column;  
+  background-color: rgb(58, 65, 76);
+  border-top: 1px solid rgb(36, 39, 48);
+  overflow-y: auto;
+  max-height: 280px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 6px 12px 0px;
+  border-radius: 2px;
+  z-index: 100;
+  margin-top: 4px;
+  margin-bottom: auto;
+}
+
+.dropdown-items.hidden {
+  display: none;
+}
+
+.dropdown-item {
+  /*box-sizing: border-box;*/
+  padding: 3px 9px;
+  padding-left: 12px;
+}
+
+.dropdown-item:hover {
+  cursor: pointer;
+  background-color: rgb(106, 116, 133);
 }
 
 .checkbox, .slider {

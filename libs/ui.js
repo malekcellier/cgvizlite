@@ -114,8 +114,14 @@ UI.Panel = function (opts) {
 // Dropdown WIP
 UI.DropDown = function (opts) {
     /**
-     * DropDown with label
+     * DropDown
      * 
+     * dropdown
+     * - dropdown-label
+     * - dropdown-data
+     *      - dropdown-selected
+     *      - dropdown-items
+     *          - dropdown-item (list)
      */
 
     // Default values    
@@ -127,80 +133,48 @@ UI.DropDown = function (opts) {
 
     
     let div = _el({type: 'div', classes: ['dropdown']});
-    div.setAttribute('index', opts.selected_index);
+    //div.setAttribute('index', opts.selected_index);
     if (opts.id !== '') {
         div.id = opts.id;
     }
 
-    let label = _el({type: 'div', classes: ['subtitle']});
+    // 1) label
+    let label = _el({type: 'div', classes: ['dropdown-label']});
     div.appendChild(label);
     label.innerText = opts.label;
 
-    let list = _el({type: 'div', classes: ['dropdown-list']});
-    div.appendChild(list);
-    list.onclick = (evt) => {
-        if (evt.target.classList.contains('dropdown-list')) {
-            evt.target.querySelector('.dropdown-list-items').classList.toggle('hidden');
-        }
-    };
-    let selected = _el({type: 'div', classes: ['dropdown-list-selected']});
-    list.appendChild(selected);
+    // 2) data
+    let data = _el({type: 'div', classes: ['dropdown-data']});
+    div.appendChild(data);
+    // 2.1) current selection
+    let selected = _el({type: 'div', classes: ['dropdown-selected']});
+    data.appendChild(selected);
+    // default element
     selected.innerText = opts.items[opts.selected_index];
-    // populate the list
-    let items = _el({type: 'div', classes: ['dropdown-list-items', 'hidden']});
-    list.appendChild(items);
-    items.onclick = (evt) => {
-        if (evt.target.classList.contains('dropdown-list-item')) {
-            // toggle hidden and change the dropdown-list-selected
-            evt.target.parentElement.classList.toggle('hidden');
-            evt.target.parentElement.previousElementSibling.innerText = evt.target.innerText;            
+    // onclick show the items
+    selected.onclick = (evt) => {
+        if (evt.target.classList.contains('dropdown-selected')) {
+            evt.target.nextElementSibling.classList.toggle('hidden')
+            evt.target.classList.toggle('active');// assuming hidden is the default state
         }
     };
+    // 2.2) items
+    let items = _el({type: 'div', classes: ['dropdown-items', 'hidden']});
+    data.appendChild(items);
+    // event for the selection of the items
+    items.onclick = (evt) => {
+        if (evt.target.classList.contains('dropdown-item')) {
+            evt.target.parentElement.previousElementSibling.innerText = evt.target.innerText;
+            evt.target.parentElement.previousElementSibling.classList.toggle('active');
+            evt.target.parentElement.classList.toggle('hidden');
+        }
+    };
+    // 2.2.1) add all item
     for (let i=0; i<opts.items.length; i++) {
-        let item = _el({type: 'div', classes: ['dropdown-list-item']});
+        let item = _el({type: 'div', classes: ['dropdown-item']});
         item.innerText = opts.items[i];
         items.appendChild(item);
     }
-
-    return div;
-};
-
-UI.DropDownBis = function (opts) {
-    /**
-     * Dropdown with label, based on select
-     */
-
-    // Default values    
-    opts = opts || {};
-    opts.id = opts.id || '';
-    opts.label = opts.label || 'Label';
-    opts.items = opts.items || ['item 1', 'item 2', 'item 3', 'item 4', 'item 5'];
-    opts.selected_index = opts.selected_index || 0; // how to keep track of the actual element?
-
-    
-    let div = _el({type: 'div', classes: ['dropdown_bis']});
-    div.setAttribute('index', opts.selected_index);
-    if (opts.id !== '') {
-        div.id = opts.id;
-    }
-
-    // The label for the dropdown
-    let label = _el({type: 'labels', classes: ['label']});
-    div.appendChild(label);
-    label.setAttribute('for', `select_${opts.id}`);
-    label.innerText = opts.label;
-
-    // The dropdown using the select/option paradigm
-    let sel = _el({type: 'select'});
-    div.appendChild(sel);
-    sel.id = `select_${opts.id}`;
-    // The options
-    for (let i=0; i<opts.items.length; i++) {
-        let option = document.createElement('option');
-        option.value = i;
-        option.innerText = opts.items[i];
-        sel.appendChild(option);
-    }   
 
     return div;
 };
@@ -514,6 +488,7 @@ UI.ColorbarSettings = function (opts) {
         // each time the category is changed:
         //   n_colors items needs to be changed
         //   the palette needs to be changed
+
     };
     // 2.3) n_colors
     let n_colors = UI.DropDown({

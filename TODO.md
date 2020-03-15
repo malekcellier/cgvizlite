@@ -156,10 +156,15 @@ Scene organization and Naming convention:
 - [X] create ui component: switch (square)?
 - [X] create ui component: checkbox (= label + square_switch)
     - [X] make switches only one svg + rotation + label update
-- [ ] create ui component: dropdown
+- [X] create ui component: dropdown
 - [ ] create ui component: slider
 - [ ] create ui component: double slider
 - [ ] create ui component: colormap editor
     - [X] create ui component: color-palette
 - [ ] rebuild cgviz-menu using ui.js instead
     - [ ]
+
+2020-03-15
+----------
+- [ ] group similar items (RX) => requires a way to group them
+- [ ] item picker

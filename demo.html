@@ -166,21 +166,6 @@
             }
         };
 
-        // 4b DropDownBis
-        let s_ddownb = _el({type: 'div', classes: ['demo-item']}); 
-        s_ddownb.innerText = 'dropdown bis';
-        menu.appendChild(s_ddownb);
-        s_ddownb.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            let el_ddownb = components.querySelector('#dropdownbis-demo');
-            if (el_ddownb === null) {
-                el_ddownb = new UI.DropDownBis({id: 'dropdownbis-demo'});
-                components.appendChild(el_ddownb);
-            } else {
-                components.removeChild(el_ddownb);
-            }
-        };
-
         // 5) Checkbox
         let s_checkbox = _el({type: 'div', classes: ['demo-item']}); 
         s_checkbox.innerText = 'checkbox round';
@@ -239,6 +224,22 @@
         s_header.innerText = 'header';
         menu.appendChild(s_header);
         s_header.onclick = (evt) => {
+            alert(`${evt.target.innerText}: not implemented yet`);
+        }
+
+        // 9) Grouper
+        let s_grouper = _el({type: 'div', classes: ['demo-item']}); 
+        s_grouper.innerText = 'grouper';
+        menu.appendChild(s_grouper);
+        s_grouper.onclick = (evt) => {
+            alert(`${evt.target.innerText}: not implemented yet`);
+        }
+
+        // 10) item picker
+        let s_picker = _el({type: 'div', classes: ['demo-item']}); 
+        s_picker.innerText = 'item picker';
+        menu.appendChild(s_picker);
+        s_picker.onclick = (evt) => {
             alert(`${evt.target.innerText}: not implemented yet`);
         }
 
