@@ -22,13 +22,14 @@ Styling of the tips (contextual piece of information)
 {
     /*display: inline;*/
     position: relative;
+    /*transition: all 2s ease-out; NOT working, requires the ::after and ::before el to be defined*/
 }
 
-.tip-left:hover:after,
-.tip-right:hover:after,
-.tip-top:hover:after,
-.tip-bottom:hover:after,
-.tip-colormap:hover:after
+.tip-left:hover::after,
+.tip-right:hover::after,
+.tip-top:hover::after,
+.tip-bottom:hover::after,
+.tip-colormap:hover::after
 {
     position: absolute;
     display: block;
@@ -42,31 +43,31 @@ Styling of the tips (contextual piece of information)
     content: attr(tip-text);
 }
 
-.tip-left:hover:after {
+.tip-left:hover::after {
     bottom: -6px; /* since the icon is normally 32x32 */
     right: 42px;
 }
-.tip-right:hover:after {
+.tip-right:hover::after {
     bottom: -6px; /* since the icon is normally 32x32 */
     left: 32px;
 }
-.tip-top:hover:after {
+.tip-top:hover::after {
     bottom: 32px; /* since the icon is normally 32x32 */
     left: -16px;
 }
-.tip-bottom:hover:after {
+.tip-bottom:hover::after {
     bottom: -40px; /* since the icon is normally 32x32 */
     left: -16px;
 }
-.tip-colormap:hover:after {
+.tip-colormap:hover::after {
     bottom: -36px; /* since the icon is normally 32x32 */
     right: 42px;
 }
 
-.tip-left:hover:before,
-.tip-right:hover:before,
-.tip-top:hover:before,
-.tip-bottom:hover:before
+.tip-left:hover::before,
+.tip-right:hover::before,
+.tip-top:hover::before,
+.tip-bottom:hover::before
 {
     position: absolute;
     display: block;
@@ -75,22 +76,22 @@ Styling of the tips (contextual piece of information)
     content: "";
 }
 
-.tip-left:hover:before {
+.tip-left:hover::before {
     border-left: var(--border-size) solid rgba(0,0,0,.8); /* top right bottom left*/
     bottom: -2px;
     right: 24px;
 }
-.tip-right:hover:before {
+.tip-right:hover::before {
     border-right: var(--border-size) solid rgba(0,0,0,.8);
     bottom: -2px;
     left: 14px;
 }
-.tip-top:hover:before {
+.tip-top:hover::before {
     border-top: var(--border-size) solid rgba(0,0,0,.8);
     bottom: 14px;
     left: 0px;
 }
-.tip-bottom:hover:before {
+.tip-bottom:hover::before {
     border-bottom: var(--border-size) solid rgba(0,0,0,.8);
     bottom: -14px;
     left: 0px;
