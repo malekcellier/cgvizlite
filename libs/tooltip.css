@@ -18,7 +18,8 @@ Styling of the tips (contextual piece of information)
 .tip-right,
 .tip-top,
 .tip-bottom,
-.tip-colormap
+.tip-colormap,
+.tip-colormap-above
 {
     /*display: inline;*/
     position: relative;
@@ -29,7 +30,8 @@ Styling of the tips (contextual piece of information)
 .tip-right:hover::after,
 .tip-top:hover::after,
 .tip-bottom:hover::after,
-.tip-colormap:hover::after
+.tip-colormap:hover::after,
+.tip-colormap-above:hover::after
 {
     position: absolute;
     display: block;
@@ -61,6 +63,10 @@ Styling of the tips (contextual piece of information)
 }
 .tip-colormap:hover::after {
     bottom: -36px; /* since the icon is normally 32x32 */
+    right: 42px;
+}
+.tip-colormap-above:hover::after {
+    bottom: 36px; /* since the icon is normally 32x32 */
     right: 42px;
 }
 
