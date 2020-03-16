@@ -152,6 +152,30 @@
             }
         };
 
+        // 3.1) Colorbar
+        let s_cbarbis = _el({type: 'div', classes: ['demo-item']});
+        s_cbarbis.innerText = 'colorbar bis';
+        menu.appendChild(s_cbarbis);
+        s_cbarbis.onclick = (evt) => {
+            evt.target.classList.toggle('clicked');
+            let el_cbar = components.querySelector('#colorbarbis-demo');
+            if (el_cbar === null) {
+                el_cbar = new UI.DiscreteColorBar({
+                    id: 'colorbarbis-demo',
+                    title: 'Something [#]',
+                    category: 'singlehue',
+                    scheme: 'Purples',
+                    n_colors: 4,
+                    min: 0,
+                    max: 100,
+                    reverse: false
+                });
+                components.appendChild(el_cbar);
+            } else {
+                components.removeChild(el_cbar);
+            }
+        };
+
         // 4 DropDown
         let s_ddown = _el({type: 'div', classes: ['demo-item']}); 
         s_ddown.innerText = 'dropdown';
