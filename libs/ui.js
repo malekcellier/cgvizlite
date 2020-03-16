@@ -418,7 +418,7 @@ UI.DiscreteColorbarSettings = function (opts) {
 
     // 1.3) precision: dropdown
     let precision = UI.DropDown({
-        label: 'precision',
+        label: 'decimals',
         selected_index: opts.precision,
         items: range(0, 6)
     });
@@ -441,7 +441,7 @@ UI.DiscreteColorbarSettings = function (opts) {
     // 2.2) scheme category TODO: read that from the color definition
     let categories = UI.DropDown({
         label: 'category',
-        id: 'category',
+        //id: 'category',
         items: ['sequential', 'diverging', 'singlehue', 'qualitative', 'all']        
     });
     color_settings.appendChild(categories);
@@ -458,7 +458,7 @@ UI.DiscreteColorbarSettings = function (opts) {
     // 2.3) n_colors
     let n_colors = UI.DropDown({
         label: 'steps',
-        id: 'n_colors',
+        //id: 'n_colors',
         selected_index: 4,
         items: range(3, 12)
     });
@@ -484,6 +484,9 @@ UI.DiscreteColorbarSettings = function (opts) {
     // here the default is handled by the ColorPalette itself
     let palette = UI.ColorPalette();
     color_settings.appendChild(palette);
+    // TODO: Trigger a click that will update the ColorPalette
+    // through the UpdateCOlorPalette interface
+    precision.click();
 
     return div;
 };
@@ -518,19 +521,30 @@ UI.ColorPalette = function (opts) {
     }
     palette.onclick = (evt) => {
         /**
-         * The click is only for the colormap
+         * The click is handlede at the level of the colormap
          */
         if (evt.target.classList.contains('colormap')) {
             console.info('Clicked on colormap');
-            let self = document.querySelector('.color-palette');
+            //let self = document.querySelector('.color-palette');
+            let self = evt.target.closest('.color-palette');
             let colormaps = self.querySelectorAll('.colormap');
+            // Remove the selected class
             for (let i=0; i<colormaps.length; i++) {
                 colormaps[i].classList.remove('selected');            
             }
+            // Add it for the clicked div
             evt.target.classList.add('selected');
+            // get the settings
+            let cbs = evt.target.closest('.colorbar-settings');
+            let opts = UI._getColorPaletteOpts(cbs)
+            // get the DiscreteColorBar
+            let cb = document.querySelector('#' + cbs.attributes.initiator.value);
+            // Replace the DCB
+            cb.parentElement.replaceChild(new UI.DiscreteColorBar(opts), cb);
+
+            /*
             self.setAttribute('scheme', evt.target.getAttribute('tip-text'));
-            //UI.UpdateColorPalette(evt); // This is wrong. Instead we should trigger the change in the parent colarbar
-            // WE are in the palette and we need the parent of the DiscreteColorBar
+            // W are in the palette and we need the parent of the DiscreteColorBar
             // we have its Id in the 'initiator' attribute of the panel colorbar-settings, which contains the color-palette
             let clrbar_settings_panel = evt.target.parentElement.parentElement.parentElement.parentElement;
             // get the parameters. TODO: make a function since this is used in 2 places
@@ -558,18 +572,12 @@ UI.ColorPalette = function (opts) {
                 max: max                
             }; // get all the settings
             clrbar_settings_panel.parentElement.replaceChild(new UI.DiscreteColorBar(clrbar_opts), clrbar);
+            */
         }
     };
-    // TODO: put the color definition in a separate file, to make it easier to refer to it
     // loop the schemes in that category (sequential, diverging, singlehue, qualitative...)
-    // and then for each scheme, loop the colors
-    let brewer = {
-        sequential: ["BuGn","BuPu","GnBu","OrRd","PuBu","PuBuGn","PuRd","RdPu","YlGn","YlGnBu","YlOrBr","YlOrRd"],
-		diverging: ["BrBG","PiYG","PRGn","PuOr","RdBu","RdGy","RdYlBu","RdYlGn","Spectral"],
-		singlehue:["Blues","Greens","Greys","Oranges","Purples","Reds"],
-        qualitative: ["Accent","Dark2","Paired","Pastel1","Pastel2","Set1","Set2","Set3"] 
-    };
-    brewer.all = [...brewer.sequential, ...brewer.diverging, ...brewer.singlehue, ...brewer.qualitative];
+    // and then for each scheme, loop the colors    
+    let brewer = UI.ColorDefinitions.brewer();
 
     // Cap the number of colors to the min the scheme supports
     let n_colors = Math.max(opts.min_n_colors, opts.n_colors);
@@ -587,7 +595,7 @@ UI.ColorPalette = function (opts) {
         // first in the list is the default
         if (i === 0) {
             clrmap.classList.add('selected');
-            palette.setAttribute('scheme', scheme); // TODO: remove? => yes, since one can read the selected
+            //palette.setAttribute('scheme', scheme); // TODO: remove? => yes, since one can read the selected
         };
         
         // Inner-container needed for the flex to work
@@ -602,7 +610,6 @@ UI.ColorPalette = function (opts) {
         let colors = chroma.scale(scheme).classes(n_colors);
         for (let j=0; j<n_colors; j++) {
             let clrel = _el({type: 'div', classes: ['colormap-item']});
-            //clrel.style['background-color'] = chroma.brewer[scheme][j];
             clrel.style['background-color'] = colors(j/(n_colors-1));
             clrmap_inner.appendChild(clrel);
         }
@@ -615,6 +622,30 @@ UI.UpdateColorPalette = function (evt) {
     /**
      * Recreates the ColorPalette based on the inputs of the colors category
      */
+    // The specific DiscreteColorBarSettings
+    let cbs = evt.target.closest('.colorbar-settings');
+    
+    // Inputs for the ColorPalette
+    let opts = UI._getColorPaletteOpts(cbs);
+
+    // Update the ColorPalette
+    let palette = cbs.querySelector('.color-palette');
+    palette.parentElement.replaceChild(
+        new UI.ColorPalette(opts),
+        palette
+    );
+
+    // Update the DiscreteColorBar
+    let cb = document.querySelector('#' + opts.id);
+    cb.parentElement.replaceChild(new UI.DiscreteColorBar(opts), cb);
+};
+
+UI.UpdateColorPalette_old = function (evt) {
+    /**
+     * Recreates the ColorPalette based on the inputs of the colors category
+     */
+
+    // Get the par
 
     // Get the data
     let settings = evt.target.closest('.category').parentElement;
@@ -659,6 +690,81 @@ UI.UpdateColorPalette = function (evt) {
     };
     let clrbar = document.querySelector('#' + clrbar_id);
     settings.parentElement.parentElement.replaceChild(new UI.DiscreteColorBar(clrbar_opts), clrbar);
+};
+
+UI._getColorPaletteOpts = function (cbs) {
+    /**
+     * Reads the DiscreteColorBarSettings 
+     * and gathers the parameters needed to produce the colorpalette
+     * 
+     * input:
+     *  - cbs_id: id of the ColorBarSetting element
+     * 
+     * Will be called from:
+     *  - UI.ColorPalette => onclick of:
+     *      - 'color-palette'
+     *      in ths case, use evt.target.closest('.panel .colorbar-settings')
+     *  - UI.UpdateColorPalette => called with evt from within DiscreteColorBarSettings onclick of:
+     *      - .dropdown-items: precision, category, n_colors
+     *      - .svg-icon: reversed 
+     *      in this case, use evt.target.closest('.panel .colorbar-settings')
+     */
+    
+    // The DiscreteColorBarSettings
+    // Get the DiscreteColorBarSettings panel that contains all the data
+    // the document can potentially contain several DiscreteColorBar, so the ID is important
+    // it is assumed that the ID is contained in the custom attribute 'initiator' of the created DiscreteColorBarSettings
+    //let cbs = document.querySelector('#' + cbs_id);
+    
+    // Range settings
+    let range_settings = cbs.querySelectorAll('.category')[0];
+    // There is 1 dropdown with the precision
+    let rng_dd = range_settings.querySelectorAll('.dropdown-selected');
+    // The 1 double slider with min/max
+    
+    // Color settings
+    let color_settings = cbs.querySelectorAll('.category')[1];
+    // There are 2 dropdowns in the colors settings: category and n_colors
+    let clr_dd = color_settings.querySelectorAll('.dropdown-selected');
+    // 1 checkbox with reversed
+    let clr_cb = color_settings.querySelector('.checkbox .svg-icon');
+    // 1 class for the selected scheme (of the category)
+    let clr_sc = color_settings.querySelector('.colormap.selected');
+
+    // Get the DiscreteColorBar from the embedded ID as initiator
+    let cb_id = cbs.attributes.initiator.value;
+    let cb = document.querySelector('#' + cb_id);
+    
+    let opts = {
+        id: cb_id, // of the DSB
+        title: cb.querySelector('.description .title').innerText, // of the DSB
+        // Range
+        precision: Number(rng_dd[0].innerText),
+        min: -25,
+        max: +21,
+        // Colors
+        category: clr_dd[0].innerText,
+        n_colors: Number(clr_dd[1].innerText),
+        reverse: clr_cb.classList.contains('rotated'),
+        // Clicked scheme
+        scheme: clr_sc.attributes['tip-text'].value,
+    };
+
+    return opts;
+};
+
+UI.ColorDefinitions = {
+    brewer: function() {
+        let brewer = {
+            sequential: ["BuGn","BuPu","GnBu","OrRd","PuBu","PuBuGn","PuRd","RdPu","YlGn","YlGnBu","YlOrBr","YlOrRd"],
+            diverging: ["BrBG","PiYG","PRGn","PuOr","RdBu","RdGy","RdYlBu","RdYlGn","Spectral"],
+            singlehue:["Blues","Greens","Greys","Oranges","Purples","Reds"],
+            qualitative: ["Accent","Dark2","Paired","Pastel1","Pastel2","Set1","Set2","Set3"] 
+        };
+        brewer.all = [...brewer.sequential, ...brewer.diverging, ...brewer.singlehue, ...brewer.qualitative];
+
+        return brewer;
+    }
 };
 
 // Demo
