@@ -143,7 +143,7 @@
                     n_colors: 7,
                     min: -10,
                     max: 31,
-                    reverse: true
+                    reverse: false
                 });
                 components.appendChild(el_cbar);
             } else {
@@ -177,10 +177,14 @@
             evt.target.classList.toggle('clicked');
             let el_cb = components.querySelector('#checkbox-demo');
             if (el_cb === null) {
-                el_cb = new UI.CheckBox({id: 'checkbox-demo', square: false});
+                el_cb = new UI.CheckBox({
+                    id: 'checkbox-demo', 
+                    label: 'round',
+                    square: false});
                 components.appendChild(el_cb);
                 // In case the widget is not included in a panel
                 el_cb.style.padding = '10px';
+                el_cb.style['padding-bottom'] = '0px';
                 el_cb.style['min-width'] = '150px';
             } else {
                 components.removeChild(el_cb);
@@ -195,10 +199,15 @@
             evt.target.classList.toggle('clicked');
             let el_cbsq = components.querySelector('#checkbox_square-demo');
             if (el_cbsq === null) {
-                el_cbsq = new UI.CheckBox({id: 'checkbox_square-demo', square: true});
+                el_cbsq = new UI.CheckBox({
+                    id: 'checkbox_square-demo',
+                    label: 'square',
+                    square: true
+                });
                 components.appendChild(el_cbsq);
                 // In case the widget is not included in a panel
-                //el_cbsq.style.padding = '10px';
+                el_cbsq.style.padding = '10px';
+                el_cbsq.style['padding-bottom'] = '0px';
                 el_cbsq.style['min-width'] = '150px';
             } else {
                 components.removeChild(el_cbsq);

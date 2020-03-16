@@ -311,13 +311,17 @@ UI.DiscreteColorBar = function (opts) {
      *      - settings: allows to set the #colors, scheme, min/max
      * Body:
      *  - list of divs with color and range next to it
+     * 
+     * NOTE: should it be configured by a colorbarsettings actually => circular dependency?
      */
     // Default values
     opts = opts || {};
     opts.scheme = opts.scheme || 'Spectral';
-    opts.n_colors = opts.n_colors || 7;
+    opts.n_colors = opts.n_colors || 7; // Pass the list of colors instead? or just recalculate it 
     opts.reverse = opts.reverse || false;
-    opts.precision = opts.precision || 4;
+    if (opts.precision === null || opts.precision === undefined) {
+        opts.precision = 4;
+    }
 
     let colorbar = UI.Panel(opts);
     colorbar.classList.add('colorbar');
@@ -325,9 +329,16 @@ UI.DiscreteColorBar = function (opts) {
     let settings = SvgIcon.new({icon: 'settings'});
     controls.appendChild(settings);
     settings.onclick = (evt) => {
-        console.info('clicked the settings to configure the colorbar');
-        let cbs = UI.ColorbarSettings();
-        evt.target.parentElement.parentElement.parentElement.parentElement.appendChild(cbs);
+        if (evt.target.classList.contains('svg-icon')) {
+            console.info('clicked the settings to configure the colorbar');
+            // read the current values and pass a opts structure
+            // pass the ID of the ColorBar to the settings            
+            let opts = {
+                initiator: evt.target.parentElement.parentElement.parentElement.id
+            };
+            let cbs = UI.DiscreteColorbarSettings(opts);
+            evt.target.parentElement.parentElement.parentElement.parentElement.appendChild(cbs);
+        }
     };
 
     // The content
@@ -354,15 +365,135 @@ UI.DiscreteColorBar = function (opts) {
         // 2) description
         let desc = _el({type: 'div', classes: ['colorbar-item-desc']});
         container.appendChild(desc);
-        desc.innerText = `${values[i].toPrecision(opts.precision)} to ${values[i+1].toPrecision(opts.precision)}`;
+        // TODO: the first from value and the last to values are always the actual min/max
+        // when changin the min/max through the double slider, the first and last color will cover wider range (it becomes heterogneous)
+        //desc.innerText = `${values[i].toPrecision(opts.precision)} to ${values[i+1].toPrecision(opts.precision)}`;
+        desc.innerText = `${values[i].toFixed(opts.precision)} to ${values[i+1].toFixed(opts.precision)}`;
     }
 
     return colorbar;
 };
 
+UI.DiscreteColorbarSettings = function (opts) {
+    /**
+     * Colorbar settings
+     * 
+     * Should be inside a Modal so as to prevent unwanted user actions
+     * 
+     * Provides a way to set the values:
+     * Range related: 
+     *  - min, max: double-slider
+     *  - precision: dropdown
+     * Color related
+     *  - scheme category: dropdown
+     *  - n_colors (steps): dropdown
+     *  - reverse: checkbox
+     *  - scheme: colorpalette
+     */
+    opts = opts || {};
+    opts.title = 'Settings';
+    opts.closable = true;
+    opts.initiator = opts.initiator || {}; // the DiscreteColorBar that initiated the ColorBarSettings
+    if (opts.precision === null || opts.precision === undefined) {
+        opts.precision = 4;
+    }
+
+    let div = UI.Panel(opts);
+    div.classList.add('colorbar-settings');
+    if (opts.initiator !== '') {
+        div.setAttribute('initiator', opts.initiator);
+    }
+
+    // The elements are put in the body
+    let body = div.querySelector('.panel-body');    
+
+    // 1) Range related settings
+    let range_settings = _el({type: 'div', classes: ['category']});
+    body.appendChild(range_settings);
+    // 1.1) Title
+    let range_title = _el({type: 'div', classes: ['title']});
+    range_settings.appendChild(range_title);
+    range_title.innerText = 'Range';
+    // 1.2) min, max: double-slider
+
+    // 1.3) precision: dropdown
+    let precision = UI.DropDown({
+        label: 'precision',
+        selected_index: opts.precision,
+        items: range(0, 6)
+    });
+    range_settings.appendChild(precision);
+    precision.querySelector('.dropdown-items').onclick = extendFunction(
+        precision.querySelector('.dropdown-items').onclick,
+        null,
+        UI.UpdateColorPalette
+    );
+    
+    // 2) Color related settings
+    let color_settings = _el({type: 'div', classes: ['category']});
+    body.appendChild(color_settings);
+
+    // 2.1) Title
+    let color_title = _el({type: 'div', classes: ['title']});
+    color_settings.appendChild(color_title);
+    color_title.innerText = 'Color';
+
+    // 2.2) scheme category TODO: read that from the color definition
+    let categories = UI.DropDown({
+        label: 'category',
+        id: 'category',
+        items: ['sequential', 'diverging', 'singlehue', 'qualitative', 'all']        
+    });
+    color_settings.appendChild(categories);
+    // each time the category is changed (i.e. an item of items):
+    //   n_colors items needs to be changed
+    //   the palette needs to be changed
+    // Extend the onclick function which was already defined    
+    categories.querySelector('.dropdown-items').onclick = extendFunction(
+        categories.querySelector('.dropdown-items').onclick,
+        null,
+        UI.UpdateColorPalette
+    );
+
+    // 2.3) n_colors
+    let n_colors = UI.DropDown({
+        label: 'steps',
+        id: 'n_colors',
+        selected_index: 4,
+        items: range(3, 12)
+    });
+    color_settings.appendChild(n_colors);
+    // Each time the n_colors is changed:
+    // the palette needs to be redrawn
+    n_colors.querySelector('.dropdown-items').onclick = extendFunction(
+        n_colors.querySelector('.dropdown-items').onclick,
+        null,
+        UI.UpdateColorPalette
+    );
+
+    // 2.4) reversed
+    let rev = UI.CheckBox({label: 'reversed'});
+    color_settings.appendChild(rev);
+    rev.querySelector('.svg-icon').onclick = extendFunction(
+        rev.querySelector('.svg-icon').onclick,
+        null,
+        UI.UpdateColorPalette
+    )
+    
+    // 2.5) colormaps (result of category + n_colors) + picker
+    // here the default is handled by the ColorPalette itself
+    let palette = UI.ColorPalette();
+    color_settings.appendChild(palette);
+
+    return div;
+};
+
 // Colorpalette
 UI.ColorPalette = function (opts) {
     /**
+     * 
+     * Component of DiscreteColorbarSettings
+     * 
      * Creates colorpalette based off:
      *  - a color category: sequencing, diverging, qualitative
      *  - a color scheme
@@ -374,8 +505,11 @@ UI.ColorPalette = function (opts) {
     // Default values
     opts = opts || {};
     opts.id = opts.id || '';
-    opts.category = opts.category || 'diverging';
-    opts.n_colors = opts.n_colors || 4;
+    opts.category = opts.category || 'sequential';
+    opts.n_colors = opts.n_colors || 7;
+    if (opts.reverse === undefined || opts.reverse === null) {
+        opts.reverse = false;
+    }
     opts.min_n_colors = opts.min_n_colors || 3;
 
     let palette = _el({type: 'div', classes: ['color-palette']});
@@ -395,6 +529,35 @@ UI.ColorPalette = function (opts) {
             }
             evt.target.classList.add('selected');
             self.setAttribute('scheme', evt.target.getAttribute('tip-text'));
+            //UI.UpdateColorPalette(evt); // This is wrong. Instead we should trigger the change in the parent colarbar
+            // WE are in the palette and we need the parent of the DiscreteColorBar
+            // we have its Id in the 'initiator' attribute of the panel colorbar-settings, which contains the color-palette
+            let clrbar_settings_panel = evt.target.parentElement.parentElement.parentElement.parentElement;
+            // get the parameters. TODO: make a function since this is used in 2 places
+            let categories = clrbar_settings_panel.querySelectorAll('.category');
+            // The range settings
+            let rng_settings = categories[0];
+            let precision = Number(rng_settings.querySelector('.dropdown-selected').innerText);
+            let min = -10;
+            let max = +10;
+            // The color settings
+            let clr_settings = categories[1];
+            let reverse = clr_settings.querySelector('.checkbox .svg-icon').classList.contains('rotated');
+            let n_colors = Number(clr_settings.querySelector('#n_colors .dropdown-selected').innerText);
+
+            let clrbar_id = clrbar_settings_panel.attributes.initiator.value;
+            let clrbar = document.querySelector('#' + clrbar_id);
+            let clrbar_opts = { 
+                id: clrbar_id,
+                title: clrbar.querySelector('.description .title').innerText,
+                scheme: self.attributes.scheme.value,
+                reverse: reverse,
+                n_colors: n_colors,
+                precision: precision,
+                min: min,
+                max: max                
+            }; // get all the settings
+            clrbar_settings_panel.parentElement.replaceChild(new UI.DiscreteColorBar(clrbar_opts), clrbar);
         }
     };
     // TODO: put the color definition in a separate file, to make it easier to refer to it
@@ -417,21 +580,30 @@ UI.ColorPalette = function (opts) {
         let clrmap = _el({type: 'div', classes: ['colormap', 'tip-colormap']});
         palette.appendChild(clrmap);
         clrmap.setAttribute('tip-text', scheme);
+        if (i>=schemes.length-2) {
+            clrmap.classList.remove('tip-colormap');
+            clrmap.classList.add('tip-colormap-above');
+        }
         // first in the list is the default
         if (i === 0) {
             clrmap.classList.add('selected');
-            palette.setAttribute('scheme', scheme);
+            palette.setAttribute('scheme', scheme); // TODO: remove? => yes, since one can read the selected
         };
         
-        // Innercontainer for the flex to work
+        // Inner-container needed for the flex to work
         let clrmap_inner = _el({type: 'div', classes: ['colormap-inner']});
         clrmap.appendChild(clrmap_inner);
+        if (opts.reverse === true) {
+            clrmap_inner.classList.add('reverse');
+        }
         // Cap the number of colors to the max the scheme supports
-        n_colors = Math.max(n_colors, chroma.brewer[scheme].length);
+        n_colors = Math.min(n_colors, chroma.brewer[scheme].length);
         // All the colors
+        let colors = chroma.scale(scheme).classes(n_colors);
         for (let j=0; j<n_colors; j++) {
             let clrel = _el({type: 'div', classes: ['colormap-item']});
-            clrel.style['background-color'] = chroma.brewer[scheme][j];
+            //clrel.style['background-color'] = chroma.brewer[scheme][j];
+            clrel.style['background-color'] = colors(j/(n_colors-1));
             clrmap_inner.appendChild(clrel);
         }
     }
@@ -439,122 +611,54 @@ UI.ColorPalette = function (opts) {
     return palette;
 };
 
-UI.ColorbarSettings = function (opts) {
-    /**
-     * Colorbar settings
-     * 
-     * Should be inside a Modal so as to prevent unwanted user actions
-     * 
-     * Provides a way to set the values:
-     * Range related: 
-     *  - min, max: double-slider
-     *  - precision: dropdown
-     * Color related
-     *  - scheme category: dropdown
-     *  - n_colors (steps): dropdown
-     *  - reverse: checkbox
-     *  - scheme: colorpalette
-     */
-    opts = opts || {};
-    opts.title = 'Settings';
-    opts.closable = true;
-
-    let div = UI.Panel(opts);
-    div.classList.add('colorbar-settings');
-
-    // The elements are put in the body
-    let body = div.querySelector('.panel-body');    
-
-    // 1) Range related settings
-    let range_settings = _el({type: 'div', classes: ['category']});
-    body.appendChild(range_settings);
-    // 1.1) Title
-    let range_title = _el({type: 'div', classes: ['title']});
-    range_settings.appendChild(range_title);
-    range_title.innerText = 'Range';
-    // 1.2) min, max: double-slider
-    // 1.3) precision: dropdown
-    let precision = UI.DropDown({
-        label: 'precision',
-        items: range(0, 6)
-    });
-    range_settings.appendChild(precision);
-    
-    // 2) Color related settings
-    let color_settings = _el({type: 'div', classes: ['category']});
-    body.appendChild(color_settings);
-    // 2.1) Title
-    let color_title = _el({type: 'div', classes: ['title']});
-    color_settings.appendChild(color_title);
-    color_title.innerText = 'Color';
-    // 2.2) scheme category TODO: read that from the color definition
-    let categories = UI.DropDown({
-        label: 'category',
-        items: ['sequential', 'diverging', 'singlehue', 'qualitative', 'all']        
-    });
-    color_settings.appendChild(categories);
-    // each time the category is changed (i.e. an item of items):
-    //   n_colors items needs to be changed
-    //   the palette needs to be changed
-    // Extend the onclick function which was already defined    
-    /*
-    categories.querySelector('.dropdown-items').onclick = extendFunction(
-        categories.querySelector('.dropdown-items').onclick,
-        before,
-        after
-    );
-    
-    function before(evt) {
-        console.log(' > before');
-        console.log(evt.target);
-    }
-
-    function after(evt) {        
-        console.log(' > after');
-        console.log(evt.target);
-    }
-    */
-    categories.querySelector('.dropdown-items').onclick = extendFunction(
-        categories.querySelector('.dropdown-items').onclick,
-        null,
-        UI.UpdateColorPalette
-    );
-
-    // 2.3) n_colors
-    let n_colors = UI.DropDown({
-        label: 'steps',
-        items: range(3, 9)
-    });
-    color_settings.appendChild(n_colors);
-    n_colors.onclick = (evt) => {
-        // Each time the n_colors is changed:
-        // the palette needs to be redrawn
-    };
-    // 2.4) reversed
-    let rev = UI.CheckBox({label: 'reversed'});
-    color_settings.appendChild(rev);
-    rev.onclick = (evt) => {
-
-    };
-    // 2.5) colormaps (result of category + n_colors) + picker
-    let palette = UI.ColorPalette();
-    color_settings.appendChild(palette);
-
-    return div;
-};
-
 UI.UpdateColorPalette = function (evt) {
     /**
-     * Recreates the ColorPalette based on the inputs
+     * Recreates the ColorPalette based on the inputs of the colors category
      */
-    console.log('Updating color palette');
-    console.log(evt);
-    let opts = {};
-    opts.category = evt.target.parentElement.previousElementSibling.innerText;
-    let palette = new UI.ColorPalette(opts);
-    let container = evt.target.parentElement.parentElement.parentElement.parentElement;
-    container.removeChild(container.querySelector('.color-palette'));
-    container.appendChild(palette);
+
+    // Get the data
+    let settings = evt.target.closest('.category').parentElement;
+    // 1) Get the category item for the colors. 
+    // Depends on where the changes originated: dropdown or checkbox. The path then is diffeten
+    let clr_settings = settings.querySelectorAll('.category')[1];
+    // 1.1) Checkbox value is special. ON if svg has state 'rotated', ja..
+    let state = false;
+    if (clr_settings.querySelector('.checkbox .svg-icon').classList.contains('rotated')) {
+        state = true;
+    }
+    // 1.2) Create the options structure and use it to create a new colorpalette panel
+    let opts = {
+        category: clr_settings.querySelector('.dropdown#category .dropdown-selected').innerText,
+        scheme: clr_settings.querySelector('.color-palette').attributes.scheme.value,
+        n_colors: Number(clr_settings.querySelector('.dropdown#n_colors .dropdown-selected').innerText),
+        reverse: state
+    };
+
+    clr_settings.replaceChild(new UI.ColorPalette(opts), clr_settings.querySelector('.color-palette'));
+
+    // 2) Get the category item for the Range
+    let range_settings = settings.querySelectorAll('.category')[0];
+    // get the data and pass it to the clrbar_opts below
+    let range_opts = {
+        precision: Number(range_settings.querySelector('.dropdown-selected').innerText),
+        min: -12,
+        max: 12
+    };
+
+    // Update the colorbar component
+    let clrbar_id = settings.parentElement.attributes['initiator'].value;
+    let clrbar_opts = {
+        id: clrbar_id,
+        title: 'Quantity [unit]',        
+        scheme: opts.scheme,
+        reverse: opts.reverse,
+        n_colors: opts.n_colors,
+        precision: range_opts.precision,
+        min: range_opts.min,
+        max: range_opts.max
+    };
+    let clrbar = document.querySelector('#' + clrbar_id);
+    settings.parentElement.parentElement.replaceChild(new UI.DiscreteColorBar(clrbar_opts), clrbar);
 };
 
 // Demo
