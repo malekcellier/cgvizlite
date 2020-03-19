@@ -125,6 +125,12 @@ SvgIcon.new = function (opts) {
             evt.target.setAttribute('tip-text', '2d');
         }
     };
+    // Special processing: OBS does not work as intended, the tooltip is also rotated :-/
+    /*
+    if (opts.icon === 'pin') {
+        svgIcon.style['transform'] = 'rotate(30deg)';
+    }
+    */
 
     return svgIcon;
 };
@@ -356,7 +362,27 @@ SvgIcon._icon_info = function() {
     
     return svg;
 };
-  
+
+SvgIcon._icon_tooltip = function () {
+    let svg = this._svgTemplate();
+
+    let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+    svg.appendChild(path);
+    path.setAttribute('d', 'M52 10H12a8 8 0 0 0-8 8v20a8 8 0 0 0 8 8h4v7c0 .567.455 1 .964 1 .17 0 .345-.031.512-.121L32 46h20a8 8 0 0 0 8-8V18a8 8 0 0 0-8-8zm-8 24H20v-4h24v4zm4-8H16v-4h32v4z');    
+
+    return svg;
+};
+
+SvgIcon._icon_pin = function () {
+    let svg = this._svgTemplate();
+
+    let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');        
+    svg.appendChild(path);
+    path.setAttribute('d', 'M36 35.476V59a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1V35.476C21.103 33.696 16 27.453 16 20c0-8.836 7.163-16 16-16s16 7.164 16 16c0 7.453-5.103 13.697-12 15.476z');
+    
+    return svg;
+};
+
 SvgIcon._icon_legend = function() {
     let svg = this._svgTemplate();
         
@@ -713,7 +739,6 @@ SvgIcon._icon_switch_square_rev = function() {
 
     return svg;   
 };
-
 
 SvgIcon._icon_cube_3d = function() {
     let svg = this._svgTemplate();
