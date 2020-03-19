@@ -247,7 +247,11 @@
             evt.target.classList.toggle('clicked');
             let el_slider = components.querySelector('#slider-demo');
             if (el_slider === null) {
-                el_slider = new UI.Slider({id: 'slider-demo', value: 33});
+                el_slider = new UI.Slider({
+                    id: 'slider-demo',
+                    label: 'some kpi',
+                    value: 33
+                });
                 components.appendChild(el_slider);
             } else {
                 components.removeChild(el_slider);
@@ -285,6 +289,30 @@
         s_picker.onclick = (evt) => {
             alert(`${evt.target.innerText}: not implemented yet`);
         }
+
+        // 11) tooltip: the one that shows detailed info about the poin
+        let s_tooltip = _el({type: 'div', classes: ['demo-item']}); 
+        s_tooltip.innerText = 'tooltip';
+        menu.appendChild(s_tooltip);
+        s_tooltip.onclick = (evt) => {
+            alert(`${evt.target.innerText}: not implemented yet`);
+        }
+
+        // 12) heatmap example
+        let s_heatmap = _el({type: 'div', classes: ['demo-item']}); 
+        s_heatmap.innerText = 'heatmap';
+        menu.appendChild(s_heatmap);
+        s_heatmap.onclick = (evt) => {
+            evt.target.classList.toggle('clicked');
+            let el_heatmap = components.querySelector('#heatmap-demo');
+            if (el_heatmap === null) {
+                el_heatmap = new UI.Heatmap({id: 'heatmap-demo'});
+                components.appendChild(el_heatmap);
+            } else {
+                components.removeChild(el_heatmap);
+            }              
+        }
+
 
     </script>
 </body>

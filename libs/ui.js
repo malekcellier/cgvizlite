@@ -696,6 +696,86 @@ UI._getColorPaletteOpts = function (cbs) {
     return opts;
 };
 
+// Dummy heatmap to demonstrate the colorbar feature
+UI.Heatmap = function (opts) {
+    /**
+     * Creates a div with colors inside
+     * 
+     * opts:
+     *  - n_rows: number, how many rows
+     *  - n_cols: number, how many columns
+     *  - mode: string, how to generate the data (random, x, y, xy, xy-center)
+     * 
+     */
+    // Default
+    opts = opts || {};
+    opts.title = opts.title || 'Heatmap';
+    opts.n_rows = opts.n_rows || 20;
+    opts.n_cols = opts.n_cols || 10;
+    opts.mode = opts.mode || 'random';
+    // maybe not needed
+    opts.scheme = opts.scheme || 'Spectral';
+    opts.n_colors = opts.n_colors || 6;
+
+    let heatmap = UI.Panel(opts);
+    let colors = chroma.scale(opts.scheme).domain([0, 1]).classes(opts.n_colors);
+
+    // Values
+    let values = [];
+    let min;
+    let max;
+
+    let body = heatmap.querySelector('.panel-body');
+    body.style['display'] = 'flex';
+    body.style['flex-direction'] = 'column';
+
+    for (let i=0; i<opts.n_rows; i++) {
+        let row = _el({type: 'div', classes: ['heatmap-row']});
+        body.appendChild(row);
+        let data = [];
+        body.appendChild(row);
+        for (let j=0; j<opts.n_cols; j++) {
+            let col = _el({type: 'div', classes: ['heatmap-item']});
+            row.appendChild(col);
+            let value = getData(opts.mode, i, j);
+            let rgb = colors(value).rgb();
+            col.style['width'] = `${500/opts.n_cols}px`;
+            col.style['background-color'] = `rgb(${rgb.join(',')})`;
+            data.push(value);
+        }
+        values.push(data);
+    }
+
+    function getData(mode, i, j) {
+        let value;
+        if (mode === 'random') {            
+            value = Math.random();
+        }
+
+        return value;
+    }
+
+    return heatmap;
+};
+
+// Tooltip
+UI.Tooltip = function (opts) {
+    /**
+     * Creates a tooltip overlay on the webgl, content of overlay is configured from panel
+     * 
+     * Has 2 components:
+     *  - Configuration Panel
+     *      - checkbox: to turn on/off
+     *      - List Panel; when the checkbox is on, a panel appears under
+     *          - dropdown with search: upon click inside the panel, the dd appears. Several items can be selected
+     *  - Tooltip window
+     *      - 1st row: Title + icon of pin
+     *      - list of kpis with name: value
+     *      - possibility to 
+     * 
+     */
+};
+
 UI.ColorDefinitions = {
     brewer: function() {
         let brewer = {
