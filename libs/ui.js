@@ -207,9 +207,11 @@ UI.Slider = function (opts) {
     if (opts.id !== '') {
         div.id = opts.id;
     }
+    /*
     div.setAttribute('min', opts.min);
     div.setAttribute('max', opts.min);
     div.setAttribute('val', opts.value);
+    */
 
     // 1) First row: label and current value
     let row_1 = _el({type: 'div', classes: ['top']});
@@ -226,7 +228,16 @@ UI.Slider = function (opts) {
     // Second row: slider widget
     let row_2 = _el({type: 'div', classes: ['bottom']});
     div.appendChild(row_2);
-    row_2.innerText = 'slider bar';
+    let nput = _el('input');
+    row_2.appendChild(nput);
+    nput.type = 'range';
+    nput.min = opts.min;
+    nput.max = opts.max;
+    nput.value = opts.value;
+    nput.oninput = (evt) => {
+        let label = evt.target.parentElement.previousSibling.querySelectorAll('.label')[1];
+        label.innerText = evt.target.value;
+    };
 
     return div;
 };
