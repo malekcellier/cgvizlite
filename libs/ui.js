@@ -363,27 +363,56 @@ UI.DiscreteColorBar = function (opts) {
         console.info(`clicked on ${evt.target}`);        
     };
     // Each colorbox has its own event listener? => better to attach one to the body
+    
     // Get data from chroma
     let colors = chroma.scale(opts.scheme).domain([opts.min, opts.max]).classes(opts.n_colors);
     let values = chroma.limits([opts.min, opts.max], 'e', opts.n_colors);
     if (opts.reverse === true) {
         values = chroma.limits([opts.max, opts.min], 'e', opts.n_colors);
     }
+    // normalize text values
+    let text_values = [];
+    let max_length = 0;
+    for (let i=0; i<values.length; i++) {
+        let text_value = `${values[i].toFixed(opts.precision)}`;
+        text_values.push(text_value);
+        if (text_value.length > max_length) {
+            max_length = text_value;
+        }
+    }
+    for (let i=0; i<text_values.length; i++) {
+        let text_value = text_values[i];
+        if (text_value.length < max_length) {
+            text_value = '&nbsp;'.repeat(max_length-text_value.length) + text_value;
+        }
+    }
+
     for (let i=0; i<opts.n_colors; i++) {
         // A row container for both the svg and the description
         let container = _el({type: 'div', classes: ['colorbar-item', `_${i}`]});
         body.appendChild(container);
 
         // 1) svg
+        let span_svg = _el({type: 'span', classes: ['colorbar-item-svg']})
+        container.appendChild(span_svg);
         let svg = SvgIcon._color_box(colors(values[i]).rgb());
-        container.appendChild(svg);
+        span_svg.appendChild(svg);
         
         // 2) description
-        let desc = _el({type: 'div', classes: ['colorbar-item-desc']});
+        let desc = _el({type: 'span', classes: ['colorbar-item-desc']});
         container.appendChild(desc);
         // TODO: the first from value and the last to values are always the actual min/max
-        // when changin the min/max through the double slider, the first and last color will cover wider range (it becomes heterogneous)
-        desc.innerText = `${values[i].toFixed(opts.precision)} to ${values[i+1].toFixed(opts.precision)}`;
+        // when changing the min/max through the double slider, the first and last color will cover wider range (it becomes heterogeneous)
+        //desc.innerText = `${values[i].toFixed(opts.precision)} to ${values[i+1].toFixed(opts.precision)}`;
+        desc.innerText = `${text_values[i]} to ${text_values[i+1]}`;
+        /*
+        desc.appendChild(_el({type: 'span', innerText: `${values[i].toFixed(opts.precision)} ` }));
+        let to = _el({type: 'span', innerText: 'to' });
+        to.style['padding-left'] = '0.5em';
+        to.style['padding-right'] = '0.5em';
+        desc.appendChild(to);
+        desc.appendChild(_el({type: 'span', innerText: ` ${values[i+1].toFixed(opts.precision)}` }));
+        */
     }
 
     return colorbar;
