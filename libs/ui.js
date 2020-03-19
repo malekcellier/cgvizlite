@@ -243,6 +243,48 @@ UI.Slider = function (opts) {
 };
 
 // DoubleSlider
+UI.DoubleSlider = function (opts) {
+    /**
+     * Creates a double slider component
+     * 
+     * Description:
+     *  - has 3 rows:
+     *      - label row
+     *      - one for min
+     *      - one for max
+     *  - each min/max row has:
+     *      - a regular slider (input range)
+     *      - a left and right label
+     *      - min: left label is min, right label is inter_min
+     *      - max: left label is inter_max, right label is max
+     *  - each slider is set from the kpi range (MIN and MAX)
+     *      - in order to keep a minimum distance between min and max, we have separation
+     *      - min slider goes from MIN to MAX - separation
+     *      - max slider goes from MIN - separation to MAX
+     *  - the draggable buttons are linked to each other
+     *      - when max < min + separation => move min to min-separation
+     *      - when min > max - separation => move max to max+separation
+     * 
+     * opts:
+     *  - id: string
+     *  - label: string, name of the kpi
+     *  - min: number, kpi min value
+     *  - inter_min: number, kpi intermediate min value >= min
+     *  - max: number, kpi max value
+     *  - inter_max: number, kpi intermediate max value <= max
+     */
+    // Default values
+    opts = opts || {};
+    opts.id = opts.id || '';
+    opts.label = opts.label || 'double slider';
+    opts.min = opts.min || 0;
+    opts.inter_min = opts.inter_min || 0;
+    opts.max = opts.max || 100;
+    opts.inter_max = opts.inter_max || 100;
+
+    // Container is the div
+
+};
 
 // Checkbox
 UI.CheckBox = function (opts) {
@@ -928,6 +970,7 @@ function _el(opts) {
     opts.type = opts.type || 'div';
     opts.id = opts.id || '';
     opts.classes = opts.classes || [];
+    opts.innerText = opts.innerText || '';
 
     // Create the html dom element
     let el = document.createElement(opts.type);
@@ -940,6 +983,11 @@ function _el(opts) {
         for (let i=0; i<opts.classes.length; i++) {
             el.classList.add(opts.classes[i]);
         }
+    }
+
+    // In case innerText is defined
+    if (opts.innerText !== '') {
+        el.innerText = opts.innerText;
     }
 
     return el;
