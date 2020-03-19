@@ -49,7 +49,7 @@ Scene organization and Naming convention:
 
 2020-02-17
 ----------
-- [ ] python script to gather pov files and trace file per tx, respectively
+- [X] python script to gather pov files and trace file per tx, respectively
 - [ ] add id to sub-menu-content-pov that captures the povType_povID
 - [ ] automatic zoom when adding povs etc
 
@@ -60,7 +60,7 @@ Scene organization and Naming convention:
 - [X] fix the modal window size (appearant when not in big screen)
 - [ ] replace finished_yet with promises
 - [X] remove the output from the json loading
-- [ ] bug toggle plane does not remove the plane
+- [X] bug toggle plane does not remove the plane
 - [ ] toggle eyes in subcategories of Universe
 - [ ] toggle eyes in subcategories of scenario
 - [ ] bug: antenna position (probably due to rotations)
@@ -105,6 +105,7 @@ Scene organization and Naming convention:
 - [X] overflow of KPIs content
 - [ ] customize appearance of pov to make them more visible
 - [ ] customize appearance of obj to make them sexy
+- [ ] customize appearance of traces to make them sexy (bloom effect)
 
 2020-02-22
 -----------
@@ -121,7 +122,7 @@ Scene organization and Naming convention:
 - [X] add the container div + canvas when creating cgvizjs
 - [ ] add the count of meshes, vertices, MB etc..
 - [X] remove colorbar when all are unclicked
-- [ ] group colorbars by title => expand on-click
+- X ] group colorbars by title => expand on-click
 - [ ] colorbar for the traces
 - [ ] category for KPI: composite/ID
 - [ ] do not populate the kpis, instead provide a menu to add/remove
@@ -150,7 +151,7 @@ Scene organization and Naming convention:
     - [X] down/up
     - [X] switch-on/switch-off
     - [X] 3d/2d
-- [ ] implement method to extend any function (to be used to avoid repeating code in the eventListeners)
+- [X] implement method to extend any function (to be used to avoid repeating code in the eventListeners)
 - [X] create a demo page to showcase and test the ui components
 - [X] create ui component: discrete legend (based on colormap)
 - [X] create ui component: switch (square)?
@@ -166,5 +167,39 @@ Scene organization and Naming convention:
 
 2020-03-15
 ----------
-- [ ] group similar items (RX) => requires a way to group them
+- [X] update the colorpalette with each n_steps/category/reverse change
+- [X] apply colorpalette changes to colorbar
+- [ ] dropdown: hide the list of items when mouse is leaving the list (in order to avoid several panels open at the same time)
+- [ ] make the extend function work
 - [ ] item picker
+    - categories of KPIS => 1 color per category (power, time)
+- [ ] group similar items (RX) => requires a way to group them
+- [ ] color definition, all brewer + uber? see also https://www.groundai.com/project/colorspace-a-toolbox-for-manipulating-and-assessing-colors-and-palettes/1
+    - [X] brewer color definitions
+- [ ] bug: reversed settings does not work correctly. The colormap is updated in a wrong way
+- [X] bug: the border is not updated
+- [X] bug: the border causes the container to trigger overflow => fixed by  moving the tootip above...
+- [ ] when changing the category, the DSC is not updated immediately. do it a second time, and it updates!
+- [X] reversed does not update the DCB
+- [X] precision has no effect...
+- [ ] double slider with min/max is missing
+- [ ] align numbers in DCB. See https://stackoverflow.com/questions/1363239/aligning-decimal-points-in-html
+
+2020-03-16
+----------
+- [X] change precision to fixed decimal precision in the legend
+- [X] text in legend gets wrapped to the next line. Make sure it stays in its line
+- [ ] colorbarsettings: 'reversed' changes the palette but the DCB is not updated
+- [X] default precision value is not applied
+- [X] precision 0 is not applied (looks like 4 is applied instead)
+- [ ] default 'category' and 'scheme' are not applied in the colorpalette
+- [X] remove id in dropdown under color category
+- [X] do not change the selected when the n_colors and reversed is activated
+- [X] make sure the CBS panel reads the values from the DCB
+- [ ] reversed icon is reset each time the panel is reopened
+- [ ] some bug with selected that disappears again when changing the settings around
+
+2020-03-18
+----------
+- [ ] double slider using 2 actual slider
+- [ ] redesign slider to make it look like it belongs with the rest of the components
