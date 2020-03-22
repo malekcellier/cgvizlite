@@ -8,110 +8,117 @@ Html menu items and widgets
 # 
 # Email: malek.cellier@gmail.com
 # Created: 2020-03-08
+
 */
 
 let UI = {};
 
+// State of the widgets akin to the datagui params structure
+// for each component with ID, an element is created in this data structure
+// each time a widget is updated, the value is updated here 
+// and then it should trigger the update of the listeners...
+UI.State = {};
+
 // Widgets
-
-// Panel
-UI.Panel = function (opts) {
+UI.Widget = function(name, opts) {
     /**
-     * Creates a Panel component with optional elements
+     * Wraps the construction of the elements:
+     *  - adds padding to the element
      * 
-     * The Panel component has 2 parts:
-     *  - head: contains title, subtitle and close button
-     *      - .controls.before: for controls before the description
-     *      - .description:
-     *          - title
-     *          - subtitle
-     *      - .controls.after: for controls after the description
-     *          - close button ...
-     *  - body: contains whatever you need (add afterwards)
-     * 
-     * opts: json object with fields:
-     *  - id: string
-     *  - classes: array of strings
-     *  - title: string
-     *  - subtitle: string
-     *  - closable: bool
-     * 
+     *  name: widget name in small caps
+     *  opts: arguments for the element
      */
-    // Default values handling
-    opts = opts || {};
-    opts.id = opts.id || '';
-    opts.classes = opts.classes || [];
-    opts.title = opts.title || 'Panel Title';
-    opts.subtitle = opts.subtitle || '';
-    opts.closable = opts.closable || false;
 
-    // The Panel is a div
-    let panel = _el({type: 'div', classes: ['panel']});
-    // ID is OPTIONAL
-    if (opts.id !== '') {
-        panel.id = opts.id;
-    }
-    // Classes array is OPTIONAL
-    if (opts.classes.length > 0) {
-        for (let i=0; i<opts.classes.length; i++) {
-            panel.classList.add(opts.classes[i]);
-        }
-    }
-
-    // 1) The head
-    let head = _el({type: 'div', classes: ['panel-head']});
-    panel.appendChild(head);
-    // Styling
-    head.style.display = 'flex';
-    head.style['justify-content'] = 'space-between';
-    head.style.padding = '12px';
-
-    // 1.0) the controls (on the left hand side)
-    let controls_before = _el({type: 'div', classes: ['controls', 'before']});
-    head.appendChild(controls_before);
-
-    // 1.1) the description
-    let desc = _el({type: 'div', classes: ['description']});
-    head.appendChild(desc);
-    // 1.1.1) the title
-    let title = _el({type: 'div', classes: ['title']});
-    desc.appendChild(title);
-    title.innerText = opts.title;
-    title.onclick = (evt) => {
-        evt.target.parentElement.parentElement.nextElementSibling.classList.toggle('hidden');
+    let elements = {
+        dropdown: 'DropDown',
+        slider: 'Slider',
+        doubleslider: 'DoubleSlider',
+        checkbox: 'CheckBox',
+        tooltip: 'Tooltip'
     };
-    // 1.1.2) the sublabel is OPTIONAL
-    if (opts.subtitle !== '' || opts.subtitle) {
-        let subtitle = _el({type: 'div', classes: ['subtitle']});
-        subtitle.innerText = opts.subtitle;
-        desc.appendChild(subtitle);
-    }
 
-    // 1.2) the controls (on the right hand side)
-    let controls = _el({type: 'div', classes: ['controls', 'after']});
-    head.appendChild(controls);    
-    // 1.2.1) the close button is OPTIONAL
-    if (opts.closable === true) {
-        let close = SvgIcon.new({icon: 'close'});
-        controls.appendChild(close);
-        close.onclick = (evt) => {
-            // TODO: should it be hidden or removed when the x is clicked?
-            //evt.target.parentElement.parentElement.nextElementSibling.classList.toggle('hidden');
-            let panel = evt.target.parentElement.parentElement.parentElement;
-            panel.parentElement.removeChild(panel);
-        };
-    }
-    
-    // 2) The body
-    let body = _el({type: 'div', classes: ['panel-body']});
-    panel.appendChild(body);
-    // Styling
-    body.style.padding = '12px';
+    let widget = UI[elements[name.toLowerCase()]](opts);
+    widget.classList.add('container');
 
-    return panel;
+    return widget;
 }
 
-// Dropdown WIP
+// BASIC ELEMENTS
+
+// BASIC ELEMENTS: Button
+UI.Button = function (opts) {
+    /**
+     * Creates a button with a svg before
+     * 
+     * opts:
+     *  - innerText: string, button text
+     *  - icon: string, icon before the button's text
+     */
+    // Defaults values
+    opts = opts || {};
+    opts.id = opts.id || '';
+    opts.label = opts.label || 'Button';
+    opts.icon = opts.icon || '';
+    opts.classes = opts.classes || [];
+
+    let btn = _el({type: 'div', id: opts.id, classes: ['button', ...opts.classes]});
+    if (opts.icon !== '') {
+        btn.appendChild(SvgIcon.new({icon: opts.icon}));
+    }
+    let txt = _el({type: 'p', classes: ['button-text'], innerText: opts.label});
+    btn.appendChild(txt);
+
+    return btn;
+};
+
+// BASIC ELEMENTS: Checkbox
+UI.CheckBox = function (opts) {
+    /**
+     * Creates a CheckBox with a label and a switch (square or not)
+     * 
+     * opts:
+     *  - id: string
+     *  - classes: array of strings
+     *  - label: string
+     *  - square: bool, indicates whether the switch is of the square type
+     */
+    
+    // Default values
+    opts = opts || {};
+    opts.id = opts.id || '';
+    opts.label = opts.label || 'checkbox';
+    opts.state = opts.state || 'off'; // switches are turned off by default    
+    if (opts.square === undefined) {
+        opts.square = true;
+    }
+    opts.tip_text = opts.tip_text || opts.state;
+    
+    let checkbox = _el({type: 'div', classes: ['checkbox']});
+    if (opts.id !== '') {
+        checkbox.id = opts.id;
+    }
+
+    // The label
+    //let label = _el({type: 'div', classes: ['label']});
+    let label = _el({type: 'div', classes: ['t_label']});
+    checkbox.appendChild(label);
+    label.innerText = opts.label;
+    
+    // The Switch
+    let icon_name = 'square_switch';
+    if (opts.square === false) {
+        icon_name = 'round_switch';
+    }
+    let icon = SvgIcon.new({icon: icon_name, tip_text: opts.tip_text});
+    if (opts.state == 'on') {
+        icon.classList.toggle('clicked');
+    }
+    checkbox.appendChild(icon);
+
+    return checkbox;
+};
+
+// BASIC ELEMENTS: Dropdown
 UI.DropDown = function (opts) {
     /**
      * DropDown
@@ -139,7 +146,8 @@ UI.DropDown = function (opts) {
     }
 
     // 1) label
-    let label = _el({type: 'div', classes: ['dropdown-label']});
+    //let label = _el({type: 'div', classes: ['dropdown-label']});
+    let label = _el({type: 'div', classes: ['t_label']});
     div.appendChild(label);
     label.innerText = opts.label;
 
@@ -180,7 +188,7 @@ UI.DropDown = function (opts) {
     return div;
 };
 
-// Slider
+// BASIC ELEMENTS: Slider
 UI.Slider = function (opts) {
     /**
      * Creates a Slider component
@@ -242,7 +250,7 @@ UI.Slider = function (opts) {
     return div;
 };
 
-// DoubleSlider
+// BASIC ELEMENTS: DoubleSlider
 UI.DoubleSlider = function (opts) {
     /**
      * Creates a double slider component
@@ -276,65 +284,198 @@ UI.DoubleSlider = function (opts) {
     // Default values
     opts = opts || {};
     opts.id = opts.id || '';
-    opts.label = opts.label || 'double slider';
+    opts.label = opts.label || 'filter';
     opts.min = opts.min || 0;
-    opts.inter_min = opts.inter_min || 0;
+    opts.inter_min = opts.inter_min || opts.min;
     opts.max = opts.max || 100;
-    opts.inter_max = opts.inter_max || 100;
+    opts.inter_max = opts.inter_max || opts.max;
 
     // Container is the div
+    let div = _el({type: 'div', classes: ['double-slider']});
+    if (opts.id !== '') {
+        div.id = opts.id;
+    }
 
+    // 1) 1st row: label
+    let row_1 = _el({type: 'div', classes: ['top']});
+    div.appendChild(row_1);
+    // 1.1) Label
+    let label = _el({type: 'div', classes: ['label']});
+    row_1.appendChild(label);
+    label.innerText = opts.label;
+
+    // 2) 2nd row: min value (fixed), slider,  inter_min value (dyn)
+    let row_2 = _el({type: 'div', classes: ['middle']});
+    div.appendChild(row_2);
+    // 2.1) min & inter_min values
+    let values = _el({type: 'div', classes: ['labels']});
+    row_2.appendChild(values);    
+    // 2.1.1)
+    let min_value = _el({type: 'div', classes: ['label']});
+    values.appendChild(min_value);
+    min_value.innerText = opts.min;
+    // 2.1.2) inter_min Value
+    let inter_min_value = _el({type: 'div', classes: ['label', 'dyn']});
+    values.appendChild(inter_min_value);
+    inter_min_value.innerText = opts.inter_min;
+    // 2.2) slider
+    let nput_min = _el('input');
+    row_2.appendChild(nput_min);
+    nput_min.type = 'range';
+    nput_min.min = opts.min;
+    nput_min.max = opts.max;
+    nput_min.value = opts.min;
+    nput_min.oninput = (evt) => {
+        let label = evt.target.previousSibling.querySelectorAll('.label')[1];        
+        // If the value is greater than max, set min distance to max
+        let delta = 1;
+        let bottom = evt.target.parentElement.nextElementSibling;
+        if ( Number(evt.target.value) >= Number(bottom.querySelector('input').value) - delta) {
+            bottom.querySelector('input').value = Number(evt.target.value) + delta;
+            bottom.querySelectorAll('.labels .label')[0].innerText = bottom.querySelector('input').value;
+        }
+        if (Number(evt.target.value) >= opts.max-delta) {
+            evt.target.value = opts.max-delta;
+        }
+        // limit 
+        label.innerText = evt.target.value;
+    }
+
+    // 3) 3rd row: inter_max value (dyn), slider,  max value (fixed)
+    let row_3 = _el({type: 'div', classes: ['bottom']});
+    div.appendChild(row_3);
+    // 3.1) min & inter_min values
+    let values_max = _el({type: 'div', classes: ['labels']});
+    row_3.appendChild(values_max);    
+    // 3.1.2) inter_max Value
+    let inter_max_value = _el({type: 'div', classes: ['label', 'dyn']});
+    values_max.appendChild(inter_max_value);
+    inter_max_value.innerText = opts.inter_max;
+    // 3.1.1)
+    let max_value = _el({type: 'div', classes: ['label']});
+    values_max.appendChild(max_value);
+    max_value.innerText = opts.max;
+    // 3.2) slider
+    let nput_max = _el('input');
+    row_3.appendChild(nput_max);
+    nput_max.type = 'range';
+    nput_max.min = opts.min;
+    nput_max.max = opts.max;
+    nput_max.value = opts.max;
+    nput_max.oninput = (evt) => {
+        let label = evt.target.previousSibling.querySelectorAll('.label')[0];
+        let delta = 1;
+        let middle = evt.target.parentElement.previousElementSibling;
+        if ( Number(evt.target.value) <= Number(middle.querySelector('input').value) + delta) {
+            middle.querySelector('input').value = Number(evt.target.value) - delta;
+            middle.querySelectorAll('.labels .label')[1].innerText = middle.querySelector('input').value;
+        }
+        if (Number(evt.target.value) <= opts.min + delta) {
+            evt.target.value = opts.min + delta;
+        }
+        // limit 
+        label.innerText = evt.target.value;
+    }
+
+    return div;
 };
 
-// Checkbox
-UI.CheckBox = function (opts) {
+
+// PANEL
+UI.Panel = function (opts) {
     /**
-     * Creates a CheckBox with a label and a switch (square or not)
+     * Creates a Panel component with optional elements
      * 
-     * opts:
+     * The Panel component has 2 parts:
+     *  - head: contains title, subtitle and close button
+     *      - .controls.before: for controls before the description
+     *      - .description:
+     *          - title
+     *          - subtitle
+     *      - .controls.after: for controls after the description
+     *          - close button ...
+     *  - body: contains whatever you need (add afterwards)
+     * 
+     * opts: json object with fields:
      *  - id: string
      *  - classes: array of strings
-     *  - label: string
-     *  - square: bool, indicates whether the switch is of the square type
+     *  - title: string
+     *  - subtitle: string
+     *  - closable: bool
+     * 
      */
-    
-    // Default values
+    // Default values handling
     opts = opts || {};
     opts.id = opts.id || '';
-    opts.label = opts.label || 'checkbox';
-    opts.state = opts.state || 'off'; // switches are turned off by default
-    
-    if (opts.square === undefined) {
-        opts.square = true;
-    }
-    
-    let checkbox = _el({type: 'div', classes: ['checkbox']});
+    opts.classes = opts.classes || [];
+    opts.title = opts.title || 'Panel Title';
+    opts.subtitle = opts.subtitle || '';
+    opts.closable = opts.closable || false;
+
+    // The Panel is a div
+    let panel = _el({type: 'div', classes: ['panel']});
+    // ID is OPTIONAL
     if (opts.id !== '') {
-        checkbox.id = opts.id;
+        panel.id = opts.id;
+    }
+    // Classes array is OPTIONAL
+    if (opts.classes.length > 0) {
+        for (let i=0; i<opts.classes.length; i++) {
+            panel.classList.add(opts.classes[i]);
+        }
     }
 
-    // The label
-    let label = _el({type: 'div', classes: ['label']});
-    checkbox.appendChild(label);
-    label.innerText = opts.label;
+    // 1) The head
+    let head = _el({type: 'div', classes: ['container', 'panel-head']});
+    panel.appendChild(head);
+    // Styling
+    head.style.display = 'flex';
+    head.style['justify-content'] = 'space-between';
+
+    // 1.0) the controls (on the left hand side)
+    let controls_before = _el({type: 'div', classes: ['controls', 'before']});
+    head.appendChild(controls_before);
+
+    // 1.1) the description
+    let desc = _el({type: 'div', classes: ['description']});
+    head.appendChild(desc);
+    // 1.1.1) the title
+    let title = _el({type: 'div', classes: ['title']});
+    desc.appendChild(title);
+    title.innerText = opts.title;
+    title.onclick = (evt) => {
+        evt.target.parentElement.parentElement.nextElementSibling.classList.toggle('hidden');
+    };
+    // 1.1.2) the sublabel is OPTIONAL
+    if (opts.subtitle !== '' || opts.subtitle) {
+        let subtitle = _el({type: 'div', classes: ['subtitle']});
+        subtitle.innerText = opts.subtitle;
+        desc.appendChild(subtitle);
+    }
+
+    // 1.2) the controls (on the right hand side)
+    let controls = _el({type: 'div', classes: ['controls', 'after']});
+    head.appendChild(controls);    
+    // 1.2.1) the close button is OPTIONAL
+    if (opts.closable === true) {
+        let close = SvgIcon.new({icon: 'close'});
+        controls.appendChild(close);
+        close.onclick = (evt) => {
+            // TODO: should it be hidden or removed when the x is clicked?
+            //evt.target.parentElement.parentElement.nextElementSibling.classList.toggle('hidden');
+            let panel = evt.target.parentElement.parentElement.parentElement;
+            panel.parentElement.removeChild(panel);
+        };
+    }
     
-    // The Switch
-    let icon_name;
-    if (opts.square === true) {
-        icon_name = 'square_switch';
-    } else {
-        icon_name = 'round_switch';
-    }
-    let icon = SvgIcon.new({icon: icon_name});
-    if (opts.state == 'on') {
-        icon.classList.toggle('clicked');
-    }
-    checkbox.appendChild(icon);
+    // 2) The body
+    let body = _el({type: 'div', classes: ['container', 'panel-body']});
+    panel.appendChild(body);
 
-    return checkbox;
-};
+    return panel;
+}
 
-// Header
+// Panel-based elements: Header
 UI.Header = function (opts) {
     /**
      * Creates a header menu with options
@@ -346,12 +487,48 @@ UI.Header = function (opts) {
      *  - subtitle: string
      *  - closable: bool 
      */
-    let header = this.Panel(opts);
+    // Default values handling
+    opts = opts || {};
+    opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
+    opts.title = opts.title || 'Panel Title';
+    opts.subtitle = opts.subtitle || '';
+    opts.closable = opts.closable || false;
+
+    opts.before = opts.before || [];
+    opts.after = opts.after || [];
+    
+    let header = UI.Panel(opts);
+    // remove the body
+
+    // add the icons for the before category
+    let before = header.querySelector('.controls.before');
+    if (opts.before !== []) {
+        for (let i=0; i<opts.before.length; i++) {
+            let icon = opts.before[i];
+            if (SvgIcon.isIcon(icon)) {
+                let svg = SvgIcon.new({icon: icon});
+                before.appendChild(svg);
+            }
+        }
+    }
+
+    // add the icons for the after category
+    let after = header.querySelector('.controls.after');
+    if (opts.after !== []) {
+        for (let i=0; i<opts.after.length; i++) {
+            let icon = opts.after[i];
+            if (SvgIcon.isIcon(icon)) {
+                let svg = SvgIcon.new({icon: icon});
+                after.appendChild(svg);
+            }
+        }
+    }
 
     return header;
 }
 
-// Discrete ColorBar
+// Panel-based elements: Discrete ColorBar
 UI.DiscreteColorBar = function (opts) {
     /**
      * Discrete Colorbar
@@ -375,6 +552,8 @@ UI.DiscreteColorBar = function (opts) {
     if (opts.precision === null || opts.precision === undefined) {
         opts.precision = 2;
     }
+    opts.inter_min = opts.inter_min || opts.min;
+    opts.inter_max = opts.inter_max || opts.max;
 
     let colorbar = UI.Panel(opts);
     colorbar.classList.add('colorbar');
@@ -407,10 +586,22 @@ UI.DiscreteColorBar = function (opts) {
     // Each colorbox has its own event listener? => better to attach one to the body
     
     // Get data from chroma
-    let colors = chroma.scale(opts.scheme).domain([opts.min, opts.max]).classes(opts.n_colors);
-    let values = chroma.limits([opts.min, opts.max], 'e', opts.n_colors);
+    let min = Number(opts.inter_min);
+    let max = Number(opts.inter_max);
+    let colors = chroma.scale(opts.scheme).domain([min, max]).classes(opts.n_colors);
+    let values = chroma.limits([min, max], 'e', opts.n_colors);
+    if (opts.edges) {
+        // including the edges means that the intervals [min, inter_min] & [inter_max, max] 
+        // will be allocated to 1 color regardless of their span
+        let delta = (max-min)/opts.n_colors;
+        opts.n_colors += 2; // NOTE: Here the n_colors widget should change (i.e. trigger UpdateCOlorPalette)
+        document.querySelectorAll('.category .dropdown-selected')[2].innerText = `${opts.n_colors}`;
+        document.querySelectorAll('.category .dropdown-selected')[2].click();
+        colors = chroma.scale(opts.scheme).domain([min - delta, max + delta]).classes(opts.n_colors);
+        values = [opts.min, ...values, opts.max];
+    }
     if (opts.reverse === true) {
-        values = chroma.limits([opts.max, opts.min], 'e', opts.n_colors);
+        values = chroma.limits([max, min], 'e', opts.n_colors);
     }
     // normalize text values
     let text_values = [];
@@ -460,6 +651,7 @@ UI.DiscreteColorBar = function (opts) {
     return colorbar;
 };
 
+// Panel-based elements: DiscreteColorbarSettings
 UI.DiscreteColorbarSettings = function (opts) {
     /**
      * Colorbar settings
@@ -501,7 +693,31 @@ UI.DiscreteColorbarSettings = function (opts) {
     range_settings.appendChild(range_title);
     range_title.innerText = 'Range';
     // 1.2) min, max: double-slider
-
+    let double_slider = new UI.DoubleSlider(opts);
+    range_settings.appendChild(double_slider);
+    double_slider.querySelectorAll('input[type=range]')[0].oninput = extendFunction(
+        double_slider.querySelectorAll('input[type=range]')[0].oninput,
+        null,
+        UI.UpdateColorPalette
+    );    
+    double_slider.querySelectorAll('input[type=range]')[1].oninput = extendFunction(
+        double_slider.querySelectorAll('input[type=range]')[1].oninput,
+        null,
+        UI.UpdateColorPalette
+    );
+    // 1.3) include edges
+    let edges = UI.CheckBox({label: 'include edges'});
+    range_settings.appendChild(edges);
+    if (opts.edges === true) {
+        let svg = edges.querySelector('.svg-icon');
+        svg.classList.add('rotated');
+        svg.querySelector('svg').style.transform = 'rotate(180deg)';
+    }
+    edges.querySelector('.svg-icon').onclick = extendFunction(
+        edges.querySelector('.svg-icon').onclick,
+        null,
+        UI.UpdateColorPalette
+    )
     // 1.3) precision: dropdown
     let precision = UI.DropDown({
         label: 'decimals',
@@ -586,7 +802,6 @@ UI.DiscreteColorbarSettings = function (opts) {
 
     return div;
 };
-
 // Colorpalette
 UI.ColorPalette = function (opts) {
     /**
@@ -653,12 +868,12 @@ UI.ColorPalette = function (opts) {
     for (let i=0; i<schemes.length; i++) {
         let scheme = schemes[i];
         // The colormap
-        let clrmap = _el({type: 'div', classes: ['colormap', 'tip-colormap']});
+        let clrmap = _el({type: 'div', classes: ['colormap', 'info-colormap']});
         palette.appendChild(clrmap);
-        clrmap.setAttribute('tip-text', scheme);
+        clrmap.setAttribute('info-text', scheme);
         if (i>=schemes.length-2) { // that's a fix for the y-overflow
-            clrmap.classList.remove('tip-colormap');
-            clrmap.classList.add('tip-colormap-above');
+            clrmap.classList.remove('info-colormap');
+            clrmap.classList.add('info-colormap-above');
         }
         // first in the list is the default
         if (i === opts.scheme_index) {
@@ -736,6 +951,9 @@ UI._getColorPaletteOpts = function (cbs) {
     // There is 1 dropdown with the precision
     let rng_dd = range_settings.querySelectorAll('.dropdown-selected');
     // The 1 double slider with min/max
+    let rng_mm = range_settings.querySelectorAll('input[type=range]');
+    // 1 checkbox with ise edges
+    let eng_cb = range_settings.querySelector('.checkbox .svg-icon');
     
     // Color settings
     let color_settings = cbs.querySelectorAll('.category')[1];
@@ -764,21 +982,24 @@ UI._getColorPaletteOpts = function (cbs) {
         title: cb.querySelector('.description .title').innerText, // of the DSB
         // Range
         precision: Number(rng_dd[0].innerText),
-        min: -25,
-        max: +21,
+        min: Number(rng_mm[0].min),
+        max: Number(rng_mm[0].max),
+        inter_min: Number(rng_mm[0].value),
+        inter_max: Number(rng_mm[1].value),
+        edges: eng_cb.classList.contains('rotated'),
         // Colors
         category: clr_dd[0].innerText,
         n_colors: Number(clr_dd[1].innerText),
         reverse: clr_cb.classList.contains('rotated'),
         // Clicked scheme
-        scheme: clr_sc.attributes['tip-text'].value,
+        scheme: clr_sc.attributes['info-text'].value,
         scheme_index: scheme_index
     };
 
     return opts;
 };
 
-// Dummy heatmap to demonstrate the colorbar feature
+// Panel-based elements: Dummy heatmap to demonstrate the colorbar feature
 UI.Heatmap = function (opts) {
     /**
      * Creates a div with colors inside
@@ -855,9 +1076,162 @@ UI.Tooltip = function (opts) {
      *      - list of kpis with name: value
      *      - possibility to 
      * 
+     * TODO: make the position follow the zoom & pan from threejs by calculating and passing the left/top position to the style
+     * 
      */
+    // Default handling
+    opts = opts || {};
+    opts.label = opts.label || 'some scenario';
+    opts.items = opts.items || {'item 1': 123, 'item 2': 'abc', 'something': 0.198, 'anything': 'O_O'};
+
+    let tooltip = _el({type: 'div', classes: ['tooltip']});
+    
+    // The head has a layers icon and the name of the scenario
+    let head = _el({type: 'div', classes: ['head']});
+    tooltip.appendChild(head);
+    head.appendChild(SvgIcon.new({icon: 'layers'}));
+    head.appendChild(_el({type: 'div', classes: ['label'], innerText: opts.label}));
+
+    // The body has a table with the key/values
+    let body = _el({type: 'div', classes: ['body']});
+    tooltip.appendChild(body);
+    // The table that contains the items
+    let table = _el({type: 'table', classes: ['table']});
+    body.appendChild(table);
+    let tbody = _el({type: 'tbody', classes: ['tbody']});
+    table.appendChild(tbody);
+    let keys = Object.keys(opts.items);
+    for (let i=0; i<keys.length; i++) {
+        let row = _el({type: 'tr'});
+        tbody.appendChild(row);
+        row.appendChild(_el({type: 'td', innerText: keys[i]}));
+        row.appendChild(_el({type: 'td', classes: ['value'], innerText: opts.items[keys[i]]}));
+    }
+
+    return tooltip; 
 };
 
+// OTHER
+
+// Resizer
+UI.Resizer = function (opts) {
+    /**
+     * Creates Resizers structure and adds it to existing div
+     * makes it possible to resize any div
+     * 
+     * opts: 
+     *  - id, string. Id of the target div
+     * 
+     */
+    let target = document.querySelector(`#${opts.id}`);
+    if (target === null) {
+        let demo_components = document.querySelector(`#${opts.parent}`);
+        target = _el({type: 'div', id: 'resizer-demo'});
+        target.style['width'] = '200px';
+        target.style['height'] = '100px';
+        target.style['background-color'] = 'white';
+        demo_components.appendChild(target);
+    }
+
+    target.classList.toggle('resizable');
+
+    let resizer = _el({type: 'div', classes: ['resizers']});
+    target.appendChild(resizer);
+    resizer.appendChild(_el({type: 'div', classes: ['resizer', 'top-left']}));
+    resizer.appendChild(_el({type: 'div', classes: ['resizer', 'top-right']}));
+    resizer.appendChild(_el({type: 'div', classes: ['resizer', 'bottom-left']}));
+    resizer.appendChild(_el({type: 'div', classes: ['resizer', 'bottom-right']}));
+
+    let min_width = 100;
+    let min_height = 50;
+
+    makeResizable(`#${opts.id}`);
+
+    function makeResizable(id) {
+        const element = document.querySelector(id);
+        const resizers = document.querySelectorAll(id + ' .resizer')
+        const minimum_size = 20;
+        let original_width = 0;
+        let original_height = 0;
+        let original_x = 0;
+        let original_y = 0;
+        let original_mouse_x = 0;
+        let original_mouse_y = 0;
+        for (let i = 0;i < resizers.length; i++) {
+            const currentResizer = resizers[i];
+            currentResizer.addEventListener('mousedown', function(evt) {
+                evt.preventDefault()
+                original_width = parseFloat(getComputedStyle(element, null).getPropertyValue('width').replace('px', ''));
+                original_height = parseFloat(getComputedStyle(element, null).getPropertyValue('height').replace('px', ''));
+                original_x = element.getBoundingClientRect().left;
+                original_y = element.getBoundingClientRect().top;
+                original_mouse_x = evt.pageX;
+                original_mouse_y = evt.pageY;
+                window.addEventListener('mousemove', resize);
+                window.addEventListener('mouseup', stopResize);
+            });
+        }
+
+        function resize(evt) {
+            let currentResizer = evt.target;
+            if (currentResizer.classList.contains('resizer')) {
+                let width;
+                let height;
+                if (currentResizer.classList.contains('bottom-right')) {
+                    width = original_width + (evt.pageX - original_mouse_x);
+                    height = original_height + (evt.pageY - original_mouse_y);
+                    if (width > minimum_size) {
+                        element.style.width = width + 'px';
+                    }
+                    if (height > minimum_size) {
+                        element.style.height = height + 'px';
+                    }
+                }
+                else if (currentResizer.classList.contains('bottom-left')) {
+                    height = original_height + (evt.pageY - original_mouse_y);
+                    width = original_width - (evt.pageX - original_mouse_x);
+                    if (height > minimum_size) {
+                        element.style.height = height + 'px';
+                    }
+                    if (width > minimum_size) {
+                        element.style.width = width + 'px';
+                        element.style.left = original_x + (evt.pageX - original_mouse_x) + 'px';
+                    }
+                }
+                else if (currentResizer.classList.contains('top-right')) {
+                    width = original_width + (evt.pageX - original_mouse_x);
+                    height = original_height - (evt.pageY - original_mouse_y);
+                    if (width > minimum_size) {
+                        element.style.width = width + 'px';
+                    }
+                    if (height > minimum_size) {
+                        element.style.height = height + 'px';
+                        element.style.top = original_y + (evt.pageY - original_mouse_y) + 'px';
+                    }
+                }
+                else {
+                    width = original_width - (evt.pageX - original_mouse_x);
+                    height = original_height - (evt.pageY - original_mouse_y);
+                    if (width > minimum_size) {
+                        element.style.width = width + 'px';
+                        element.style.left = original_x + (evt.pageX - original_mouse_x) + 'px';
+                    }
+                    if (height > minimum_size) {
+                        element.style.height = height + 'px';
+                        element.style.top = original_y + (evt.pageY - original_mouse_y) + 'px';
+                    }
+                }
+            }
+        }
+
+        function stopResize() {
+            window.removeEventListener('mousemove', resize);
+        }
+    }
+
+};
+
+// Color definitions
 UI.ColorDefinitions = {
     brewer: function() {
         let brewer = {
@@ -872,7 +1246,7 @@ UI.ColorDefinitions = {
     }
 };
 
-// Demo
+// Demo of all elements and widgets
 UI.Demo = function () {
     /**
      * Simple component to demo the ui
@@ -920,16 +1294,17 @@ UI.Demo = function () {
 }
 
 // Icons showcase
-UI.IconsShowCase = function () {
+UI.IconsShowCase = function (opts) {
     /**
      * Shows all the implemented icons
      */
-    let div = _el({type: 'div', id: 'icon-demo', classes: ['icons']});
+    opts = opts || {};
+    opts.id = opts.id || 'icon-demo';
+    let div = _el({type: 'div', id: opts.id, classes: ['icons', 'container']});
     div.style.display = 'flex';
     div.style['flex-direction'] = 'row';
     div.style['flex-wrap'] = 'wrap';
-    div.style['justify-content'] = 'flex-start';
-    div.style.padding = '20px';
+    div.style['justify-content'] = 'flex-start';    
     div.style['background-color'] = 'var(--color-bg-body)';
     div.style.border = '1px white solid';
 
@@ -940,7 +1315,7 @@ UI.IconsShowCase = function () {
         let pos = ['top', 'bottom', 'left', 'right'];
         let j = Math.round(Math.random() * (pos.length-1));
 
-        let svgIcon = SvgIcon.new({icon: icons[i], tip_pos: `tip-${pos[j]}`});
+        let svgIcon = SvgIcon.new({icon: icons[i], tip_pos: `info-${pos[j]}`});
         svgIcon.style['padding-right'] = '10px';
         div.appendChild(svgIcon);
     }
@@ -948,7 +1323,7 @@ UI.IconsShowCase = function () {
     return div;
 }
 
-// Helper functions
+// Helper functions. NOTE: should this moved to utils.js instead?
 
 function _el(opts) {
     /**

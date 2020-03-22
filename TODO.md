@@ -158,9 +158,9 @@ Scene organization and Naming convention:
 - [X] create ui component: checkbox (= label + square_switch)
     - [X] make switches only one svg + rotation + label update
 - [X] create ui component: dropdown
-- [ ] create ui component: slider
-- [ ] create ui component: double slider
-- [ ] create ui component: colormap editor
+- [X] create ui component: slider
+- [X] create ui component: double slider
+- [X] create ui component: colormap editor
     - [X] create ui component: color-palette
 - [ ] rebuild cgviz-menu using ui.js instead
     - [ ]
@@ -182,7 +182,7 @@ Scene organization and Naming convention:
 - [ ] when changing the category, the DSC is not updated immediately. do it a second time, and it updates!
 - [X] reversed does not update the DCB
 - [X] precision has no effect...
-- [ ] double slider with min/max is missing
+- [X] double slider with min/max is missing
 - [ ] align numbers in DCB. See https://stackoverflow.com/questions/1363239/aligning-decimal-points-in-html
 
 2020-03-16
@@ -201,5 +201,5 @@ Scene organization and Naming convention:
 
 2020-03-18
 ----------
-- [ ] double slider using 2 actual slider
+- [X] double slider using 2 actual slider
 - [ ] redesign slider to make it look like it belongs with the rest of the components

@@ -17,11 +17,11 @@ def process_all(path_name):
     Find all pov and trace files and gather them by Tx
     """
     os.mkdir(os.path.join(path_name, 'processed'))
-    processPovs(path_name)
-    processTraces(path_name)
+    process_povs(path_name)
+    process_traces(path_name)
 
 
-def processPovs(path_name):
+def process_povs(path_name):
     '''
     Gathers all qcmPov.Rx01.json files into qcmPov.Rx.json
     note that the qualifier for the Pov is not always the same. The fixed part is qcmPov.*.json
@@ -40,13 +40,13 @@ def processPovs(path_name):
         with open(file, 'r') as fid:
             data[pov_type][pov_id] = json.load(fid)
 
-    for pov_type in data.keys():
+    for pov_type, pov_data in data.items():
         filename = 'qcmPov.' + pov_type + '.json'
         with open(os.path.join(path_name, 'processed', filename), 'w') as outfile:
-            json.dump(data[pov_type], outfile)
+            json.dump(pov_data, outfile)
 
 
-def processTraces(path_name):
+def process_traces(path_name):
     '''
     Gathers all qcmTracev.Rx01.json files into qcmPov.Rx.json
     Gathers all qcmTrace.Tx05-Rx1567.json files into qcmTrace.Tx05.json
@@ -75,10 +75,10 @@ def processTraces(path_name):
             data[tx_id][rx_id] = json.load(fid)
 
     # Write the files on the HD
-    for tx_id in data.keys():
+    for tx_id, tx_data in data.items():
         filename = 'qcmTrace.' + tx_id + '.json'
         with open(os.path.join(path_name, 'processed', filename), 'w') as fid:
-            json.dump(data[tx_id], fid)
+            json.dump(tx_data, fid)
 
 
 #process_all('D:\\temp\\outputQcm\\dummy')

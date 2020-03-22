@@ -36,6 +36,14 @@ SvgIcon.getList = function () {
     return icons;
 };
 
+SvgIcon.elements = SvgIcon.getList();
+
+SvgIcon.isIcon = function (icon) {
+    // TODO check that icon is a string
+    let elements = SvgIcon.getList();
+    return elements.includes(icon);
+}
+
 SvgIcon.new = function (opts) {
     /**
      * Creates a new div containing a SVG Icon
@@ -50,7 +58,8 @@ SvgIcon.new = function (opts) {
     opts = opts || {};
     opts.icon = opts.icon || 'close';
     opts.attrs = opts.attrs || {};
-    opts.tip_pos = opts.tip_pos || 'tip-bottom';
+    opts.tip_pos = opts.tip_pos || 'info-bottom';
+    opts.tip_text = opts.tip_text || opts.icon;
 
     let svgIcon = document.createElement('div');
     svgIcon.classList.add('svg-icon');
@@ -67,8 +76,10 @@ SvgIcon.new = function (opts) {
     }
     // add tooltip
     svgIcon.classList.add(opts.tip_pos);
+    // add icon type as attribute
+    svgIcon.setAttribute('type', opts.icon);
     // add tooltip text
-    svgIcon.setAttribute('tip-text', opts.icon);
+    svgIcon.setAttribute('info-text', opts.tip_text);
     // add click event
     svgIcon.onclick = (evt) => {
         evt.target.classList.toggle('clicked');
@@ -81,7 +92,8 @@ SvgIcon.new = function (opts) {
          */
         // NOTE: this function will have to be extended in order to add extra behaviors
         // See https://stackoverflow.com/questions/9134686/adding-code-to-a-javascript-function-programmatically/54379923#54379923
-        let icon_name = evt.target.attributes['tip-text'].value;
+        //let icon_name = evt.target.attributes['info-text'].value;
+        let icon_name = evt.target.attributes['type'].value;
         //if (icon_name === 'down' || icon_name === 'switch_square' || icon_name === 'switch_square_rev') {
         if (['down', 'switch_square', 'switch_square_rev', 'square_switch', 'round_switch'].includes(icon_name)) {
             if (evt.target.classList.contains('rotated')) {
@@ -102,27 +114,27 @@ SvgIcon.new = function (opts) {
         } else if (icon_name === 'eye_open') {
             evt.target.removeChild(evt.target.querySelector('svg'));
             evt.target.appendChild(this._get('eye_closed'));
-            evt.target.setAttribute('tip-text', 'eye_closed');
+            evt.target.setAttribute('type', 'eye_closed');
         } else if (icon_name === 'eye_closed') {
             evt.target.removeChild(evt.target.querySelector('svg'));
             evt.target.appendChild(this._get('eye_open'));
-            evt.target.setAttribute('tip-text', 'eye_open');
+            evt.target.setAttribute('type', 'eye_open');
         } else if (icon_name === 'switch_on') {
             evt.target.removeChild(evt.target.querySelector('svg'));
             evt.target.appendChild(this._get('switch_off'));
-            evt.target.setAttribute('tip-text', 'switch_off');
+            evt.target.setAttribute('type', 'switch_off');
         } else if (icon_name === 'switch_off') {
             evt.target.removeChild(evt.target.querySelector('svg'));
             evt.target.appendChild(this._get('switch_on'));
-            evt.target.setAttribute('tip-text', 'switch_on');
+            evt.target.setAttribute('type', 'switch_on');
         } else if (icon_name === '2d') {
             evt.target.removeChild(evt.target.querySelector('svg'));
             evt.target.appendChild(this._get('3d'));
-            evt.target.setAttribute('tip-text', '3d');
+            evt.target.setAttribute('type', '3d');
         } else if (icon_name === '3d') {
             evt.target.removeChild(evt.target.querySelector('svg'));
             evt.target.appendChild(this._get('2d'));
-            evt.target.setAttribute('tip-text', '2d');
+            evt.target.setAttribute('type', '2d');
         }
     };
     // Special processing: OBS does not work as intended, the tooltip is also rotated :-/
@@ -210,7 +222,7 @@ SvgIcon._icon_cgviz = function() {
     return svg;
 };
 
-SvgIcon._icon_scenarios = function() {
+SvgIcon._icon_layers = function() {
     let svg = this._svgTemplate();
         
     let path = document.createElementNS("http://www.w3.org/2000/svg", 'path');        

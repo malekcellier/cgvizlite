@@ -8,30 +8,33 @@ Styling of the tips (contextual piece of information)
 # 
 # Email: malek.cellier@gmail.com
 # Created: 2020-03-10
+
+TODO: rename to info
+
 */
 
 :root {
     --border-size: 12px;
 }
 
-.tip-left,
-.tip-right,
-.tip-top,
-.tip-bottom,
-.tip-colormap,
-.tip-colormap-above
+.info-left,
+.info-right,
+.info-top,
+.info-bottom,
+.info-colormap,
+.info-colormap-above
 {
     /*display: inline;*/
     position: relative;
     /*transition: all 2s ease-out; NOT working, requires the ::after and ::before el to be defined*/
 }
 
-.tip-left:hover::after,
-.tip-right:hover::after,
-.tip-top:hover::after,
-.tip-bottom:hover::after,
-.tip-colormap:hover::after,
-.tip-colormap-above:hover::after
+.info-left:hover::after,
+.info-right:hover::after,
+.info-top:hover::after,
+.info-bottom:hover::after,
+.info-colormap:hover::after,
+.info-colormap-above:hover::after
 {
     position: absolute;
     display: block;
@@ -42,38 +45,38 @@ Styling of the tips (contextual piece of information)
     text-shadow: 0 1px 0 #000;
     white-space: nowrap;
     z-index: 98;
-    content: attr(tip-text);
+    content: attr(info-text);
 }
 
-.tip-left:hover::after {
+.info-left:hover::after {
     bottom: -6px; /* since the icon is normally 32x32 */
     right: 42px;
 }
-.tip-right:hover::after {
+.info-right:hover::after {
     bottom: -6px; /* since the icon is normally 32x32 */
     left: 32px;
 }
-.tip-top:hover::after {
+.info-top:hover::after {
     bottom: 32px; /* since the icon is normally 32x32 */
     left: -16px;
 }
-.tip-bottom:hover::after {
+.info-bottom:hover::after {
     bottom: -40px; /* since the icon is normally 32x32 */
     left: -16px;
 }
-.tip-colormap:hover::after {
+.info-colormap:hover::after {
     bottom: -36px; /* since the icon is normally 32x32 */
     right: 42px;
 }
-.tip-colormap-above:hover::after {
+.info-colormap-above:hover::after {
     bottom: 36px; /* since the icon is normally 32x32 */
     right: 42px;
 }
 
-.tip-left:hover::before,
-.tip-right:hover::before,
-.tip-top:hover::before,
-.tip-bottom:hover::before
+.info-left:hover::before,
+.info-right:hover::before,
+.info-top:hover::before,
+.info-bottom:hover::before
 {
     position: absolute;
     display: block;
@@ -82,22 +85,22 @@ Styling of the tips (contextual piece of information)
     content: "";
 }
 
-.tip-left:hover::before {
+.info-left:hover::before {
     border-left: var(--border-size) solid rgba(0,0,0,.8); /* top right bottom left*/
     bottom: -2px;
     right: 24px;
 }
-.tip-right:hover::before {
+.info-right:hover::before {
     border-right: var(--border-size) solid rgba(0,0,0,.8);
     bottom: -2px;
     left: 14px;
 }
-.tip-top:hover::before {
+.info-top:hover::before {
     border-top: var(--border-size) solid rgba(0,0,0,.8);
     bottom: 14px;
     left: 0px;
 }
-.tip-bottom:hover::before {
+.info-bottom:hover::before {
     border-bottom: var(--border-size) solid rgba(0,0,0,.8);
     bottom: -14px;
     left: 0px;

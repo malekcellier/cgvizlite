@@ -1,0 +1,745 @@
+/*
+
+ui.css
+
+Styling of the ui.js component suite
+
+# Author: Malek Cellier
+# 
+# Email: malek.cellier@gmail.com
+# Created: 2020-03-08
+*/
+
+/* CSS Variables */
+:root {
+    /* Surfaces */
+    --color-bg-button: #6a7485; /* buttons */
+    --color-bg-head: #3a4552; /* panel header top - hierarchy L1*/
+    --color-bg-head-darker: #29323c; /* panel header - hierarchy L2 */
+    --color-bg-body: #242730; /* panel body - backgrounds*/
+    --color-bg-lighter: #3a414c; /* Dropdown focused - used with  --color-txt-label*/
+    --color-bg-darker: #1f2129; /*  */
+    /* Text */
+    --color-txt-bright: rgb(255, 255, 255); /* Title - used with --color-bg-body */
+    --color-txt: rgb(240, 240, 240);  /* Label:hover - used with head/body/lighter */
+    --color-txt-colormap: rgb(200, 200, 200);  /* legend item */
+    --color-txt-label: rgb(160, 167, 180);   /* label - used with --color-bg-body */
+    --color-txt-sublabel: rgb(106, 116, 133);  /* sublabel - used with --color-bg-head-darker */
+    --color-txt-link: rgb(31, 186, 214);      /* logo - used with --color-bg-head-darker */
+    --color-svg: #6a7485;
+    --color-svg-hover: #fff;
+    /* Specific colors */
+    --color-purple: rgb(143, 47, 191);
+    --color-orange: rgb(192, 108, 132);
+    --color-green: rgb( 84, 122, 130);
+    --color-green-bright: rgb( 19, 177, 123);
+    --color-blue: rgb(  0, 92, 255);
+    --color-blue-light: #4286f4;
+    --color-melon: rgb(248, 177, 149);
+    --color-cyan: rgb( 62, 172, 168);    
+    /* Colors for some boxes */
+    --color-box-yellow: rgb(248,194,28);
+    --color-box-green: rgb(140,210,205);
+    --color-box-blue: rgb(106, 160, 206);
+    --color-icon: rgb(144, 152, 167);
+
+    /* Sizes */
+    --padding: 12px;
+  }
+
+body {
+    background: var(--color-bg-darker);  
+    padding: 0;
+    margin: 0;
+    font-family: Consolas, 'Maven Pro', Consolas, Roboto, serif;
+    font-weight: 400;    
+    font-size: 0.875em;    
+    line-height: 1.71429;    
+  }
+  
+  body, div {
+    box-sizing: border-box;
+  }
+
+/*
+  Hierarchy of containers:
+  - (transparent) container: div without padding, margin
+  - (padded) container: div with padding, the parent of each standalone widget
+*/
+
+/* Global >> */
+.container {
+  padding: var(--padding) !important;
+  min-width: 150px;
+}
+
+.outer-container {
+  padding: 0;
+  margin: 0;
+}
+
+.inner-container {
+  padding: var(--padding) !important;
+  min-width: 150px;
+}
+
+.hidden {
+  /* using !important to make sure the hidden rule is always enforced whenpresent in a lsit of classes*/
+  display: none !important;
+}
+
+._debug-show {
+  /* for debugging purposes*/
+  border: 1px white solid !important;
+}
+/* Global << */
+
+/* Text >> */
+.t_title {
+  box-sizing: border-box;
+  font-size: 14px;
+  font-size: calc(var(--padding) + 2px);
+  color: var(--color-txt-label);  
+}
+.t_subtitle {
+  box-sizing: border-box;
+  font-size: calc(var(--padding) - 2px);
+  color: var(--color-txt-sublabel);
+}
+.t_label, .t_value { /* Meant to be used on the left hand side of a widget to describe the right hand side*/
+  box-sizing: border-box;
+  font-size: var(--padding);
+  color: var(--color-txt-sublabel);
+  font-weight: 400;
+  text-transform: capitalize;
+}
+.t_label {
+  flex-grow: 1;
+}
+/* Text << */
+
+/* svg icon >> */
+.svg-icon {
+  box-sizing: content-box;
+  cursor: pointer;
+  height: 18px;
+  width: 18px;
+}
+
+.svg-icon svg{
+  color: var(--color-icon);
+  pointer-events: none;
+}
+
+.svg-icon:hover svg{
+  color: var(--color-txt);
+}
+
+.svg-icon.clicked svg{
+  color: var(--color-txt-bright);
+}
+/* svg icon << */
+
+/** 1) SIMPLE WIDGETS >>
+  this includes:
+    - 1.1) button
+    - 1.2) checkbox
+    - 1.3) dropdown
+    - 1.4) slider
+    - 1.5) double slider
+ */
+
+ /* 1.1) Button >> */
+.button {
+  width: 115px;    
+  background-color: var(--color-green-bright);
+  border-radius: 2px;
+  color: var(--color-txt-bright);
+  font-size: 11px;    
+  font-weight: 500; 
+  letter-spacing: 0.3px;    
+  text-transform: capitalize;
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center;
+  transition: all 0.4s ease 0s;    
+  padding: 0 var(--padding) 0 var(--padding);
+  cursor: pointer;
+  pointer-events: all;    
+}
+
+.button.cancel {
+  background-color: var(--color-orange);
+}
+
+.button:hover {
+  opacity: 0.75; 
+}
+
+.button .svg-icon {
+  padding-right: 8px; /* to make sure the icon is separated from the paragraph*/
+}
+/* 1.1) Button << */
+
+/* 1.2) Checkbox << */
+/* common to .slider, .double-slider*/
+.checkbox {
+  background-color: var(--color-bg-head-darker);
+  max-width: 200px;
+  width: 100%; /* TODO: all should inherit form a type with a fixed size*/ 
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  color: var(--color-txt-label);
+}
+.checkbox .svg-icon.clicked svg{  
+  color: var(--color-box-green);
+}
+/*
+.checkbox .label, .checkbox .svg-icon {
+  /*padding: 12px;*//*
+  padding-bottom: 12px;
+  text-transform: capitalize;
+}
+*/
+/* 1.2) Checkbox >> */
+
+/* 1.3) Dropdown << */
+.dropdown {
+  box-sizing: border-box;
+  max-width: 200px;
+  background-color: var(--color-bg-head-darker);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  /*padding: 10px;*/
+  padding-bottom: 12px;
+}
+
+.dropdown-label {
+  flex-grow: 1;
+  box-sizing: border-box;
+  color: var(--color-txt-sublabel);
+  /*display: inline-block;*/
+  font-size: 11px;
+  font-weight: 400;
+  /*
+  margin-bottom: 4px;
+  margin: auto;
+  */
+  text-transform: capitalize;
+}
+
+.dropdown-data {
+  flex-grow: 1;
+  box-sizing: border-box;
+  position: relative;
+  color: var(--color-txt-label);
+  font-size: 12px;
+  /*margin: auto;*/
+  text-align: right;
+}
+
+.dropdown-selected {
+  box-sizing: border-box;
+  margin: auto;
+  width: 100%;
+  align-items: center;
+  cursor: pointer;
+  background-color: var(--color-bg-body);
+  height: 34px;
+  text-overflow: ellipsis;
+  border: 1px solid var(--color-bg-body);
+  border-radius: 2px;  
+  padding: 6px;
+  /*padding-left: 12px;  */
+  padding-right: 12px;
+}
+
+.dropdown-selected.active {
+  background-color: var(--color-bg-lighter);
+  border-color: white;
+}
+
+.dropdown-items {
+  /*box-sizing: border-box;*/
+  width: 100%;  
+  position: absolute;
+  left: 0px;
+  bottom: auto;
+  display: flex;
+  flex-direction: column;  
+  background-color: var(--color-bg-lighter);
+  border-top: 1px solid var(--color-bg-body);
+  overflow-y: auto;
+  max-height: 280px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 6px 12px 0px;
+  border-radius: 2px;
+  z-index: 100;
+  margin-top: 4px;
+  margin-bottom: auto;
+}
+
+.dropdown-item {
+  /*box-sizing: border-box;*/
+  padding: 3px 9px;
+  padding-right: 12px;
+}
+
+.dropdown-item:hover {
+  cursor: pointer;
+  background-color: var(--color-txt-sublabel);
+  transition: all 0.4s ease 0s;
+}
+/* 1.3) Dropdown >> */
+
+/* 1.4) Slider << */
+/* common to .checkbox, .double-slider*/
+.slider {
+  background-color: var(--color-bg-head-darker);
+  max-width: 200px;
+  width: 100%; /* TODO: all should inherit form a type with a fixed size*/ 
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  color: var(--color-txt-label);
+  /*
+  font-size: 14px;
+  align-items: baseline;
+  margin: auto;
+  */
+}
+
+.slider {
+  flex-direction: column;
+}
+
+input[type=range] {
+  -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
+  width: 100%; /* Specific width is required for Firefox. */
+  background: transparent; /* Otherwise white in Chrome */
+}
+
+/* FIREFOX */
+input[type=range]::-moz-range-track {
+  background-color: var(--color-txt-sublabel);
+  height: 2px;
+  height: 1px;
+}
+
+input[type=range]::-moz-range-progress {
+  background-color: var(--color-txt-bright);
+  height: 3px;
+  height: 1px;
+}
+
+input[type=range]::-moz-range-thumb {
+  width: 6px;
+  height: 6px;
+  border-radius: 10%;
+  background: var(--color-txt-bright);
+  border: 1px solid var(--color-txt-bright);
+  cursor: pointer;
+}
+
+/* CHROME */
+input[type=range]::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  background: var(--color-txt-sublabel);
+  height: 1px;
+}
+
+input[type=range]::-webkit-progress-value {  
+  -webkit-appearance: none;
+  background: var(--color-txt-bright);
+  height: 1px;
+} 
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  
+  margin-top: -3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 10%;
+  background: var(--color-txt-bright);
+  border: 1px solid var(--color-txt-bright);
+  cursor: pointer;
+} 
+
+/* IE */
+input[type="range"]::-ms-fill-lower {
+  background-color: var(--color-txt-bright)
+}
+
+input[type="range"]::-ms-fill-upper {
+  background-color: var(--color-txt-sublabel);
+}
+
+.label {
+  color: var(--color-txt-sublabel);
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: capitalize;
+}
+
+.label.dyn {
+  background-color: var(--color-bg-body);
+  padding: 0 12px 0 12px;
+}
+
+.slider .top{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 12px;
+  display: flex;
+  padding: 0;
+}
+
+.slider .bottom {
+  padding: 0 12px 0 12px;
+  padding: 0;
+}
+
+/* 1.4) Slider >> */
+
+/* 1.5) Double Slider << */
+/* common to .checkbox, .slider*/
+.double-slider {
+  background-color: var(--color-bg-head-darker);
+  max-width: 200px;
+  width: 100%; /* TODO: all should inherit form a type with a fixed size*/ 
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  color: var(--color-txt-label);
+}
+.double-slider {
+  flex-direction: column;
+}
+
+.double-slider .top{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  display: flex;
+  padding: 12px 12px 0 12px;
+  padding: 0;
+  padding-bottom: 6px;
+}
+
+.double-slider .middle, 
+.double-slider .bottom {
+  flex-direction: column;
+  padding: 0 12px 0 12px;
+  padding: 0;
+  padding-left: 6px;
+}
+
+.double-slider .labels {
+  /*padding: 12px;*/
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+/* 1.5) Double Slider >> */
+
+/** 1) SIMPLE WIDGETS << */
+
+/** 2) COMPLEX WIDGETS >>
+  this includes:
+    - 2.1) panel
+    - 2.2) colorbar
+    - 2.3) colormap
+    - 2.4) heatmap
+    - 2.5) tooltip
+ */
+
+/** 2) COMPLEX WIDGETS << */
+
+/* 2.1) Panel >> */
+/* 2.1) Panel << */
+
+/* 2.2) Colorbar >> */
+/* 2.2) Colorbar << */
+
+/* 2.3) Colormap >> */
+/* 2.3) Colormap << */
+
+/* 2.4) Heatmap >> */
+/* 2.4) Heatmap << */
+
+/* 2.5) Tooltip >> */
+.tooltip {
+  background-color: var(--color-bg-head-darker);  
+  max-width: 500px;
+  z-index: 1001;
+  position: absolute;
+  overflow-x: auto;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-txt-label);
+}
+
+.tooltip .head {
+  display: flex;
+  -moz-box-align: center;
+  align-items: center;
+  padding: 0px 14px;
+  margin-top: 12px;
+}
+
+.tooltip .head .label {
+  text-transform: capitalize;
+  letter-spacing: 0.43px;
+  font-size: 12px;
+  color: var(--color-txt);
+}
+
+.tooltip .head .svg-icon {
+  padding-right: 4px;
+}
+
+.tooltip .body .table {
+  width: auto;
+  margin: 2px 12px 12px;
+}
+
+.tooltip .body .table .tbody {
+  border-top: medium none transparent;
+  border-bottom: medium none transparent;
+}
+
+.tooltip .body .table .tbody td {
+  border-color: transparent;
+  padding: 4px;
+  color: var(--color-txt-label);
+}
+
+.tooltip .body .table .tbody td.value {
+  text-align: right;
+  font-weight: 500;
+  color: var(--color-txt);
+}
+
+/* 2.5) Tooltip << */
+
+/* Panel >> */
+.panel {
+  position: relative; /*absolute;*/
+  top: 0px;
+  left: 0px;
+  width: 200px;
+  padding: 0px;
+}
+
+  .panel-head {
+    background-color: var(--color-bg-head);
+    flex-wrap: wrap; /* to make sure the .controls.before stays at 0 when empty*/
+    align-items: center;
+  }
+
+    .panel-head .description {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      padding-left: calc(var(--padding)*0.75);
+    }
+
+    .panel-head .controls {
+      display: flex;
+      flex-direction: row;
+    }
+
+.controls.before {
+  /*flex-basis: 100%; /* to make sure the .controls.before stays at 0 when empty*/
+}
+
+.title {
+  font-size: 14px;
+  color: var(--color-txt-label);
+}
+
+.description .title:hover {
+  font-weight: 900;
+  color: var(--color-txt-bright);
+  cursor: pointer;
+}
+
+.subtitle {
+  font-size: 10px;
+  color: var(--color-txt-sublabel);
+}
+
+.panel-body {
+  background-color: var(--color-bg-body);
+}
+/* Panel << */ 
+
+.panel.colorbar .panel-head {
+  color: var(--color-txt);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.colorbar-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  /*padding: 4px;*/
+}
+
+.colorbar-item svg {
+  pointer-events: none;
+  /*padding-top: 6px;*/
+}
+
+.colorbar-item-svg {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+}
+
+.colorbar-item-desc {
+  color: var(--color-txt-colormap);
+  font-size: 11px;
+  font-weight: 900;
+  /*height: 15px;*/
+  padding-left: 10px;
+  /*padding-top: 4px;*/
+  /*line-height: 12px;*/
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: row;
+  align-items: end;
+}
+
+.colorbar-settings .panel-head{
+  background-color: var(--color-bg-body);
+}
+
+.colorbar-settings .panel-body{
+  background-color: var(--color-bg-head-darker);
+}
+
+.heatmap-row {
+  display: flex;
+  flex-direction: row;
+  width: 500px;
+  /*border: 1px solid steelblue;*/
+}
+
+.heatmap-item {
+  height: 12px;
+}
+
+
+.color-palette {
+  /*padding: 0px 8px;*/
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.colormap {
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  border: 1px solid transparent;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.colormap div[class*='info-'] {
+  display: block;
+}
+
+.colormap:hover {
+  background-color: var(--color-bg-head);
+  cursor: pointer;
+}
+
+.colormap.selected {
+  border-color: white;
+}
+
+.colormap-inner {
+  height: 10px;
+  border-radius: 2px;
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  justify-content: space-between;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.colormap-inner.reverse {
+  transform: scale(-1, 1);
+}
+
+.colormap-item {
+  flex-grow: 1;
+  pointer-events: none;  
+}
+
+.category .title {
+  border-bottom: 1px solid var(--color-txt-sublabel);
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+}
+
+
+
+/** 3) OTHERS >>
+  this includes:
+    - 3.1) resizers
+    - 3.2) mover
+ */
+
+/* 3.1) resizers >> */
+.resizers{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border: 1px dashed var(--color-blue-light);
+  box-sizing: border-box;
+}
+
+.resizers .resizer{
+  width: 10px;
+  height: 10px;
+  border-radius: 10%;
+  background: black;
+  border: 1px solid white;
+  position: absolute;
+}
+
+.resizers .resizer.top-left {
+  left: -5px;
+  top: -5px;
+  cursor: nwse-resize;
+}
+.resizers .resizer.top-right {
+  right: -5px;
+  top: -5px;
+  cursor: nesw-resize;
+}
+.resizers .resizer.bottom-left {
+  left: -5px;
+  bottom: -5px;
+  cursor: nesw-resize;
+}
+.resizers .resizer.bottom-right {
+  right: -5px;
+  bottom: -5px;
+  cursor: nwse-resize;
+}
+/* 3.1) resizers << */
+
