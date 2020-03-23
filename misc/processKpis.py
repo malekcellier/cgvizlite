@@ -15,21 +15,48 @@ import shutil
 
 def process_all(path_name):
     """
-    Find all pov and trace files and gather them by Tx
+    Process all files coming from the older version of QCM used together with KPIs2JSON prior to 2020-01
+    In future versions of the ray tracer, a new conversion script is (will be) available that directly outputs the kpis in fewer number of files.
+
+    The present function has the following responsibilities
+        - move all existing files to a subdirectory called raw
+        - merge the povs files from raw/ and put them above raw
+        - merge the trace files from raw/ and put them above raw
+        - zip all the files in raw/ to raw.zip
+        - delete the raw directory and only leave the raw.zip behind
     """
-    os.mkdir(os.path.join(path_name, 'processed'))
-    print(f'Merging files')
-    print(f'1) Povs:')
+    directory = os.path.join(path_name, 'raw')
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+
+    print(f'Move files to:{directory}')
+    files = os.path.join(path_name, '*.*')
+    for file in glob.glob(files):
+        shutil.move(file, directory)
+
+    print(f'Zip folder {directory}')
+    shutil.make_archive(os.path.join('.', 'raw'), 'zip', directory)
+
+    print('Merging files')
     process_povs(path_name)
-    
-    print(f'2) Traces:')
     process_traces(path_name)
 
-    print(f'Copying files')
-    print(f'1) Kpis:')
-    process_kpis(path_name)
-    print(f'2) OBJs and MTL:')
-    process_obj(path_name)
+    print('Copy qcmKpis and OBJ files')
+    cwd = os.path.join(path_name)
+    kpi_files = os.path.join(path_name, 'raw', 'qcmKpis.*.json')
+    for file in glob.glob(kpi_files):
+        shutil.copy(file, cwd)
+    
+    obj_files = os.path.join(path_name, 'raw', '*.obj')
+    for file in glob.glob(obj_files):
+        shutil.copy(file, cwd)    
+    
+    mtl_files = os.path.join(path_name, 'raw', '*.mtl')
+    for file in glob.glob(mtl_files):
+        shutil.copy(file, cwd)
+
+    print('Delete the raw/ folder')
+    shutil.rmtree(directory)
 
 
 def process_povs(path_name):
@@ -37,10 +64,12 @@ def process_povs(path_name):
     Gathers all qcmPov.Rx01.json files into qcmPov.Rx.json
     note that the qualifier for the Pov is not always the same. The fixed part is qcmPov.*.json
     '''
+    print(f'1) Povs:')
     data = {}
 
-    file_re = os.path.join(path_name, 'qcmPov.*.json')
+    file_re = os.path.join(path_name, 'raw', 'qcmPov.*.json')
 
+    # Read the files and put them in a single dictionary
     for file in glob.glob(file_re):
         name = file.split('.')[1]
         # pov type and id
@@ -51,9 +80,10 @@ def process_povs(path_name):
         with open(file, 'r') as fid:
             data[pov_type][pov_id] = json.load(fid)
 
+    # Write each 1st level ke yto a separate file
     for pov_type, pov_data in data.items():
         filename = 'qcmPov.' + pov_type + '.json'
-        with open(os.path.join(path_name, 'processed', filename), 'w') as outfile:
+        with open(os.path.join(path_name, filename), 'w') as outfile:
             json.dump(pov_data, outfile)
 
 
@@ -63,10 +93,12 @@ def process_traces(path_name):
     Gathers all qcmTrace.Tx05-Rx1567.json files into qcmTrace.Tx05.json
     note that the qualifier for the Pov is not always the same. The fixed part is qcmTrace..*.json
     '''
+    print(f'2) Traces:')
     data = {}
 
-    file_re = os.path.join(path_name, 'qcmTrace.*.json')
+    file_re = os.path.join(path_name, 'raw', 'qcmTrace.*.json')
 
+    # Read the files and put them in a single dictionary
     for file in glob.glob(file_re):
         name = file.split('.')[1]
         # The name can contain - to separate the tx from the rx
@@ -88,32 +120,5 @@ def process_traces(path_name):
     # Write the files on the HD
     for tx_id, tx_data in data.items():
         filename = 'qcmTrace.' + tx_id + '.json'
-        with open(os.path.join(path_name, 'processed', filename), 'w') as fid:
+        with open(os.path.join(path_name, filename), 'w') as fid:
             json.dump(tx_data, fid)
-
-
-def process_kpis(path_name):
-    '''
-    Copies all the kpis files to the processed directory
-    '''
-    files = os.path.join(path_name, 'qcmKpis.*.json')
-
-    for file in glob.glob(files):
-        shutil.copy(file, os.path.join(path_name, 'processed'))
-
-
-def process_obj(path_name):
-    '''
-    Copies all the obj nd mtl files to the processed directory
-    '''
-    obj_files = os.path.join(path_name, '*.obj')
-    for file in glob.glob(obj_files):
-        shutil.copy(file, os.path.join(path_name, 'processed'))
-
-    mtl_files = os.path.join(path_name, '*.mtl')
-    for file in glob.glob(mtl_files):
-        shutil.copy(file, os.path.join(path_name, 'processed'))
-
-
-
-#process_all('D:\\temp\\outputQcm\\dummy')
