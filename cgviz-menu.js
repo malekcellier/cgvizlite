@@ -1444,7 +1444,7 @@ class CgVizMenu {
                 file_reader.onload = function(evt){
                     let this_file = JSON.parse(evt.target.result);
                     if (file.name.includes('qcmPov')) {
-                        self.__handleQcmPov(this_file);
+                        self.__handleQcmPov(this_file, file.webkitRelativePath);
                     } else if (file.name.includes('qcmTrace')) {
                         self.__handleQcmTrace(this_file, file.webkitRelativePath);
                     } else if (file.name.includes('qcmKpis')) {
@@ -1572,18 +1572,30 @@ class CgVizMenu {
         qcmUniverse.objs[thisFile.name] = thisFile;
     }
 
-    __handleQcmPov(thisFile) {
+    __handleQcmPov(thisFile, fileParts) {
         // the file name is typically built like so: qcmPov.Rx22.json but it has a tag with its name
         //data.scenarios[dir_name].qcmPov[thisFile.tag] = thisFile;
         // split the name in 2 parts: pov type & id
         // ex Rx01 becomes 'Rx' & '01'  
         let qcmPov = this.cgviz.data.scenarios[this.cgviz.data.selected].qcmPov;
-        let pov_type = thisFile.tag.replace(/[0-9]/g, '');
-        let pov_id = thisFile.tag.replace(/\D/g,'');
-        if (!qcmPov.hasOwnProperty(pov_type)) {
-            qcmPov[pov_type] = {};
+
+        // In case the compact form is used, there are no number in the name
+        let pathParts = fileParts.split('/');
+        let filename = pathParts[1];
+        let filenameParts = filename.split('.');
+        let centralPart = filenameParts[1];
+        // if no numbers, then all data is here       
+        if (centralPart.match(/\d+/g) === null) {            
+            qcmPov[centralPart] = thisFile;
+        } else {
+            // there is a number in the name, so it is not the compact version
+            let pov_type = thisFile.tag.replace(/[0-9]/g, '');
+            let pov_id = thisFile.tag.replace(/\D/g,'');
+            if (!qcmPov.hasOwnProperty(pov_type)) {
+                qcmPov[pov_type] = {};
+            }
+            qcmPov[pov_type][pov_id] = thisFile;
         }
-        qcmPov[pov_type][pov_id] = thisFile;
     }
 
     __handleQcmTrace(thisFile, fileParts) {
@@ -1599,21 +1611,28 @@ class CgVizMenu {
         let filename = pathParts[1];
         let filenameParts = filename.split('.');
         let centralPart = filenameParts[1].split('-');
-        let txId, rxId;
-        if (centralPart.length==2) {
-            txId = centralPart[0];
-            rxId = centralPart[1];
-        } else if (centralPart.length==4) {
-            txId = centralPart[0] + '-' + centralPart[1];
-            rxId = centralPart[2] + '-' + centralPart[3];
+        // For the compact version where all Tx1-Rxa have been merged for all a to Tx1
+        // there is only one central component to the name, if of course - has not been used in the name
+        // DO NOT USE the - in the name
+        if (centralPart.length==1) {
+            qcmTrace[centralPart] = thisFile;
         } else {
-            alert('the number of components in the name is not as expected :-S')
+            let txId, rxId;
+            if (centralPart.length==2) {
+                txId = centralPart[0];
+                rxId = centralPart[1];
+            } else if (centralPart.length==4) {
+                txId = centralPart[0] + '-' + centralPart[1];
+                rxId = centralPart[2] + '-' + centralPart[3];
+            } else {
+                alert('the number of components in the name is not as expected :-S')
+            }
+            // Save the data across 2 levels: txId then rxId
+            if (!qcmTrace.hasOwnProperty(txId)) {
+                qcmTrace[txId] = {};
+            }
+            qcmTrace[txId][rxId] = thisFile;
         }
-        // Save the data across 2 levels: txId then rxId
-        if (!qcmTrace.hasOwnProperty(txId)) {
-            qcmTrace[txId] = {};
-        }
-        qcmTrace[txId][rxId] = thisFile;
     }
 
     __handleQcmKpis(thisFile, fileParts) {
