@@ -1511,6 +1511,15 @@ class CgVizMenu {
             obj_reader.onload = function(evt) {
                 let obj = new THREE.OBJLoader().parse(evt.target.result);
                 obj.name = threed.objs[i].file.name;
+                // HACK to forcefully turn doubleside ON
+                for (let ii=0;ii<obj.children.length; ii++) {
+                    let o = obj.children[ii];
+                    if (o.isMesh) {
+                        for (let jj=0; jj<o.material.length;jj++) {
+                            o.material[jj].side = THREE.DoubleSide;
+                        }
+                    }
+                }
                 self.__handleObj(obj)
             };
             obj_reader.onprogress = function(xhr) {
