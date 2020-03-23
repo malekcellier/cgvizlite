@@ -10,6 +10,7 @@ import json
 import re
 import glob
 import os
+import shutil
 
 
 def process_all(path_name):
@@ -17,8 +18,18 @@ def process_all(path_name):
     Find all pov and trace files and gather them by Tx
     """
     os.mkdir(os.path.join(path_name, 'processed'))
+    print(f'Merging files')
+    print(f'1) Povs:')
     process_povs(path_name)
+    
+    print(f'2) Traces:')
     process_traces(path_name)
+
+    print(f'Copying files')
+    print(f'1) Kpis:')
+    process_kpis(path_name)
+    print(f'2) OBJs and MTL:')
+    process_obj(path_name)
 
 
 def process_povs(path_name):
@@ -79,6 +90,30 @@ def process_traces(path_name):
         filename = 'qcmTrace.' + tx_id + '.json'
         with open(os.path.join(path_name, 'processed', filename), 'w') as fid:
             json.dump(tx_data, fid)
+
+
+def process_kpis(path_name):
+    '''
+    Copies all the kpis files to the processed directory
+    '''
+    files = os.path.join(path_name, 'qcmKpis.*.json')
+
+    for file in glob.glob(files):
+        shutil.copy(file, os.path.join(path_name, 'processed'))
+
+
+def process_obj(path_name):
+    '''
+    Copies all the obj nd mtl files to the processed directory
+    '''
+    obj_files = os.path.join(path_name, '*.obj')
+    for file in glob.glob(obj_files):
+        shutil.copy(file, os.path.join(path_name, 'processed'))
+
+    mtl_files = os.path.join(path_name, '*.mtl')
+    for file in glob.glob(mtl_files):
+        shutil.copy(file, os.path.join(path_name, 'processed'))
+
 
 
 #process_all('D:\\temp\\outputQcm\\dummy')
