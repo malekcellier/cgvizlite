@@ -248,21 +248,31 @@
             toggleComponent('Heatmap', {id: 'heatmap-demo'});         
         }
 
-        // 2.4) Grouper
-        let s_grouper = _el({type: 'div', classes: ['demo-item'], innerText: 'grouper'}); 
+        // 2.4) Item Grouper
+        let s_grouper = _el({type: 'div', classes: ['demo-item'], innerText: 'item grouper'}); 
         menu.appendChild(s_grouper);
         s_grouper.onclick = (evt) => {
-            alert(`${evt.target.innerText}: not implemented yet`);
+            evt.target.classList.toggle('clicked');
+            toggleComponent('ItemGrouper', {id: 'item-grouper-demo'});
         }
 
         // 2.5) item picker
         let s_picker = _el({type: 'div', classes: ['demo-item'], innerText: 'item picker'}); 
         menu.appendChild(s_picker);
         s_picker.onclick = (evt) => {
-            alert(`${evt.target.innerText}: not implemented yet`);
+            evt.target.classList.toggle('clicked');
+            toggleComponent('ItemPicker', {id: 'item-picker-demo'});
         }
 
-        // 2.6) tooltip: the one that shows detailed info about a hovered point
+        // 2.5) item griper
+        let s_griper = _el({type: 'div', classes: ['demo-item'], innerText: 'item griper'}); 
+        menu.appendChild(s_griper);
+        s_griper.onclick = (evt) => {
+            evt.target.classList.toggle('clicked');
+            toggleComponent('ItemGriper', {id: 'item-griper-demo'});
+        }
+
+        // 2.7) tooltip: the one that shows detailed info about a hovered point
         let s_tooltip = _el({type: 'div', classes: ['demo-item'], innerText: 'tooltip'}); 
         menu.appendChild(s_tooltip);
         s_tooltip.onclick = (evt) => {

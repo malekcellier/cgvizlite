@@ -19,7 +19,7 @@ let UI = {};
 // and then it should trigger the update of the listeners...
 UI.State = {};
 
-// Widgets
+// Widgets factory
 UI.Widget = function(name, opts) {
     /**
      * Wraps the construction of the elements:
@@ -93,10 +93,7 @@ UI.CheckBox = function (opts) {
     }
     opts.tip_text = opts.tip_text || opts.state;
     
-    let checkbox = _el({type: 'div', classes: ['checkbox']});
-    if (opts.id !== '') {
-        checkbox.id = opts.id;
-    }
+    let checkbox = _el({type: 'div', id: opts.id, classes: ['checkbox']});
 
     // The label
     //let label = _el({type: 'div', classes: ['label']});
@@ -139,11 +136,8 @@ UI.DropDown = function (opts) {
     opts.selected_index = opts.selected_index || 0; // how to keep track of the actual element?
 
     
-    let div = _el({type: 'div', classes: ['dropdown']});
+    let div = _el({type: 'div', id: opts.id, classes: ['dropdown']});
     //div.setAttribute('index', opts.selected_index);
-    if (opts.id !== '') {
-        div.id = opts.id;
-    }
 
     // 1) label
     //let label = _el({type: 'div', classes: ['dropdown-label']});
@@ -211,10 +205,7 @@ UI.Slider = function (opts) {
     opts.max = opts.max || 100;
     opts.value = opts.value || 75;
 
-    let div = _el({type: 'div', classes: ['slider']});
-    if (opts.id !== '') {
-        div.id = opts.id;
-    }
+    let div = _el({type: 'div', id: opts.id, classes: ['slider']});
     /*
     div.setAttribute('min', opts.min);
     div.setAttribute('max', opts.min);
@@ -291,10 +282,7 @@ UI.DoubleSlider = function (opts) {
     opts.inter_max = opts.inter_max || opts.max;
 
     // Container is the div
-    let div = _el({type: 'div', classes: ['double-slider']});
-    if (opts.id !== '') {
-        div.id = opts.id;
-    }
+    let div = _el({type: 'div', id: opts.id, classes: ['double-slider']});
 
     // 1) 1st row: label
     let row_1 = _el({type: 'div', classes: ['top']});
@@ -413,11 +401,8 @@ UI.Panel = function (opts) {
     opts.closable = opts.closable || false;
 
     // The Panel is a div
-    let panel = _el({type: 'div', classes: ['panel']});
-    // ID is OPTIONAL
-    if (opts.id !== '') {
-        panel.id = opts.id;
-    }
+    let panel = _el({type: 'div', id: opts.id, classes: ['panel']});
+
     // Classes array is OPTIONAL
     if (opts.classes.length > 0) {
         for (let i=0; i<opts.classes.length; i++) {
@@ -829,10 +814,7 @@ UI.ColorPalette = function (opts) {
         opts.scheme_index = 0;
     } 
 
-    let palette = _el({type: 'div', classes: ['color-palette']});
-    if (opts.id !== '') {
-        palette.id = opts.id;
-    }
+    let palette = _el({type: 'div', id: opts.id, classes: ['color-palette']});
     palette.onclick = (evt) => {
         /**
          * The click is handlede at the level of the colormap
@@ -1081,10 +1063,11 @@ UI.Tooltip = function (opts) {
      */
     // Default handling
     opts = opts || {};
+    opts.id = opts.id || '';
     opts.label = opts.label || 'some scenario';
-    opts.items = opts.items || {'item 1': 123, 'item 2': 'abc', 'something': 0.198, 'anything': 'O_O'};
+    opts.items = opts.items || {'item 1': 123, 'item 2': 'abc', 'something': 0.198, 'anything': 'O_O', 'something else': 3.141592};
 
-    let tooltip = _el({type: 'div', classes: ['tooltip']});
+    let tooltip = _el({type: 'div', id: opts.id, classes: ['tooltip']});
     
     // The head has a layers icon and the name of the scenario
     let head = _el({type: 'div', classes: ['head']});
@@ -1109,6 +1092,160 @@ UI.Tooltip = function (opts) {
     }
 
     return tooltip; 
+};
+
+// ItemGrouper
+UI.ItemGrouper = function (opts) {
+    /**
+     * Creates an grouper i.e. a container with a list of elements
+     */
+    // Default values
+    opts = opts || {};
+    opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
+    opts.selected = opts.selected || ['item 1', 'item 2', 'item 3', 'item 4', 'item 5', 'item 6', 'item 7'];
+
+    let div = _el({type: 'div', id: opts.id, classes: ['item-grouper']});
+    // content
+    let content = _el({type: 'div', classes: ['content']});
+    div.appendChild(content);
+    // items    
+    for (let i=0; i<opts.selected.length; i++) {
+        let item = _el({type: 'div', classes: ['item']});
+        content.appendChild(item);
+        item.onclick = (evt) => {
+            if (evt.target.classList.contains('item')) {
+                evt.target.parentElement.parentElement.removeChild(evt.target.parentElement);
+            }
+        };
+        let span = _el({type: 'span', innerText: opts.selected[i]});
+        item.appendChild(span);
+        item.appendChild(SvgIcon.new({icon: 'close'}));
+    }
+
+    return div;
+}
+
+// Item Picker
+UI.ItemPicker = function (opts) {
+    /**
+     * Creates a container where the items are listed. Upon clicking within the container, a list with a search bar appears below.
+     * Items have a close button to remove them from the container.
+     * 
+     * There should be 2 cases: allow multiple or not
+     * 
+     */
+
+    // Default values
+    opts = opts || {};
+    opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
+    if (opts.multiple === null) {
+        opts.multiple = true;
+    }
+    let fake_items = [
+        {name: 'item 1', category: 'int'},
+        {name: 'item 2', category: 'float'},
+        {name: 'item 3', category: 'string'},
+        {name: 'item 4', category: 'geo'},
+        {name: 'item 5', category: 'int'},
+        {name: 'item 6', category: 'int'},
+        {name: 'item 7', category: 'string'},
+        {name: 'item 8', category: 'geo'},
+        {name: 'item 9', category: 'float'},
+        {name: 'item 0', category: 'geo'},
+    ];
+    opts.items = opts.items || fake_items;
+    opts.filtered_items = opts.filtered_items || fake_items;
+
+    let div = _el({type: 'div', id: opts.id, classes: ['item-picker', ...opts.classes]});
+
+    // The search bar is made of an input field and a search icon
+    let bar = _el({type: 'div', classes: ['search-bar']});
+    div.appendChild(bar);
+    // input field
+    let input = _el('input');    
+    bar.appendChild(input);
+    input.type = 'text';
+    input.placeholder = 'Search';
+    // icon
+    bar.appendChild(SvgIcon.new({icon: 'search'}));
+    // When entering keys, the filtered_items list reduces to a smaller list
+    input.oninput = null;
+
+    // Category mapping
+    let mapping = {
+        'int': 'yellow',
+        'float': 'red',
+        'string': 'green',
+        'geo': 'blue'
+    };
+
+    // The list of items
+    let items = _el({type: 'div', classes: ['search-items']});
+    div.appendChild(items);
+    for (let i=0; i<opts.items.length;i++) {
+        let item = _el({type: 'div', classes: ['search-item']})
+        items.appendChild(item);
+        // Each item has a (not unique) category icon (float, int, string or kpi type)
+        let cat = _el({type: 'div', classes: ['category']});
+        item.appendChild(cat);
+        let el = _el({type: 'div', classes: ['element'], innerText: opts.items[i].category});
+        cat.appendChild(el);
+        el.classList.add(mapping[opts.items[i].category]);
+        // and a span for the actual name
+        let span = _el({type: 'span', innerText: opts.items[i].name});
+        item.appendChild(span);
+    }
+
+    // functions to handle the dynamic search and filtering
+    function handleSearch(keyword) {
+        let items_copy = items.slice();
+        items_copy.sort((a, b) => {
+            return getSimilarity(b, keyword) - getSimilarity(a, keyword);
+        });
+        
+        function getSimilarity(data, keyword) {
+            data = data.toLowerCase();
+            keyword = keyword.toLowerCase();
+            return data.length - data.replace(new RegExp(keyword, 'g'), '').length;
+        }
+
+        return items_copy;
+    }
+
+
+    return div;
+
+};
+
+// Item Picker and Grouper
+UI.ItemGriper = function (opts) {
+    /**
+     * Creates an item picker and grouper
+     * combines the UI.ItemGrouper & UI.ItemPicker
+     */
+    // Default values
+    opts = opts || {};
+    opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
+    if (opts.multiple === null) {
+        opts.multiple = true;
+    }
+    opts.items = opts.items || ['item 1', 'item 2', 'item 3', 'item 4', 'item 5', 'item 6', 'item 7'];
+    opts.selected = opts.selected || [];
+
+    let div = _el({type: 'div', id: opts.id, classes: ['item-picker', ...opts.classes]});
+
+    // the output of the selection
+    let output = _el({type: 'div', classes: ['output']});
+    div.appendChild(output);
+    
+    // the search bar
+    let input = _el({type: 'div', classes: ['input']});
+    div.appendChild(input);
+
+    return div;    
 };
 
 // OTHER

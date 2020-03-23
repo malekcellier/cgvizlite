@@ -15,9 +15,9 @@ Styling of the ui.js component suite
     /* Surfaces */
     --color-bg-button: #6a7485; /* buttons */
     --color-bg-head: #3a4552; /* panel header top - hierarchy L1*/
-    --color-bg-head-darker: #29323c; /* panel header - hierarchy L2 */
-    --color-bg-body: #242730; /* panel body - backgrounds*/
-    --color-bg-lighter: #3a414c; /* Dropdown focused - used with  --color-txt-label*/
+    --color-bg-head-darker: #29323c; /* panel header - hierarchy L2 /=rgb(41, 50, 60) */
+    --color-bg-body: #242730; /* panel body - backgrounds / =rgb(36, 39, 48)*/
+    --color-bg-lighter: #3a414c; /* Dropdown focused - used with  --color-txt-label / =rgb(58, 65, 76)*/
     --color-bg-darker: #1f2129; /*  */
     /* Text */
     --color-txt-bright: rgb(255, 255, 255); /* Title - used with --color-bg-body */
@@ -38,9 +38,12 @@ Styling of the ui.js component suite
     --color-melon: rgb(248, 177, 149);
     --color-cyan: rgb( 62, 172, 168);    
     /* Colors for some boxes */
-    --color-box-yellow: rgb(248,194,28);
-    --color-box-green: rgb(140,210,205);
-    --color-box-blue: rgb(106, 160, 206);
+    --alpha-box: 0.2;
+    --raw-box-yellow: 248, 194, 28;
+    --raw-box-green: 140, 210, 205;
+    --raw-box-blue: 106, 160, 206;
+    --raw-box-red: 206, 106, 106;
+
     --color-icon: rgb(144, 152, 167);
 
     /* Sizes */
@@ -526,6 +529,228 @@ input[type="range"]::-ms-fill-upper {
 }
 
 /* 2.5) Tooltip << */
+
+/* 2.6) Item Grouper >> */
+.item-grouper {
+  background-color: var(--color-bg-head-darker);
+  padding: var(--padding);
+  border-top: 1px solid var(--color-bg-lighter);
+  max-width: 200px;
+}
+
+.item-grouper .content {
+  -moz-box-align: center;
+  align-items: center;
+  border-radius: 2px;
+  caret-color: rgb(211, 216, 224);
+  display: flex;
+  font-size: 11px;
+  font-weight: 500;
+  outline: currentcolor none medium;
+  text-overflow: ellipsis;
+  transition: all 0.4s ease 0s;
+  width: 100%;
+  overflow-wrap: normal;
+  pointer-events: all;
+  opacity: 1;
+  background-color: var(--color-bg-body);
+  border: 1px solid var(--color-bg-body);
+  cursor: pointer;
+  flex-wrap: wrap;
+  height: auto;
+  -moz-box-pack: start;
+  justify-content: start;
+  margin-bottom: 2px;
+  padding: 0px 7px 0px 4px;
+  white-space: normal;
+  color: var(-color-txt-label);
+  overflow: hidden;
+}
+
+.item-grouper .content:hover {
+  cursor: pointer;
+  background-color: rgb(58, 65, 76);
+  border-color: rgb(58, 65, 76);
+}
+
+.item-grouper .content:active {
+  background-color: rgb(58, 65, 76);
+  border-color: rgb(211, 216, 224);
+}
+
+.item-grouper .content .item {
+  background: rgb(58, 69, 82) none repeat scroll 0% 0%;
+  border-radius: 1px;
+  color: var(-color-txt-label);
+  font-size: 11px;
+  line-height: 20px;
+  margin: 4px 10px 4px 3px;
+  padding: 2px 6px;
+  display: flex;
+  -moz-box-align: center;
+  align-items: center;
+  max-width: calc(100% - 8px);
+}
+
+.item-grouper .content .item span {
+  margin-right: 10px;
+  text-overflow: ellipsis;
+  width: 100%;
+  overflow: hidden;
+  color: rgb(160, 167, 180);
+  font-size: 11px;
+  line-height: 20px;
+}
+
+.item-grouper .content .item .svg-icon {
+  width: 10px;
+  height: 10px;
+  display: flex;
+}
+/* 2.6) Item Grouper << */
+
+
+/* 2.7) Item picker >> */
+.item-picker {
+  max-width: 200px;
+  border: 0px none;
+  width: 100%;
+  left: 0px;
+  z-index: 100;
+  position: absolute;
+  bottom: auto;
+  margin-top: 4px;
+  margin-bottom: auto;
+  /*2nd part*/ 
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(58, 65, 76);
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 6px 12px 0px;  
+  /*overwrite*/
+  position: relative;
+}
+
+.item-picker .search-bar {
+  padding: 8px;
+  /*overwrite*/  
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.item-picker .search-bar input {
+  -moz-box-align: center;
+  align-items: center;
+  border-radius: 2px;
+  caret-color: rgb(211, 216, 224);
+  display: flex;
+  font-size: 11px;
+  font-weight: 500;
+  height: 34px;
+  -moz-box-pack: justify;
+  justify-content: space-between;
+  outline: currentcolor none medium;
+  overflow: hidden;
+  padding: 4px 10px;
+  text-overflow: ellipsis;
+  transition: all 0.4s ease 0s;
+  white-space: nowrap;
+  width: 100%;
+  overflow-wrap: normal;
+  pointer-events: all;
+  opacity: 1;
+  color: rgb(160, 167, 180);
+  background-color: rgb(36, 39, 48);
+  border: 1px solid rgb(36, 39, 48);
+}
+
+.item-picker .search-bar input::placeholder {
+  color: rgb(106, 116, 133);
+  font-weight: 400;  
+}
+
+.item-picker .search-bar .svg-icon {
+  width: 18px;
+  height: 18px;
+  position: absolute;
+  right: 15px;
+  top: 20px;
+  color: rgb(106, 116, 133);
+}
+
+.item-picker .search-items {
+  background-color: rgb(58, 65, 76);
+  border-top: 1px solid rgb(36, 39, 48);
+  overflow-y: auto;
+  max-height: 280px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 6px 12px 0px;
+  border-radius: 2px;
+  padding: calc(var(--padding)*0.5) 0 calc(var(--padding)*0.5) 0;
+}
+
+.item-picker .search-items .search-item {
+  font-size: 11px;
+  padding: 3px 9px;
+  font-weight: 500;
+  white-space: nowrap;  
+}
+
+.item-picker .search-items .search-item:hover {
+  cursor: pointer;
+  background-color: rgb(106, 116, 133);
+}
+
+.item-picker .search-items .search-item .category { 
+  display: inline-block;
+  margin: 0px 4px 0px 0px;
+}
+
+.item-picker .search-items .search-item .category .element {
+  border-radius: 2px;
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 400;
+  padding: 0px 5px;
+  text-align: center;
+  width: 40px;
+}
+
+.element.blue{
+  background-color: rgba(var(--raw-box-blue), var(--alpha-box));
+  border: 1px solid rgb(var(--raw-box-blue));
+  color: rgb(var(--raw-box-blue));
+}
+
+.element.yellow {
+  background-color: rgba(var(--raw-box-yellow), var(--alpha-box));
+  border: 1px solid rgb(var(--raw-box-yellow));
+  color: rgb(var(--raw-box-yellow));
+}
+
+.element.green {
+  background-color: rgba(var(--raw-box-green), var(--alpha-box));
+  border: 1px solid rgb(var(--raw-box-green));
+  color: rgb(var(--raw-box-green));
+}
+
+.element.red {
+  background-color: rgba(var(--raw-box-red), var(--alpha-box));
+  border: 1px solid rgb(var(--raw-box-red));
+  color: rgb(var(--raw-box-red));
+}
+
+.item-picker .search-items .search-item span {
+  color: rgb(240, 240, 240);
+  padding-left: calc(var(--padding)*0.5);
+}
+
+/* 2.7) Item picker << */
+
+/* 2.8) Item griper >> */
+.item-griper {
+
+}
+/* 2.8) Item griper << */
 
 /* Panel >> */
 .panel {
