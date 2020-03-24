@@ -1105,13 +1105,21 @@ UI.ItemGrouper = function (opts) {
     opts = opts || {};
     opts.id = opts.id || '';
     opts.classes = opts.classes || [];
-    opts.selected = opts.selected || ['item 1', 'item 2', 'item 3', 'item 4', 'item 5', 'item 6', 'item 7'];
+    opts.selected = opts.selected || [];
+    if (opts.fake === null) {
+        opts.fake = false;
+    }
+
+    if (opts.fake) {
+        opts.selected = ['item 1', 'item 2', 'item 3', 'item 4', 'item 5', 'item 6', 'item 7'];
+    }
 
     let div = _el({type: 'div', id: opts.id, classes: ['item-grouper']});
     // content
     let content = _el({type: 'div', classes: ['content']});
     div.appendChild(content);
-    // items    
+    // items
+    /*
     for (let i=0; i<opts.selected.length; i++) {
         let item = _el({type: 'div', classes: ['item']});
         content.appendChild(item);
@@ -1124,6 +1132,27 @@ UI.ItemGrouper = function (opts) {
                 evt.target.parentElement.parentElement.removeChild(evt.target.parentElement);
             }
         };
+    }
+    */
+    if (opts.selected.length > 0) {
+        for (let i=0; i<opts.selected.length; i++) {
+            addItem(opts.selected[i]);
+        }
+    }
+
+    var addItem = function (name) {
+        let item = _el({type: 'div', classes: ['item']});
+        let span = _el({type: 'span', innerText: name});
+        item.appendChild(span);
+        let svg = SvgIcon.new({icon: 'close'})
+        item.appendChild(svg);
+        svg.onclick = (evt) => {
+            if (evt.target.classList.contains('svg-icon')) {
+                evt.target.parentElement.parentElement.removeChild(evt.target.parentElement);
+            }
+        };
+
+        content.appendChild(item);
     }
 
     return div;
@@ -1195,16 +1224,20 @@ UI.ItemPicker = function (opts) {
     let input = _el('input');    
     bar.appendChild(input);
     input.type = 'text';
-    input.placeholder = 'Search';
+    input.placeholder = 'Search categories & values';
     // icon
     bar.appendChild(SvgIcon.new({icon: 'search'}));
     // When entering keys, the filtered_items list reduces to a smaller list
     input.onkeyup = (evt) => {
         if (evt.target.type === 'text') {
-            let list_items = substringPresence(evt.target.value, fake_items);
-            //let output_ = handleSearch(evt.target.value, fake_items);
+            let list_items = filterJson(evt.target.value, opts.items);
             let div = evt.target.parentElement.parentElement;
             populateSearchItems(div, list_items)
+        }
+    };
+    input.onclick = (evt) => {
+        if (evt.target.type === 'text') {
+            evt.target.parentElement.nextElementSibling.classList.toggle('hidden');
         }
     };
 
@@ -1227,24 +1260,15 @@ UI.ItemPicker = function (opts) {
             mapping[elements[j]] = colors[i];
         }
     }
-    /*
-    let mapping = {
-        'int': 'yellow',
-        'float': 'red',
-        'string': 'green',
-        'geo': 'blue'
-    };
-    */
 
     // The list of items
-    let items = _el({type: 'div', classes: ['search-items']});
+    let items = _el({type: 'div', classes: ['search-items', 'hidden']});
     div.appendChild(items);
     populateSearchItems(div, opts.items);
 
     // Function to build the list below the search field
     // this is needed since the input in the search bar impacts the list
     function populateSearchItems(div, list_items) {
-        //let items = _el({type: 'div', classes: ['search-items']});
         let items = div.querySelector('.search-items');
         // remove all children
         while (items.lastChild) {
@@ -1268,39 +1292,15 @@ UI.ItemPicker = function (opts) {
         }
     }
 
-    // functions to handle the dynamic search and filtering
-    function substringPresence_old(keyword, json_items) {
+    function filterJson(keyword, json_items) {
         /**
-         * this method is simple and looks for substrings
-         * it will not find KPI if you wrongly typed KOI for ex
-         */
-        // the keys of the json are the KPI names
-        let items = Object.keys(json_items);
-        items = items.filter(s => s.includes(keyword));
-
-        // the values
-        // removing duplicates => not needed but keep the code for future reference
-        //let values = [... new Set(Object.values(json_items))];
-        let values = Object.values(json_items);
-        values = values.filter(s => s.includes(keyword));
-
-        let output = {};
-        for (let i=0;i<items.length; i++) {
-            output[items[i]] = json_items[items[i]];
-        }
-        
-        return output;
-    }
-
-    function substringPresence(keyword, json_items) {
-        /**
-         * this version loops the original json_items and keep the indices where
-         * the keyword is found in either the key or the value
+         * Filters the json object entries that include the keyword in either key:value
          */
         let output = {};
 
         let keys = Object.keys(json_items);
         let values = Object.values(json_items);
+        keyword = keyword.toLowerCase();
         for (let i=0; i<keys.length; i++) {
             let key = keys[i];
             let val = values[i];
@@ -1312,39 +1312,7 @@ UI.ItemPicker = function (opts) {
         return output;
     }
 
-    function handleSearch(keyword, json_items) {
-        /**
-         * this is supposedly better as it uses a form of distance between words
-         */
-        let items = Object.keys(json_items);
-        let items_copy = items.slice();
-        items_copy.sort((a, b) => {
-            return getSimilarity(b, keyword) - getSimilarity(a, keyword);
-        });
-
-        // only keep the items with similarity > 1
-        items_copy = items_copy.filter(item => {
-            return getSimilarity(item, keyword) > 0;
-        });
-        
-        function getSimilarity(data, keyword) {
-            data = data.toLowerCase();
-            keyword = keyword.toLowerCase();
-            let similarity = data.length - data.replace(new RegExp(keyword, 'g'), '').length;            
-            return similarity;
-        }       
-
-        let output = {};
-        for (let i=0;i<items_copy.length; i++) {
-            output[items_copy[i]] = json_items[items_copy[i]];
-        }
-
-        return output;
-    }
-
-
     return div;
-
 };
 
 // Item Picker and Grouper
@@ -1360,18 +1328,65 @@ UI.ItemGriper = function (opts) {
     if (opts.multiple === null) {
         opts.multiple = true;
     }
-    opts.items = opts.items || ['item 1', 'item 2', 'item 3', 'item 4', 'item 5', 'item 6', 'item 7'];
+    opts.items = opts.items || {};
     opts.selected = opts.selected || [];
 
     let div = _el({type: 'div', id: opts.id, classes: ['item-picker', ...opts.classes]});
 
     // the output of the selection
-    let output = _el({type: 'div', classes: ['output']});
+    let output = UI.ItemGrouper();
     div.appendChild(output);
     
     // the search bar
-    let input = _el({type: 'div', classes: ['input']});
+    let input = UI.ItemPicker({items: opts.items});
     div.appendChild(input);
+    // a click on the individual item returns the element's name and adds it to the grouper
+    // the event listerner is placed on the parent i.e. the div with class .search-items
+    let dom_items = input.querySelector('.search-items');
+    dom_items.onclick = (evt) => {
+        if (evt.target.classList.contains('search-item')) {
+            let name = evt.target.querySelector('span').innerText;
+            console.log(name);
+            // add to grouper
+            let content = output.querySelector('.content');
+            // get list of existing items
+            let alreadyThere = false;
+            let spans = content.querySelectorAll('span');
+            for (let i=0; i<spans.length; i++) {
+                if (spans[i].innerText === name) {
+                    alreadyThere = true;
+                    break;
+                }
+            }
+            if (!alreadyThere) {
+                // create new item
+                let item = newItem(name)
+                // check here whether it is already in the content
+                content.appendChild(item);
+            }
+        }
+    };
+
+    function newItem(name) {
+        let item = _el({type: 'div', classes: ['item']});
+        let span = _el({type: 'span', innerText: name});
+        item.appendChild(span);
+        let svg = SvgIcon.new({icon: 'close'})
+        item.appendChild(svg);
+        svg.onclick = (evt) => {
+            if (evt.target.classList.contains('svg-icon')) {
+                evt.target.parentElement.parentElement.removeChild(evt.target.parentElement);
+            }
+        };
+
+        return item;
+    }
+
+    function alreadyIncluded(name) {
+        /**
+         * Checks if span name is already there
+         */
+    }
 
     return div;    
 };
