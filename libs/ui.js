@@ -1098,6 +1098,8 @@ UI.Tooltip = function (opts) {
 UI.ItemGrouper = function (opts) {
     /**
      * Creates an grouper i.e. a container with a list of elements
+     * 
+     * TODO: rename to something else. Grouper should be instead a way to group similar divs.
      */
     // Default values
     opts = opts || {};
@@ -1113,14 +1115,15 @@ UI.ItemGrouper = function (opts) {
     for (let i=0; i<opts.selected.length; i++) {
         let item = _el({type: 'div', classes: ['item']});
         content.appendChild(item);
-        item.onclick = (evt) => {
-            if (evt.target.classList.contains('item')) {
+        let span = _el({type: 'span', innerText: opts.selected[i]});
+        item.appendChild(span);
+        let svg = SvgIcon.new({icon: 'close'})
+        item.appendChild(svg);
+        svg.onclick = (evt) => {
+            if (evt.target.classList.contains('svg-icon')) {
                 evt.target.parentElement.parentElement.removeChild(evt.target.parentElement);
             }
         };
-        let span = _el({type: 'span', innerText: opts.selected[i]});
-        item.appendChild(span);
-        item.appendChild(SvgIcon.new({icon: 'close'}));
     }
 
     return div;
@@ -1143,18 +1146,43 @@ UI.ItemPicker = function (opts) {
     if (opts.multiple === null) {
         opts.multiple = true;
     }
-    let fake_items = [
-        {name: 'item 1', category: 'int'},
-        {name: 'item 2', category: 'float'},
-        {name: 'item 3', category: 'string'},
-        {name: 'item 4', category: 'geo'},
-        {name: 'item 5', category: 'int'},
-        {name: 'item 6', category: 'int'},
-        {name: 'item 7', category: 'string'},
-        {name: 'item 8', category: 'geo'},
-        {name: 'item 9', category: 'float'},
-        {name: 'item 0', category: 'geo'},
-    ];
+    let fake_items = {
+        'item 1': 'int',
+        'element 2 ': 'float',
+        'component 3': 'string',
+        'row 4': 'geo',
+        'level 5': 'int',
+        'section 5a': 'obj',
+        'category 6': 'int',
+        'channel 7': 'string',
+        'subchannel 7z': 'mtl',
+        'group 8': 'geo',
+        'section 9': 'float',
+        'subsection 9': 'json',
+        'row 10': 'geo',
+    };
+    // same as above but with the kpis names we care about
+    let fake_kpis = {
+        power: ['P'],
+        time: ['Delay', 'Doppler'],
+        angle: ['AoA0', 'AoA1', 'EoA0', 'EoA1'],
+        count: ['Nr'],
+        ratio: ['SNR', 'SNR0', 'SINR', 'SU-SINR', 'MU-SINR'],
+        unitless: ['Rank', 'Kfactor'],
+        vector: ['position', 'velocity'],
+    };
+    // reformat fake_kpis so that it looks like fake_items
+    let use_kpis = true;
+    if (use_kpis) {
+        fake_items = {};
+        let categories = Object.keys(fake_kpis);
+        for (let i=0; i<categories.length; i++) {
+            let elements = fake_kpis[categories[i]];
+            for (let j=0; j<elements.length; j++) {
+                fake_items[elements[j]] = categories[i];
+            }
+        }
+    }
     opts.items = opts.items || fake_items;
     opts.filtered_items = opts.filtered_items || fake_items;
 
@@ -1171,47 +1199,147 @@ UI.ItemPicker = function (opts) {
     // icon
     bar.appendChild(SvgIcon.new({icon: 'search'}));
     // When entering keys, the filtered_items list reduces to a smaller list
-    input.oninput = null;
+    input.onkeyup = (evt) => {
+        if (evt.target.type === 'text') {
+            let list_items = substringPresence(evt.target.value, fake_items);
+            //let output_ = handleSearch(evt.target.value, fake_items);
+            let div = evt.target.parentElement.parentElement;
+            populateSearchItems(div, list_items)
+        }
+    };
 
-    // Category mapping
+    // Category mapping. TODO: this should somehow be configurable, for ex cgviz needs a similar mapping for the kpis
+    let mapping_config = {
+        red: ['float', 'power'],
+        orange: ['int', 'time'],
+        yellow: ['string', 'angle'],
+        green: ['geo', 'count'],
+        blue: ['obj', 'ratio'],
+        indigo: ['mtl', 'unitless'],
+        violet: ['json', 'vector'],
+    };
+    // form the mapping from the mapping_config
+    let mapping = {};
+    let colors = Object.keys(mapping_config);
+    for (let i=0; i<colors.length; i++) {
+        let elements = mapping_config[colors[i]];
+        for (let j=0; j<elements.length; j++) {
+            mapping[elements[j]] = colors[i];
+        }
+    }
+    /*
     let mapping = {
         'int': 'yellow',
         'float': 'red',
         'string': 'green',
         'geo': 'blue'
     };
+    */
 
     // The list of items
     let items = _el({type: 'div', classes: ['search-items']});
     div.appendChild(items);
-    for (let i=0; i<opts.items.length;i++) {
-        let item = _el({type: 'div', classes: ['search-item']})
-        items.appendChild(item);
-        // Each item has a (not unique) category icon (float, int, string or kpi type)
-        let cat = _el({type: 'div', classes: ['category']});
-        item.appendChild(cat);
-        let el = _el({type: 'div', classes: ['element'], innerText: opts.items[i].category});
-        cat.appendChild(el);
-        el.classList.add(mapping[opts.items[i].category]);
-        // and a span for the actual name
-        let span = _el({type: 'span', innerText: opts.items[i].name});
-        item.appendChild(span);
+    populateSearchItems(div, opts.items);
+
+    // Function to build the list below the search field
+    // this is needed since the input in the search bar impacts the list
+    function populateSearchItems(div, list_items) {
+        //let items = _el({type: 'div', classes: ['search-items']});
+        let items = div.querySelector('.search-items');
+        // remove all children
+        while (items.lastChild) {
+            items.removeChild(items.lastChild);
+        }
+        let inputs = Object.keys(list_items);
+        for (let i=0; i<inputs.length;i++) {
+            let key = inputs[i];
+            let val = list_items[key];
+            let item = _el({type: 'div', classes: ['search-item']})
+            items.appendChild(item);
+            // Each item has a (not unique) category icon (float, int, string or kpi type)
+            let cat = _el({type: 'div', classes: ['category']});
+            item.appendChild(cat);
+            let el = _el({type: 'div', classes: ['element'], innerText: val});
+            cat.appendChild(el);
+            el.classList.add(mapping[val]);
+            // and a span for the actual name
+            let span = _el({type: 'span', innerText: key});
+            item.appendChild(span);
+        }
     }
 
     // functions to handle the dynamic search and filtering
-    function handleSearch(keyword) {
+    function substringPresence_old(keyword, json_items) {
+        /**
+         * this method is simple and looks for substrings
+         * it will not find KPI if you wrongly typed KOI for ex
+         */
+        // the keys of the json are the KPI names
+        let items = Object.keys(json_items);
+        items = items.filter(s => s.includes(keyword));
+
+        // the values
+        // removing duplicates => not needed but keep the code for future reference
+        //let values = [... new Set(Object.values(json_items))];
+        let values = Object.values(json_items);
+        values = values.filter(s => s.includes(keyword));
+
+        let output = {};
+        for (let i=0;i<items.length; i++) {
+            output[items[i]] = json_items[items[i]];
+        }
+        
+        return output;
+    }
+
+    function substringPresence(keyword, json_items) {
+        /**
+         * this version loops the original json_items and keep the indices where
+         * the keyword is found in either the key or the value
+         */
+        let output = {};
+
+        let keys = Object.keys(json_items);
+        let values = Object.values(json_items);
+        for (let i=0; i<keys.length; i++) {
+            let key = keys[i];
+            let val = values[i];
+            if (key.toLowerCase().includes(keyword) || val.toLowerCase().includes(keyword)) {
+                output[key] = val;
+            }
+        }
+
+        return output;
+    }
+
+    function handleSearch(keyword, json_items) {
+        /**
+         * this is supposedly better as it uses a form of distance between words
+         */
+        let items = Object.keys(json_items);
         let items_copy = items.slice();
         items_copy.sort((a, b) => {
             return getSimilarity(b, keyword) - getSimilarity(a, keyword);
+        });
+
+        // only keep the items with similarity > 1
+        items_copy = items_copy.filter(item => {
+            return getSimilarity(item, keyword) > 0;
         });
         
         function getSimilarity(data, keyword) {
             data = data.toLowerCase();
             keyword = keyword.toLowerCase();
-            return data.length - data.replace(new RegExp(keyword, 'g'), '').length;
+            let similarity = data.length - data.replace(new RegExp(keyword, 'g'), '').length;            
+            return similarity;
+        }       
+
+        let output = {};
+        for (let i=0;i<items_copy.length; i++) {
+            output[items_copy[i]] = json_items[items_copy[i]];
         }
 
-        return items_copy;
+        return output;
     }
 
 

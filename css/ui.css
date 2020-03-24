@@ -39,10 +39,23 @@ Styling of the ui.js component suite
     --color-cyan: rgb( 62, 172, 168);    
     /* Colors for some boxes */
     --alpha-box: 0.2;
-    --raw-box-yellow: 248, 194, 28;
-    --raw-box-green: 140, 210, 205;
-    --raw-box-blue: 106, 160, 206;
-    --raw-box-red: 206, 106, 106;
+    /*--raw-box-red: 206, 106, 106;
+    --raw-box-red: 255, 0, 0;*/
+    --raw-box-red: 255, 80, 80;
+    --raw-box-orange: 255, 127, 0;
+    /*--raw-box-yellow: 248, 194, 28;
+    --raw-box-yellow: 255, 255, 0;*/
+    --raw-box-yellow: 192, 192, 0;
+    /*--raw-box-green: 140, 210, 205;
+    --raw-box-green: 0, 255, 0;*/
+    --raw-box-green: 100, 255, 100;
+    /*--raw-box-blue: 106, 160, 206;
+    --raw-box-blue: 0, 0, 255;*/
+    --raw-box-blue: 50, 150, 255;
+    /*--raw-box-indigo: 63, 0, 255;*/
+    --raw-box-indigo: 163, 100, 255;
+    /*--raw-box-violet: 127, 0, 255;*/
+    --raw-box-violet: 255, 27, 255;
 
     --color-icon: rgb(144, 152, 167);
 
@@ -712,13 +725,19 @@ input[type="range"]::-ms-fill-upper {
   font-weight: 400;
   padding: 0px 5px;
   text-align: center;
-  width: 40px;
+  min-width: 40px;
 }
 
-.element.blue{
-  background-color: rgba(var(--raw-box-blue), var(--alpha-box));
-  border: 1px solid rgb(var(--raw-box-blue));
-  color: rgb(var(--raw-box-blue));
+.element.red {
+  background-color: rgba(var(--raw-box-red), var(--alpha-box));
+  border: 1px solid rgb(var(--raw-box-red));
+  color: rgb(var(--raw-box-red));
+}
+
+.element.orange {
+  background-color: rgba(var(--raw-box-orange), var(--alpha-box));
+  border: 1px solid rgb(var(--raw-box-orange));
+  color: rgb(var(--raw-box-orange));
 }
 
 .element.yellow {
@@ -733,11 +752,24 @@ input[type="range"]::-ms-fill-upper {
   color: rgb(var(--raw-box-green));
 }
 
-.element.red {
-  background-color: rgba(var(--raw-box-red), var(--alpha-box));
-  border: 1px solid rgb(var(--raw-box-red));
-  color: rgb(var(--raw-box-red));
+.element.blue{
+  background-color: rgba(var(--raw-box-blue), var(--alpha-box));
+  border: 1px solid rgb(var(--raw-box-blue));
+  color: rgb(var(--raw-box-blue));
 }
+
+.element.indigo{
+  background-color: rgba(var(--raw-box-indigo), var(--alpha-box));
+  border: 1px solid rgb(var(--raw-box-indigo));
+  color: rgb(var(--raw-box-indigo));
+}
+
+.element.violet{
+  background-color: rgba(var(--raw-box-violet), var(--alpha-box));
+  border: 1px solid rgb(var(--raw-box-violet));
+  color: rgb(var(--raw-box-violet));
+}
+
 
 .item-picker .search-items .search-item span {
   color: rgb(240, 240, 240);
