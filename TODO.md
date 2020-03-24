@@ -201,5 +201,44 @@ Scene organization and Naming convention:
 
 2020-03-18
 ----------
-- [X] double slider using 2 actual slider
-- [ ] redesign slider to make it look like it belongs with the rest of the components
+- [X] double slider using 2 actual sliders
+- [X] redesign slider to make it look like it belongs with the rest of the components
+
+
+2020-03-22
+-----------
+- [ ] create movable
+- [ ] create resizable
+- [X] create tooltip
+- [X] restructure ui.js by category of widget
+- [X] restructure ui.css by category of widget
+- [X] organize demo
+- [X] create button
+- [X] create cancel button
+- [X] adjust svg size
+- [X] create generic header
+- [ ] create slider from divs (using the window events I didnot want to use)
+- [ ] create double slider from divs (using the window events I didnot want to use)
+- [ ] cleanup the label/title/subtitle styling and usage
+- [ ] cleanup the weird classes like category...
+- [ ] create item picker
+- [ ] style input range for chrome & IE..
+- [ ] check if there is a better way to handle the default parameters opts (there is a lot of repeating going on)
+
+2020-03-23
+-----------
+- [ ] create a hierarchy of headers and content (maybe 3 levels are enough, style so that the progression is obvious)
+- [ ] remove "edges" settings from the colorbar
+- [ ] review the naming conventions, colorbar, colormap etc
+- [X] processKpis copy existing files automatically
+- [X] handle compact json files in cgviz-menu.js
+- [X] make sure the old json files are saved and zipped under "old" directory
+
+2020-03-24
+----------
+- [X] item-picker: populate items list based on key search
+- [ ] item-picker: create config categories for cgviz kpis
+- [ ] item-picker: close on click
+- [ ] item-picker: select on click (in case multi is allowed)
+- [X] item-picker: create 3 new colors for the items: orange, indigo, violet
+- [ ] item-picker: add button to switch from searching categories/values OR allow both in the field
