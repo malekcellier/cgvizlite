@@ -241,4 +241,9 @@ Scene organization and Naming convention:
 - [ ] item-picker: close on click
 - [ ] item-picker: select on click (in case multi is allowed)
 - [X] item-picker: create 3 new colors for the items: orange, indigo, violet
-- [ ] item-picker: add button to switch from searching categories/values OR allow both in the field
+- [X] item-picker: ~~add button to switch from searching categories/values OR~~ allow both in the field
+- [X] item-picker: search-items hidden on start
+- [X] item-picker: search-items appears upon click in the field
+- [ ] item-picker: search-items disappears when losing items focus
+- [X] item-griper: connect the picker to the grouper
+- [X] item-grouper: populate dynamically
