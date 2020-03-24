@@ -248,28 +248,52 @@
             toggleComponent('Heatmap', {id: 'heatmap-demo'});         
         }
 
+        let fake_items = {
+            'item 1': 'int',
+            'element 2 ': 'float',
+            'component 3': 'string',
+            'row 4': 'geo',
+            'level 5': 'int',
+            'section 5a': 'obj',
+            'category 6': 'int',
+            'channel 7': 'string',
+            'subchannel 7z': 'mtl',
+            'group 8': 'geo',
+            'section 9': 'float',
+            'subsection 9': 'json',
+            'row 10': 'geo',
+        };
+
         // 2.4) Item Grouper
         let s_grouper = _el({type: 'div', classes: ['demo-item'], innerText: 'item grouper'}); 
         menu.appendChild(s_grouper);
         s_grouper.onclick = (evt) => {
             evt.target.classList.toggle('clicked');
-            toggleComponent('ItemGrouper', {id: 'item-grouper-demo'});
+            toggleComponent('ItemGrouper', {id: 'item-grouper-demo', selected: Object.keys(fake_items)});
         }
 
         // 2.5) item picker
-        let s_picker = _el({type: 'div', classes: ['demo-item'], innerText: 'item picker'}); 
-        menu.appendChild(s_picker);
-        s_picker.onclick = (evt) => {
+        // 2.5.1) example 1
+        let s_picker_ex1 = _el({type: 'div', classes: ['demo-item'], innerText: 'item picker ex1'}); 
+        menu.appendChild(s_picker_ex1);
+        s_picker_ex1.onclick = (evt) => {
             evt.target.classList.toggle('clicked');
-            toggleComponent('ItemPicker', {id: 'item-picker-demo'});
+            toggleComponent('ItemPicker', {id: 'item-picker-ex1-demo', items: fake_items});
+        }
+        // 2.5.2) example 2
+        let s_picker_ex2 = _el({type: 'div', classes: ['demo-item'], innerText: 'item picker ex2'}); 
+        menu.appendChild(s_picker_ex2);
+        s_picker_ex2.onclick = (evt) => {
+            evt.target.classList.toggle('clicked');
+            toggleComponent('ItemPicker', {id: 'item-picker-ex2-demo'});
         }
 
         // 2.5) item griper
         let s_griper = _el({type: 'div', classes: ['demo-item'], innerText: 'item griper'}); 
         menu.appendChild(s_griper);
         s_griper.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('ItemGriper', {id: 'item-griper-demo'});
+            evt.target.classList.toggle('clicked');  
+            toggleComponent('ItemGriper', {id: 'item-griper-demo', items: fake_items});
         }
 
         // 2.7) tooltip: the one that shows detailed info about a hovered point
