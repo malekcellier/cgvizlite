@@ -659,7 +659,7 @@ input[type="range"]::-ms-fill-upper {
   display: flex;
   font-size: 11px;
   font-weight: 500;
-  height: 34px;
+  height: 24px;
   -moz-box-pack: justify;
   justify-content: space-between;
   outline: currentcolor none medium;
@@ -682,12 +682,17 @@ input[type="range"]::-ms-fill-upper {
   font-weight: 400;  
 }
 
+.item-picker .search-bar input:active {
+  background-color: rgb(58, 65, 76);
+  border-color: rgb(211, 216, 224);
+}
+
 .item-picker .search-bar .svg-icon {
   width: 18px;
   height: 18px;
   position: absolute;
   right: 15px;
-  top: 20px;
+  top: 16px;
   color: rgb(106, 116, 133);
 }
 
@@ -711,6 +716,10 @@ input[type="range"]::-ms-fill-upper {
 .item-picker .search-items .search-item:hover {
   cursor: pointer;
   background-color: rgb(106, 116, 133);
+}
+
+.item-picker .search-items .search-item div, span {
+  pointer-events: none;
 }
 
 .item-picker .search-items .search-item .category { 
