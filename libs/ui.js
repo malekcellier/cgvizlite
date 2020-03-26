@@ -160,7 +160,17 @@ UI.DropDown = function (opts) {
     // onclick show the items
     selected.onclick = (evt) => {
         if (evt.target.classList.contains('dropdown-selected')) {
-            evt.target.nextElementSibling.classList.toggle('hidden')
+            evt.target.nextElementSibling.classList.toggle('hidden'); // the list of items
+            // hide all others 
+            let dd_items = document.querySelectorAll('.dropdown-items');
+            for (let i=0; i<dd_items.length; i++) {
+                let dd_item = dd_items[i];
+                if (dd_item !== evt.target.nextElementSibling) {
+                    if (!dd_item.classList.contains('hidden')) {
+                        dd_item.classList.toggle('hidden');
+                    }
+                }
+            }
             evt.target.classList.toggle('active');// assuming hidden is the default state
         }
     };
