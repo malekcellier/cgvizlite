@@ -10,9 +10,7 @@
     <link  type="text/css" href="css/ui.css" rel="stylesheet"> 
     <link  type="text/css" href="css/info.css" rel="stylesheet"> 
     <script type='text/javascript' src='vendors/chroma.min.js'></script>
-    <script type='text/javascript' src='libs/utils.js'></script>
-    <script type='text/javascript' src='libs/svgIcon.js'></script>
-    <script type='text/javascript' src='libs/ui.js'></script>
+    <script type='module' src='./libs/ui.js'></script>
     <style>
         body, div {
             box-sizing: border-box;
@@ -93,7 +91,8 @@
     </style>      
 </head>
 <body>
-    <script type='text/javascript'>
+    <script type='module'>
+    import {UI, _el} from './libs/ui.js';
     // Move all this to UI.Demo
         // 0) Menu to show/hide the elements of the demo
         let demo = new UI.Demo();

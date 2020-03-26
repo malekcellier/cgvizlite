@@ -11,6 +11,10 @@ Html menu items and widgets
 
 */
 
+import {_el, range, extendFunction} from './utils.js';
+import {SvgIcon} from './SvgIcon.js';
+
+
 let UI = {};
 
 // State of the widgets akin to the datagui params structure

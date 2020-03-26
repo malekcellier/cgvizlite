@@ -831,3 +831,5 @@ SvgIcon._color_box = function(rgb) {
 
     return svg;
 };
+
+export {SvgIcon};
