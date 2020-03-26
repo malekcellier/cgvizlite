@@ -95,7 +95,7 @@ Scene organization and Naming convention:
 - [ ] Feature/Bug pov mast display depends on the click order :-/
 - [ ] pov mast colors => same as povs to start with (helps distinguish them)
 - [ ] clear webgl contexts: https://stackoverflow.com/questions/54913836/how-to-properly-dispose-of-my-webgl-context-in-order-to-avoid-the-16-webgl-conte
-- [ ] autozoom on scenewhen adding povs/rays etc
+- [ ] autozoom on scene when adding povs/rays etc
 - [ ] BUG: .sub-menu.switch behaves differently in Settings vs Interactions. Why?
 - [ ] Add height control to KPI (while maintaining it constant)
 - [ ] Fix the range when plotting a given KPI so that the colors are the same from one graph to the next
@@ -122,7 +122,7 @@ Scene organization and Naming convention:
 - [X] add the container div + canvas when creating cgvizjs
 - [ ] add the count of meshes, vertices, MB etc..
 - [X] remove colorbar when all are unclicked
-- X ] group colorbars by title => expand on-click
+- [X] group colorbars by title => expand on-click
 - [ ] colorbar for the traces
 - [ ] category for KPI: composite/ID
 - [ ] do not populate the kpis, instead provide a menu to add/remove
@@ -170,8 +170,8 @@ Scene organization and Naming convention:
 - [X] update the colorpalette with each n_steps/category/reverse change
 - [X] apply colorpalette changes to colorbar
 - [ ] dropdown: hide the list of items when mouse is leaving the list (in order to avoid several panels open at the same time)
-- [ ] make the extend function work
-- [ ] item picker
+- [X] make the extend function work
+- [X] item picker
     - categories of KPIS => 1 color per category (power, time)
 - [ ] group similar items (RX) => requires a way to group them
 - [ ] color definition, all brewer + uber? see also https://www.groundai.com/project/colorspace-a-toolbox-for-manipulating-and-assessing-colors-and-palettes/1
@@ -184,6 +184,7 @@ Scene organization and Naming convention:
 - [X] precision has no effect...
 - [X] double slider with min/max is missing
 - [ ] align numbers in DCB. See https://stackoverflow.com/questions/1363239/aligning-decimal-points-in-html
+    See also https://devhints.io/css-flexbox the Table-like category, uses flexbox
 
 2020-03-16
 ----------
@@ -208,7 +209,7 @@ Scene organization and Naming convention:
 2020-03-22
 -----------
 - [ ] create movable
-- [ ] create resizable
+- [X] create resizable
 - [X] create tooltip
 - [X] restructure ui.js by category of widget
 - [X] restructure ui.css by category of widget
@@ -220,8 +221,8 @@ Scene organization and Naming convention:
 - [ ] create slider from divs (using the window events I didnot want to use)
 - [ ] create double slider from divs (using the window events I didnot want to use)
 - [ ] cleanup the label/title/subtitle styling and usage
-- [ ] cleanup the weird classes like category...
-- [ ] create item picker
+- [ ] cleanup the weird classes like 'category'...
+- [X] create item picker
 - [ ] style input range for chrome & IE..
 - [ ] check if there is a better way to handle the default parameters opts (there is a lot of repeating going on)
 
@@ -243,7 +244,39 @@ Scene organization and Naming convention:
 - [X] item-picker: create 3 new colors for the items: orange, indigo, violet
 - [X] item-picker: ~~add button to switch from searching categories/values OR~~ allow both in the field
 - [X] item-picker: search-items hidden on start
-- [X] item-picker: search-items appears upon click in the field
-- [ ] item-picker: search-items disappears when losing items focus
+- [X] item-picker: search-items should appear upon click in the field
+- [ ] item-picker: search-items should disappear when losing items focus
 - [X] item-griper: connect the picker to the grouper
 - [X] item-grouper: populate dynamically
+- [ ] item-griper: hide the search bar initially, show it when the user clicks in the area of the grouper:content
+- [X] makeResizable: reuse component from the web
+
+2020-03-25
+----------
+- [ ] makeResizable: does not work with Panel. it doesn't seem to get the right parent size
+- [ ] loading a scenario with 5000+ povs makes the qcmTrace display impossibly slow. Maybe process the eye-toggle in a different way.
+        i.e. when toggled one by one, keep the same strategy but when all are wanted at the same time, then used a merge geometry or a buffer geometry like we did in the heatmap.
+- [ ] image comparer for the KPIs heatmap: https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_image_compare THis can also be used to understand how to create own slider...
+- [ ] div expander/collapser: group divs (like the ones representing the pov) under a div with a range
+    click on range.
+        OR use a search field to add items with a x to remove them (as in the "Grouper")
+- [ ] file reader component for the UI
+- [X] contextmenu component
+- [X] using modules instead of including in html => does not work for chroma.min.js
+
+2020-03-26
+----------
+- [ ] Headers definition for cgviz
+- [ ] padding and embedded componenents: consider adding a parameter in opts like opts.embedded that toggles the padding 
+- [X] Component: simple context menu
+- [ ] consider using mutation observer to sync the innerText for ex (see solution used in DropDown implementation)
+- [ ] review all components and homogenize the code, check the labels, check the way other items are accessed
+        try to use el.closet instead of a chain of parentElement
+- [ ] use the obj paradigm to control the components values like in datgui. Maybe a Proxy can be used for that.
+    this means having a json object inside the UI 
+- [ ] turn UI into a set of classes? all would inherit from a basic component that controls the way the input is passed
+    plus extra functions for the common operations.
+- [X] make the categories in the demo clickable=> collapse examples. Since now there are quite numerous.
+- [ ] try resizable with an invisible border around the window
+- [ ] Component: modal
+- [X] Component: fixed
