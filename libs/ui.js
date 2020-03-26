@@ -21,7 +21,12 @@ let UI = {};
 // for each component with ID, an element is created in this data structure
 // each time a widget is updated, the value is updated here 
 // and then it should trigger the update of the listeners...
-UI.State = {};
+UI.State = {
+    /**
+     * Use the Proxy paradigm to sync the components with the controls
+     * maybe the mutation observer too...
+     */
+};
 
 // Widgets factory
 UI.Widget = function(name, opts) {
@@ -31,6 +36,8 @@ UI.Widget = function(name, opts) {
      * 
      *  name: widget name in small caps
      *  opts: arguments for the element
+     * 
+     * TODO: replace with an option in opts... duh!
      */
 
     let elements = {
@@ -48,8 +55,6 @@ UI.Widget = function(name, opts) {
 }
 
 // BASIC ELEMENTS
-
-// BASIC ELEMENTS: Button
 UI.Button = function (opts) {
     /**
      * Creates a button with a svg before
@@ -75,7 +80,6 @@ UI.Button = function (opts) {
     return btn;
 };
 
-// BASIC ELEMENTS: Checkbox
 UI.CheckBox = function (opts) {
     /**
      * Creates a CheckBox with a label and a switch (square or not)
@@ -119,7 +123,6 @@ UI.CheckBox = function (opts) {
     return checkbox;
 };
 
-// BASIC ELEMENTS: Dropdown
 UI.DropDown = function (opts) {
     /**
      * DropDown
@@ -196,7 +199,6 @@ UI.DropDown = function (opts) {
     return div;
 };
 
-// BASIC ELEMENTS: Slider
 UI.Slider = function (opts) {
     /**
      * Creates a Slider component
@@ -255,7 +257,6 @@ UI.Slider = function (opts) {
     return div;
 };
 
-// BASIC ELEMENTS: DoubleSlider
 UI.DoubleSlider = function (opts) {
     /**
      * Creates a double slider component
@@ -382,8 +383,19 @@ UI.DoubleSlider = function (opts) {
     return div;
 };
 
+UI.CustomSlider = function (opts) {
+    /**
+     * Creates a fully custom slider based off divs
+     */
+};
 
-// PANEL
+UI.CustomDoubleSlider = function (opts) {
+    /**
+     * Creates a fully custom double slider based off divs
+     */
+};
+
+// COMPLEX ELEMENTS
 UI.Panel = function (opts) {
     /**
      * Creates a Panel component with optional elements
@@ -474,7 +486,6 @@ UI.Panel = function (opts) {
     return panel;
 }
 
-// Panel-based elements: Header
 UI.Header = function (opts) {
     /**
      * Creates a header menu with options
@@ -527,7 +538,6 @@ UI.Header = function (opts) {
     return header;
 }
 
-// Panel-based elements: Discrete ColorBar
 UI.DiscreteColorBar = function (opts) {
     /**
      * Discrete Colorbar
@@ -650,7 +660,7 @@ UI.DiscreteColorBar = function (opts) {
     return colorbar;
 };
 
-// Panel-based elements: DiscreteColorbarSettings
+// Needed by DiscreteColorBar
 UI.DiscreteColorbarSettings = function (opts) {
     /**
      * Colorbar settings
@@ -801,7 +811,7 @@ UI.DiscreteColorbarSettings = function (opts) {
 
     return div;
 };
-// Colorpalette
+// Needed by DiscreteColorbarSettings
 UI.ColorPalette = function (opts) {
     /**
      * 
@@ -895,7 +905,7 @@ UI.ColorPalette = function (opts) {
 
     return palette;
 };
-
+// Needed by DiscreteColorbarSettings
 UI.UpdateColorPalette = function (evt) {
     /**
      * Recreates the ColorPalette based on the inputs of the colors category
@@ -917,7 +927,7 @@ UI.UpdateColorPalette = function (evt) {
     let cb = document.querySelector('#' + opts.id);
     cb.parentElement.replaceChild(new UI.DiscreteColorBar(opts), cb);
 };
-
+// Needed by UpdateColorPalette and ColorPalette
 UI._getColorPaletteOpts = function (cbs) {
     /**
      * Reads the DiscreteColorBarSettings 
@@ -1057,7 +1067,6 @@ UI.Heatmap = function (opts) {
     return heatmap;
 };
 
-// Tooltip
 UI.Tooltip = function (opts) {
     /**
      * Creates a tooltip overlay on the webgl, content of overlay is configured from panel
@@ -1108,7 +1117,6 @@ UI.Tooltip = function (opts) {
     return tooltip; 
 };
 
-// ItemGrouper
 UI.ItemGrouper = function (opts) {
     /**
      * Creates an grouper i.e. a container with a list of elements
@@ -1132,29 +1140,14 @@ UI.ItemGrouper = function (opts) {
     // content
     let content = _el({type: 'div', classes: ['content']});
     div.appendChild(content);
-    // items
-    /*
-    for (let i=0; i<opts.selected.length; i++) {
-        let item = _el({type: 'div', classes: ['item']});
-        content.appendChild(item);
-        let span = _el({type: 'span', innerText: opts.selected[i]});
-        item.appendChild(span);
-        let svg = SvgIcon.new({icon: 'close'})
-        item.appendChild(svg);
-        svg.onclick = (evt) => {
-            if (evt.target.classList.contains('svg-icon')) {
-                evt.target.parentElement.parentElement.removeChild(evt.target.parentElement);
-            }
-        };
-    }
-    */
+    // items TODO: it does not make sense to populate this element
     if (opts.selected.length > 0) {
         for (let i=0; i<opts.selected.length; i++) {
             addItem(opts.selected[i]);
         }
     }
 
-    var addItem = function (name) {
+    function addItem(name) {
         let item = _el({type: 'div', classes: ['item']});
         let span = _el({type: 'span', innerText: name});
         item.appendChild(span);
@@ -1172,7 +1165,6 @@ UI.ItemGrouper = function (opts) {
     return div;
 }
 
-// Item Picker
 UI.ItemPicker = function (opts) {
     /**
      * Creates a container where the items are listed. Upon clicking within the container, a list with a search bar appears below.
@@ -1188,6 +1180,9 @@ UI.ItemPicker = function (opts) {
     opts.classes = opts.classes || [];
     if (opts.multiple === null) {
         opts.multiple = true;
+    }
+    if (opts.fake === null) {
+        opts.fake = false;
     }
     let fake_items = {
         'item 1': 'int',
@@ -1215,8 +1210,7 @@ UI.ItemPicker = function (opts) {
         vector: ['position', 'velocity'],
     };
     // reformat fake_kpis so that it looks like fake_items
-    let use_kpis = true;
-    if (use_kpis) {
+    if (opts.fake) {
         fake_items = {};
         let categories = Object.keys(fake_kpis);
         for (let i=0; i<categories.length; i++) {
@@ -1226,7 +1220,11 @@ UI.ItemPicker = function (opts) {
             }
         }
     }
-    opts.items = opts.items || fake_items;
+    //opts.items = opts.items || fake_items;
+    opts.items = opts.items || {};
+    if (Object.keys(opts.items).length === 0) {
+        opts.items = fake_items;
+    }
     opts.filtered_items = opts.filtered_items || fake_items;
 
     let div = _el({type: 'div', id: opts.id, classes: ['item-picker', ...opts.classes]});
@@ -1238,12 +1236,13 @@ UI.ItemPicker = function (opts) {
     let input = _el('input');    
     bar.appendChild(input);
     input.type = 'text';
-    input.placeholder = 'Search categories & values';
+    input.placeholder = 'Search...';
     // icon
     bar.appendChild(SvgIcon.new({icon: 'search'}));
     // When entering keys, the filtered_items list reduces to a smaller list
     input.onkeyup = (evt) => {
         if (evt.target.type === 'text') {
+            evt.target.parentElement.nextElementSibling.classList.remove('hidden');
             let list_items = filterJson(evt.target.value, opts.items);
             let div = evt.target.parentElement.parentElement;
             populateSearchItems(div, list_items)
@@ -1309,6 +1308,7 @@ UI.ItemPicker = function (opts) {
     function filterJson(keyword, json_items) {
         /**
          * Filters the json object entries that include the keyword in either key:value
+         * TODO: move to utils
          */
         let output = {};
 
@@ -1329,7 +1329,6 @@ UI.ItemPicker = function (opts) {
     return div;
 };
 
-// Item Picker and Grouper
 UI.ItemGriper = function (opts) {
     /**
      * Creates an item picker and grouper
@@ -1344,6 +1343,9 @@ UI.ItemGriper = function (opts) {
     }
     opts.items = opts.items || {};
     opts.selected = opts.selected || [];
+    if (opts.fake === null) {
+        opts.fake = false;
+    }
 
     let div = _el({type: 'div', id: opts.id, classes: ['item-picker', ...opts.classes]});
 
@@ -1352,7 +1354,7 @@ UI.ItemGriper = function (opts) {
     div.appendChild(output);
     
     // the search bar
-    let input = UI.ItemPicker({items: opts.items});
+    let input = UI.ItemPicker({items: opts.items, fake: opts.fake});
     div.appendChild(input);
     // a click on the individual item returns the element's name and adds it to the grouper
     // the event listerner is placed on the parent i.e. the div with class .search-items
@@ -1392,22 +1394,25 @@ UI.ItemGriper = function (opts) {
                 evt.target.parentElement.parentElement.removeChild(evt.target.parentElement);
             }
         };
-
         return item;
-    }
-
-    function alreadyIncluded(name) {
-        /**
-         * Checks if span name is already there
-         */
     }
 
     return div;    
 };
 
-// OTHER
+UI.FileReader = function (opts) {
+    /**
+     * Creates a file reader based on promises
+     */
+};
 
-// Resizer
+UI.ProgressBar = function (opts) {
+    /**
+     * Creates a progress bar (set?)
+     */
+};
+
+// OTHER
 UI.Resizer = function (opts) {
     /**
      * Creates Resizers structure and adds it to existing div
@@ -1417,6 +1422,10 @@ UI.Resizer = function (opts) {
      *  - id, string. Id of the target div
      * 
      */
+    // Default values
+    opts = opts || {};
+    opts.pos = opts.pos || 'one'; // can be 'one' for bottom-right, 'middles', 'corners', 'all'
+
     let target = document.querySelector(`#${opts.id}`);
     if (target === null) {
         let demo_components = document.querySelector(`#${opts.parent}`);
@@ -1431,10 +1440,24 @@ UI.Resizer = function (opts) {
 
     let resizer = _el({type: 'div', classes: ['resizers']});
     target.appendChild(resizer);
-    resizer.appendChild(_el({type: 'div', classes: ['resizer', 'top-left']}));
-    resizer.appendChild(_el({type: 'div', classes: ['resizer', 'top-right']}));
-    resizer.appendChild(_el({type: 'div', classes: ['resizer', 'bottom-left']}));
-    resizer.appendChild(_el({type: 'div', classes: ['resizer', 'bottom-right']}));
+
+    if (opts.pos === 'one') {
+        resizer.appendChild(_el({type: 'div', classes: ['resizer', 'bottom-right']}));
+    } else {
+        if (opts.pos === 'all' || opts.pos === 'middles') {
+            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'top-middle']}));
+            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'bottom-middle']}));
+            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'left-middle']}));
+            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'right-middle']}));
+        }
+        if (opts.pos === 'all' || opts.pos === 'corners') {
+            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'top-left']}));
+            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'top-right']}));
+            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'bottom-left']}));
+            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'bottom-right']}));
+        }
+    }
+
 
     let min_width = 100;
     let min_height = 50;
@@ -1698,6 +1721,35 @@ UI.ColorDefinitions = {
     }
 };
 
+UI.IconsShowCase = function (opts) {
+    /**
+     * Shows all the implemented icons
+     */
+    opts = opts || {};
+    opts.id = opts.id || 'icon-demo';
+    let div = _el({type: 'div', id: opts.id, classes: ['icons', 'container']});
+    div.style.display = 'flex';
+    div.style['flex-direction'] = 'row';
+    div.style['flex-wrap'] = 'wrap';
+    div.style['justify-content'] = 'flex-start';    
+    div.style['background-color'] = 'var(--color-bg-body)';
+    div.style.border = '1px white solid';
+
+    let icons = SvgIcon.getList();;
+
+    for (let i=0; i<icons.length; i++) {
+        // Shuffle the positions just to test
+        let pos = ['top', 'bottom', 'left', 'right'];
+        let j = Math.round(Math.random() * (pos.length-1));
+
+        let svgIcon = SvgIcon.new({icon: icons[i], tip_pos: `info-${pos[j]}`});
+        svgIcon.style['padding-right'] = '10px';
+        div.appendChild(svgIcon);
+    }
+    
+    return div;
+}
+
 UI.ContextMenu = {
     /**
      * Intercepts the right-click and provides options
@@ -1840,78 +1892,5 @@ UI.Demo = function () {
     return demo_container;
 }
 
-// Icons showcase
-UI.IconsShowCase = function (opts) {
-    /**
-     * Shows all the implemented icons
-     */
-    opts = opts || {};
-    opts.id = opts.id || 'icon-demo';
-    let div = _el({type: 'div', id: opts.id, classes: ['icons', 'container']});
-    div.style.display = 'flex';
-    div.style['flex-direction'] = 'row';
-    div.style['flex-wrap'] = 'wrap';
-    div.style['justify-content'] = 'flex-start';    
-    div.style['background-color'] = 'var(--color-bg-body)';
-    div.style.border = '1px white solid';
 
-    let icons = SvgIcon.getList();;
-
-    for (let i=0; i<icons.length; i++) {
-        // Shuffle the positions just to test
-        let pos = ['top', 'bottom', 'left', 'right'];
-        let j = Math.round(Math.random() * (pos.length-1));
-
-        let svgIcon = SvgIcon.new({icon: icons[i], tip_pos: `info-${pos[j]}`});
-        svgIcon.style['padding-right'] = '10px';
-        div.appendChild(svgIcon);
-    }
-    
-    return div;
-}
-
-// Helper functions. NOTE: should this moved to utils.js instead?
-
-function _el(opts) {
-    /**
-     * Convenience function to create a dom element
-     * opts is a json object that should contain the following:
-     *  - type: string, standard dom element name (div, span, h1, p)
-     *  - id: string, id in the html/css sense
-     *  - classes: array of strings, class name in the html/css sense
-    */
-    // Default values handling
-    // Allow to pass a string for the type, no more
-    if (typeof opts === 'string') {
-        //let type = opts;
-        //opts = {type: type};
-        opts = {type: opts}; // same as the 2 lines above?
-    } else {
-        opts = opts || {};
-    }
-    opts.type = opts.type || 'div';
-    opts.id = opts.id || '';
-    opts.classes = opts.classes || [];
-    opts.innerText = opts.innerText || '';
-
-    // Create the html dom element
-    let el = document.createElement(opts.type);
-    // Allocate an id only if not the empty string
-    if (opts.id !== '') {
-        el.id = opts.id;
-    }
-    // Populate the classList of the dom element only if the list is not empty
-    if (opts.classes.length > 0) {
-        for (let i=0; i<opts.classes.length; i++) {
-            el.classList.add(opts.classes[i]);
-        }
-    }
-
-    // In case innerText is defined
-    if (opts.innerText !== '') {
-        el.innerText = opts.innerText;
-    }
-
-    return el;
-}
-
+export {UI, _el};
