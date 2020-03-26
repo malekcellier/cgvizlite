@@ -1540,6 +1540,101 @@ UI.ColorDefinitions = {
     }
 };
 
+UI.ContextMenu = {
+    /**
+     * Intercepts the right-click and provides options
+     * 
+     * TODO: since this is a single event for the entire page,
+     * we can add special cases and use different action depending on the evt.target
+     * for ex:
+     *  - a right click on an item could give extra options
+     * 
+     */
+
+    on: false,
+
+    toggle: () => {
+        if (UI.ContextMenu.on) {
+            window.removeEventListener('contextmenu', UI.ContextMenu.simple)
+            window.removeEventListener('click', UI.ContextMenu.click);            
+        } else {
+            window.addEventListener('contextmenu', UI.ContextMenu.simple);            
+            window.addEventListener('click', UI.ContextMenu.click);            
+        }
+        UI.ContextMenu.on = !UI.ContextMenu.on;
+    },
+
+    simple: function (evt) {
+        evt.preventDefault();
+        console.log(`Context menu: x=${evt.clientX} - y=${evt.clientY}`);
+        // remove the context-menu if already there
+        let cmenu = document.querySelector('.context-menu');
+        if (cmenu) {
+            document.body.removeChild(cmenu);
+        }
+        // recreate the context-menu
+        cmenu = _el({type: 'div', id: 'context-menu', classes: ['context-menu']});
+        document.body.appendChild(cmenu);
+        let oHeight = document.querySelector('#context-menu').offsetHeight;
+        let oWidth = document.querySelector('#context-menu').offsetWidth;
+        let top = (evt.clientY + oHeight) > window.innerHeight ? (window.innerHeight - oHeight) : evt.clientY;
+        let left = (evt.clientX + oWidth) > window.innerWidth ? (window.innerWidth - oWidth) : evt.clientX;
+        console.log(`H: ${oHeight} - W: ${oWidth}`)
+        cmenu.style.top = `${top}px`;
+        cmenu.style.left = `${left}px`;
+        //cmenu.style.left = `${evt.clientX}px`;
+        //cmenu.style.top = `${evt.clientY}px`;
+        // Add items to the menu
+        let head = _el({type: 'div', classes: ['cm-head'], innerText: 'Context menu'});
+        cmenu.appendChild(head);
+        let body = _el({type: 'div', classes: ['cm-body']});
+        cmenu.appendChild(body);
+        body.appendChild(_el({type: 'div', classes: ['cm-divider']}));
+        body.appendChild(_el({type: 'div', classes: ['cm-item'], innerText: `x: ${evt.clientX}`}));
+        body.appendChild(_el({type: 'div', classes: ['cm-item'], innerText: `y: ${evt.clientY}`}));
+    },
+
+    click: function (evt) {
+        console.log(`clicked: ${evt.target.innerText}`);
+        let cmenu = document.querySelector('.context-menu');
+        if (cmenu) {
+            document.body.removeChild(cmenu);
+        }
+    },
+
+    main: null
+
+};
+
+UI.Modal = {
+    activate: () => {window.addEventListener('click', UI.Modal.handleModal)},
+    handleModal: function (evt) {
+        if (evt.target !== null) {
+
+        }
+    }
+};
+
+UI.Fixed = function (opts) {
+    /**
+     * Create an element with fixed position in the document (useful for cgviz current heatmap info)
+     */
+    // Default values
+    opts = opts || {};
+    opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
+    opts.title = opts.title || 'Fixed element';
+    opts.top = opts.top || '0px';
+    opts.left = opts.left || '50%';
+
+    let div = _el({type: 'div', id: opts.id, classes: ['fixed', ...opts.classes], innerText: opts.title});
+    div.style.position = 'fixed';
+    div.style.top = opts.top;
+    div.style.left = opts.left;
+
+    return div;
+}
+
 // Demo of all elements and widgets
 UI.Demo = function () {
     /**
