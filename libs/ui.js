@@ -1910,13 +1910,34 @@ UI.ContextMenu = {
 
 };
 
-UI.Modal = {
-    activate: () => {window.addEventListener('click', UI.Modal.handleModal)},
-    handleModal: function (evt) {
-        if (evt.target !== null) {
+UI.Modal = function (opts) {
+    /**
+     * Creates a modal from a passed div
+     */
+    // Default values
+    opts = opts || {};
+    opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
+    // Create a dummy div in case nothing is passed
+    if (!opts.div) {
+        opts.div = UI.Panel();
+    }
 
+    let modal = UI.el({type: 'div', id: opts.id, classes: ['modal', ...opts.classes]});
+    modal.appendChild(opts.div);
+    opts.div.classList.add('modal-content');
+
+    // remove the modal in case a click is registered on the modal
+    modal.addEventListener('click', handleClickOnModal, false);
+
+    function handleClickOnModal (evt) {
+        if (!evt.target.classList.contains('modal-content')) {
+            evt.target.removeEventListener('click', handleClickOnModal);
+            evt.target.parentElement.removeChild(evt.target);
         }
     }
+
+    return modal;
 };
 
 UI.Fixed = function (opts) {
