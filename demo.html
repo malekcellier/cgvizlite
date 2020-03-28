@@ -15,8 +15,8 @@
 </head>
 <body>
     <script type='module'>
-    import {UI, _el} from './libs/ui.js';
-    // Move all this to UI.Demo
+        // Move all this to UI.Demo
+        import {UI} from './libs/ui.js';
         // 0) Menu to show/hide the elements of the demo
         let demo = new UI.Demo();
         document.body.appendChild(demo);
@@ -24,81 +24,51 @@
         // shorthand for the parts
         let menu = demo.querySelector('#demo-menu');
         let components = demo.querySelector('#demo-components');
+        let args;
 
         /* 1) SIMPLE WIDGETS */
-        let simple_widgets = _el({type: 'div', classes: ['demo-category'], innerText: 'Simple Widgets'});
-        simple_widgets.onclick = () => {document.querySelectorAll('.demo-item.simple').forEach(i => i.classList.toggle('visible'))};
+        let simple_widgets = UI.el({type: 'div', classes: ['demo-category'], innerText: 'Simple Widgets'});
         menu.appendChild(simple_widgets)
+        simple_widgets.onclick = () => {
+            document.querySelectorAll('.demo-item.simple').forEach(i => i.classList.toggle('visible'));
+        };
+        
         // 1.1) button
-        // 1.1.1) add button
-        let s_button = _el({type: 'div', classes: ['demo-item', 'simple'], innerText: 'button w/ icon'}); 
-        menu.appendChild(s_button);
-        s_button.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('Button', {id: 'button-demo', label: 'button', icon: 'add'});
-        }
+        // 1.1.1) + button
+        simpleDemoItem({widget: 'Button', args: {label: 'upload', icon: 'add'}, name: 'with icon'});
         // 1.1.2) Upload button
-        let s_button_upload = _el({type: 'div', classes: ['demo-item', 'simple'], innerText: 'button upload'}); 
-        menu.appendChild(s_button_upload);
-        s_button_upload.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('Button', {id: 'upload-button-demo', label: 'upload'});
-        }
+        simpleDemoItem({widget: 'Button', args: {label: 'upload'}, name: 'upload'});
         // 1.1.3) Cancel button
-        let s_button_cancel = _el({type: 'div', classes: ['demo-item', 'simple'], innerText: 'button cancel'}); 
-        menu.appendChild(s_button_cancel);
-        s_button_cancel.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('Button', {id: 'cancel-button-demo', label: 'cancel', classes: ['cancel']});          
-        }
+        simpleDemoItem({widget: 'Button', args: {label: 'cancel', classes: ['cancel']}, name: 'cancel'});
+        
         // 1.2) Checkbox
         // 1.2.1) Round
-        let s_checkbox = _el({type: 'div', classes: ['demo-item', 'simple'], innerText: 'checkbox round'}); 
-        menu.appendChild(s_checkbox);
-        s_checkbox.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('widget_CheckBox', {id: 'checkbox-demo', label: 'round', square: false});          
-        }
+        simpleDemoItem({widget: 'CheckBox', args: {label: 'round', square: false, embed: true}, name: 'round'});
         // 1.2.2) Square
-        let s_checkbox_square = _el({type: 'div', classes: ['demo-item', 'simple'], innerText: 'checkbox square'}); 
-        menu.appendChild(s_checkbox_square);
-        s_checkbox_square.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('widget_CheckBox', {id: 'checkbox_square-demo', label: 'square', square: true});         
-        }
-
+        simpleDemoItem({widget: 'CheckBox', args: {label: 'square', square: true, embed: true}, name: 'square'});
+        
         // 1.3) DropDown
-        let s_ddown = _el({type: 'div', classes: ['demo-item', 'simple'], innerText: 'dropdown'}); 
-        menu.appendChild(s_ddown);
-        s_ddown.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('widget_DropDown', {id: 'dropdown-demo'});
-        };
+        simpleDemoItem({widget: 'DropDown', args: {embed: true}});        
 
         // 1.4) Slider
-        let s_slider = _el({type: 'div', classes: ['demo-item', 'simple'], innerText: 'slider'}); 
-        menu.appendChild(s_slider);
-        s_slider.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('widget_Slider', {id: 'slider-demo', label: 'some kpi', value: 33});
-        }
-
+        simpleDemoItem({widget: 'Slider', args: {label: 'some kpi', value: 33, embed: true}});
+        
         // 1.5) Double Slider
-        let s_dslider = _el({type: 'div', classes: ['demo-item', 'simple'], innerText: 'double slider'}); 
-        menu.appendChild(s_dslider);
-        s_dslider.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('widget_DoubleSlider', {id: 'double-slider-demo', label: 'some kpi range', min: -10, max: 20});         
-        }         
+        simpleDemoItem({widget: 'DoubleSlider', args: {label: 'some kpi range', min: -140, max: -70, embed: true}});
+        
+        // 1.6) Progressbar
+        simpleDemoItem({widget: 'ProgressBar', args: {label: 'some kpi', value: 56, embed: true}});
 
 
         /* 2) COMPLEX WIDGETS */
-        let complex_widgets = _el({type: 'div', classes: ['demo-category'], innerText: 'Complex Widgets'});
-        complex_widgets.onclick = () => {document.querySelectorAll('.demo-item.complex').forEach(i => i.classList.toggle('visible'))};
+        let complex_widgets = UI.el({type: 'div', classes: ['demo-category'], innerText: 'Complex Widgets'});
+        complex_widgets.onclick = () => {
+            document.querySelectorAll('.demo-item.complex').forEach(i => i.classList.toggle('visible'));
+        };
         menu.appendChild(complex_widgets);
 
         // 2.1) Simple Panel
-        let s_panel = _el({type: 'div', classes: ['demo-item', 'complex'], innerText: 'panel'});
+        let s_panel = UI.el({type: 'div', classes: ['demo-item', 'complex'], innerText: 'panel'});
         menu.appendChild(s_panel);
         s_panel.onclick = (evt) => {
             evt.target.classList.toggle('clicked');
@@ -108,7 +78,7 @@
                 // Add data to the panel
                 let body = el_panel.querySelector('.panel-body');
                 for (let i=0; i<15; i++) {
-                    let div = _el({style: 'div'});
+                    let div = UI.el({style: 'div'});
                     div.innerText = `Some text ${i}`;
                     div.classList.add('t_label');
                     body.appendChild(div);
@@ -125,54 +95,21 @@
         // 2.2.3) Left: 1 - Title: 0 - right: 1
         // 2.2.1) Left: 0 - Title: 0 - right: 0
         // 2.2.1) Left: 0 - Title: 0 - right: 0
-        let s_header = _el({type: 'div', classes: ['demo-item', 'complex'], innerText: 'header'}); 
-        menu.appendChild(s_header);
-        s_header.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('Header', {id: 'header-demo', before: ['grab', 'eye_open'], after: ['settings', 'close']});         
-        }
-
+        complexDemoItem({widget: 'Header', args: {before: ['grab', 'eye_open'], after: ['settings', 'close']}});
+        
         // 2.3) Colorbar
         // 2.3.1) Example 1
-        let s_cbar_ex1 = _el({type: 'div', classes: ['demo-item', 'complex'], innerText: 'colorbar ex1'});
-        menu.appendChild(s_cbar_ex1);
-        s_cbar_ex1.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('DiscreteColorBar', {
-                    id: 'colorbar-ex1-demo',
-                    title: 'Quantity [unit]',
-                    category: 'diverging',
-                    scheme: 'Spectral',
-                    n_colors: 7,
-                    min: -10,
-                    max: 31,
-                    reverse: false
-                });
-        };
+        args = {title: 'Quantity [unit]', category: 'diverging', scheme: 'Spectral', n_colors: 7, min: -10, max: 31, reverse: false};
+        complexDemoItem({widget: 'DiscreteColorBar', args: args, name: 'ex1'});
         // 2.3.2) Example 2
-        let s_cbar_ex2 = _el({type: 'div', classes: ['demo-item', 'complex'], innerText: 'colorbar ex2'});
-        menu.appendChild(s_cbar_ex2);
-        s_cbar_ex2.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('DiscreteColorBar', {                                
-                            id: 'colorbar-ex2-demo',
-                            title: 'Something [#]',
-                            category: 'singlehue',
-                            scheme: 'Purples',
-                            n_colors: 4,
-                            min: 0,
-                            max: 100,
-                            reverse: false
-                            })
-        };     
-
+        args = {title: 'Something [#]', category: 'singlehue', scheme: 'Purples', n_colors: 4, min: 0, max: 100, reverse: false};
+        complexDemoItem({widget: 'DiscreteColorBar', args: args, name: 'ex2'});
+        // 2.3.2) Example 3
+        args = {title: 'Anythin [dB]', category: 'qualitative', scheme: 'Set1', n_colors: 5, min: -140, max: -70, reverse: true};
+        complexDemoItem({widget: 'DiscreteColorBar', args: args, name: 'ex3'});
+        
         // 2.3bis) heatmap example (to go along one of the examples above...or both!!)
-        let s_heatmap = _el({type: 'div', classes: ['demo-item', 'complex'], innerText: 'heatmap'}); 
-        menu.appendChild(s_heatmap);
-        s_heatmap.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('Heatmap', {id: 'heatmap-demo'});         
-        }
+        complexDemoItem({widget: 'Heatmap', name: 'div'});
 
         let fake_items = {
             'item 1': 'int',
@@ -191,69 +128,37 @@
         };
 
         // 2.4) Item Grouper
-        let s_grouper = _el({type: 'div', classes: ['demo-item', 'complex'], innerText: 'item grouper'}); 
-        menu.appendChild(s_grouper);
-        s_grouper.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('ItemGrouper', {id: 'item-grouper-demo', selected: Object.keys(fake_items)});
-        }
-
+        complexDemoItem({widget: 'ItemGrouper', args: {selected: Object.keys(fake_items)}});
+        
         // 2.5) item picker
         // 2.5.1) example 1
-        let s_picker_ex1 = _el({type: 'div', classes: ['demo-item', 'complex'], innerText: 'item picker ex1'}); 
-        menu.appendChild(s_picker_ex1);
-        s_picker_ex1.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('ItemPicker', {id: 'item-picker-ex1-demo', items: fake_items});
-        }
+        complexDemoItem({widget: 'ItemPicker', args: {items: fake_items}, name: 'ex1'});
         // 2.5.2) example 2
-        let s_picker_ex2 = _el({type: 'div', classes: ['demo-item', 'complex'], innerText: 'item picker ex2'}); 
-        menu.appendChild(s_picker_ex2);
-        s_picker_ex2.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('ItemPicker', {id: 'item-picker-ex2-demo'});
-        }
-
+        complexDemoItem({widget: 'ItemPicker', args: {}, name: 'ex2'});
+        
         // 2.6) item griper
         // 2.6.1) example 1
-        let s_griper = _el({type: 'div', classes: ['demo-item', 'complex'], innerText: 'item griper'}); 
-        menu.appendChild(s_griper);
-        s_griper.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');  
-            toggleComponent('ItemGriper', {id: 'item-griper-demo', items: fake_items});
-        }
+        complexDemoItem({widget: 'ItemGriper', args: {items: fake_items}, name: 'ex1'});
         // 2.6.6) example 2
-        let s_griper_ex2 = _el({type: 'div', classes: ['demo-item', 'complex'], innerText: 'item griper ex2'}); 
-        menu.appendChild(s_griper_ex2);
-        s_griper_ex2.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');  
-            toggleComponent('ItemGriper', {id: 'item-griper-ex2-demo', fake: true});
-        }
-
+        complexDemoItem({widget: 'ItemGriper', args: {fake: true}, name: 'ex2'});
+        
         // 2.7) tooltip: the one that shows detailed info about a hovered point
-        let s_tooltip = _el({type: 'div', classes: ['demo-item', 'complex'], innerText: 'tooltip'}); 
-        menu.appendChild(s_tooltip);
-        s_tooltip.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('Tooltip', {id: 'tooltip-demo'});         
-        }
+        complexDemoItem({widget: 'Tooltip', args: {}});
 
 
         /* 3) OTHER */
-        let other_widgets = _el({type: 'div', classes: ['demo-category'], innerText: 'Other'});
-        other_widgets.onclick = () => {document.querySelectorAll('.demo-item.other').forEach(i => i.classList.toggle('visible'))};
+        let other_widgets = UI.el({type: 'div', classes: ['demo-category'], innerText: 'Other'});
         menu.appendChild(other_widgets);
-        // 3.1) Icons
-        let s_icons = _el({type: 'div', classes: ['demo-item', 'other'], innerText: 'icons'});
-        menu.appendChild(s_icons);
-        s_icons.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('IconsShowCase', {id: 'icon-demo'});
+        other_widgets.onclick = () => {
+            document.querySelectorAll('.demo-item.other').forEach(i => i.classList.toggle('visible'));
         };
 
-        // 3.2) resizable window
-        // 3.2.1) empty div
-        let s_resizable = _el({type: 'div', classes: ['demo-item', 'other'], innerText: 'resizable'}); 
+        // 3.0) Icons
+        otherDemoItem({widget: 'IconsShowCase', name: '!icons'});
+
+        // 3.1) resizable window
+        // 3.1.1) empty div
+        let s_resizable = UI.el({type: 'div', classes: ['demo-item', 'other'], innerText: 'resizable'}); 
         menu.appendChild(s_resizable);
         s_resizable.onclick = (evt) => {
             evt.target.classList.toggle('clicked');                       
@@ -262,7 +167,7 @@
             
             let element = components.querySelector('#resizable-demo');
             if (element === null) {
-                let div = _el({type: 'div', id: 'resizable-demo'});
+                let div = UI.el({type: 'div', id: 'resizable-demo'});
                 div.classList.add('resizable');
                 div.style.width = '200px';
                 div.style.height = '100px';
@@ -273,8 +178,8 @@
                 components.removeChild(element);
             }
         }
-        // 3.2.2) Panel
-        let s_resizable_panel = _el({type: 'div', classes: ['demo-item', 'other'], innerText: 'resizable panel'});
+        // 3.1.2) Panel
+        let s_resizable_panel = UI.el({type: 'div', classes: ['demo-item', 'other'], innerText: 'resizable panel'});
         menu.appendChild(s_resizable_panel);
         s_resizable_panel.onclick = (evt) => {
             evt.target.classList.toggle('clicked');
@@ -285,46 +190,86 @@
             }
         };        
 
-        // 3.3) movable window
-        let s_movable = _el({type: 'div', classes: ['demo-item', 'other'], innerText: 'movable'}); 
+        // 3.2) movable window
+        let s_movable = UI.el({type: 'div', classes: ['demo-item', 'other'], innerText: 'movable'}); 
         menu.appendChild(s_movable);
         s_movable.onclick = (evt) => {
             alert(`${evt.target.innerText}: not implemented yet`);
         }
 
-        // 3.4) Context menu
-        let s_context = _el({type: 'div', classes: ['demo-item', 'other'], innerText: 'context menu'}); 
+        // 3.3) Context menu
+        let s_context = UI.el({type: 'div', classes: ['demo-item', 'other'], innerText: 'context menu'}); 
         menu.appendChild(s_context);
         s_context.onclick = (evt) => {
             UI.ContextMenu.toggle();
             evt.target.classList.toggle('clicked');
         };
 
-        // 3.5) Fixed
-        let s_fixed = _el({type: 'div', classes: ['demo-item', 'other'], innerText: 'fixed'}); 
-        menu.appendChild(s_fixed);
-        s_fixed.onclick = (evt) => {
-            evt.target.classList.toggle('clicked');
-            toggleComponent('Fixed', {id: 'fixed-demo', top: '100px', left: '50%'});
-        };
+        // 3.4) Fixed
+        otherDemoItem({widget: 'Fixed', args: {top: '100px', left: '50%'}});        
+        
+        // 3.5) Modal
+        otherDemoItem({widget: 'Modal'});        
 
-        /* Helper function*/
-        function toggleComponent(name, args) {
+        
+        /* Helper functions*/
+        function simpleDemoItem(opts) {
+            demoItem(opts.widget, opts.args, 'simple', opts.name);
+        }
+
+        function complexDemoItem(opts) {
+            demoItem(opts.widget, opts.args, 'complex', opts.name);
+        }
+
+        function otherDemoItem(opts) {
+            demoItem(opts.widget, opts.args, 'other', opts.name);
+        }
+
+        function demoItem(widget, args, category, name) {
+            /**
+             * 
+             * widget: case-correct string, UI component name
+             * args: json, arguments to the widget (needed to create the component)
+             * category: string, component category ('simple', 'complex', 'other')
+             * name: string, name of the item in the demo. only postfix is needed
+             * 
+             * to simplify the API:
+             *  - if not specified, the id will always be the widget name appended by '-demo'
+             *  - if not specified, the label 
+            */
+            args = args || {};            
+            if (!name) {
+                name = widget; // + ' ' + args.label;
+            } else {
+                // we use the ! sign to force a name in the menu because why not?
+                if (name.startsWith('!')) {
+                    name = name.split('!')[1];
+                } else {
+                    name = widget + ' ' + name;
+                }
+            }
+            
+            args.id = args.id || 'demo-' + widget.toLowerCase() + '_' + name.replace(/ /g, '-');
+
+            let item_switch = UI.el({type: 'div', classes: ['demo-item', category], innerText: name});            
+            menu.appendChild(item_switch);
+            item_switch.onclick = (evt) => {
+                evt.target.classList.toggle('clicked');
+                toggleComponent(widget, args);                
+            };
+        }
+
+        function toggleComponent(widget, args) {
             /** 
              * toggle component on the page
-             * assumption: id is included in args (no #)
+             * assumption: id is included in args
             */
             let element = components.querySelector(`#${args.id}`);
-            if (element === null) {
-                if (name.includes('widget_')) {
-                    name = name.split('_')[1];
-                    element = new UI.Widget(name, args);
-                } else {
-                    element = new UI[name](args);
-                }
-                components.appendChild(element);
-            } else {
+            if (element) {
                 components.removeChild(element);
+            } else {
+                element = new UI[widget](args);
+                components.appendChild(element);
             }
         }
 
