@@ -463,6 +463,32 @@ input[type="range"]::-ms-fill-upper {
 }
 /* 1.5) Double Slider >> */
 
+/* 1.6) progress bar << */
+.progress-bar {
+  background-color: var(--color-bg-head-darker);
+  /*height: 6px;*/
+  border: 1px solid var(--color-bg-button);
+}
+
+.progress-bar .head {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.progress-bar .body {
+  height: 6px;
+  border: 1px solid transparent;
+}
+
+.progress-bar .pbar-item {
+  height: 6px;
+  width: 60%;
+  background-color: var(--color-txt-link);
+}
+
+/* 1.6) progress bar >> */
+
 /** 1) SIMPLE WIDGETS << */
 
 /** 2) COMPLEX WIDGETS >>

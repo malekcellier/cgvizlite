@@ -428,6 +428,67 @@ UI.CustomDoubleSlider = function (opts) {
      */
 };
 
+UI.ProgressBar = function (opts) {
+    /**
+     * Creates a progress bar
+     */
+    // Default values
+    opts = opts || {};
+    opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
+    opts.label = opts.label || 'progressbar';
+    opts.min = opts.min || 0;
+    opts.max = opts.max || 100;
+    opts.value = opts.value || 75;
+    if (!opts.embed) {
+        opts.embed = false;
+    }
+    if (opts.embed) {
+        opts.classes.push('container');
+    }
+
+    let div = UI.el({type: 'div', id: opts.id, classes: ['progress-bar', ...opts.classes]});
+
+    // 1) First row: label and current value
+    let head = UI.el({type: 'div', classes: ['head']});
+    div.appendChild(head);
+    // 1.1) description
+    let desc = UI.el({type: 'div', classes: ['label', 'description']});
+    head.appendChild(desc);
+    desc.innerText = opts.label;
+    // 1.2) value
+    let value = UI.el({type: 'div', classes: ['label', 'value']});
+    head.appendChild(value);
+    value.innerText = opts.value;
+
+    // 2) Second row: progressbar
+    let body = UI.el({type: 'div', classes: ['body']});
+    div.appendChild(body);
+    // 2.1) actual progress bar
+    let bar = UI.el({type: 'div', classes: ['pbar-item']});
+    body.appendChild(bar);
+    bar.style.width = `${opts.value/(opts.max-opts.min)*100}%`;
+    
+    return div;
+};
+
+UI.ProgressBarGroup = function (opts) {
+    /**
+     * Creates a group of progress bars with a global progressbar
+     */
+    // Default values
+    opts = opts || {};
+    opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
+
+    let div = UI.el({type: 'div', id: opts.id, classes: ['progress-bar-group', ...opts.classes]});
+
+    // The global progress
+
+
+    return div;
+};
+
 // COMPLEX ELEMENTS
 UI.Panel = function (opts) {
     /**
