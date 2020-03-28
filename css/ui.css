@@ -493,15 +493,18 @@ input[type="range"]::-ms-fill-upper {
 /* 1.7) progress bar group >> */
 .progress-bar-group {
   min-width: 150px;
-  border: 1px solid var(--color-bg-button);
+  background-color: var(--color-bg-head-darker);  
+  padding: var(--padding);
 }
 .progress-bar-group .progress-bar.global {
-  border: 1px solid var(--color-bg-body);
+  border: 1px solid var(--color-bg-button);
   padding-bottom: var(--padding);
 }
 .progress-bar-group .progress-bar.global .pbar-item {
   background-color: var(--color-purple);
+  height: var(--padding);
 }
+
 
 /* 1.7) progress bar group << */
 
@@ -523,6 +526,8 @@ input[type="range"]::-ms-fill-upper {
   position: relative; /*absolute;*/
   top: 0px;
   left: 0px;
+  display: flex;
+  flex-direction: column;
   width: 200px;
   padding: 0px;
 }
@@ -567,6 +572,7 @@ input[type="range"]::-ms-fill-upper {
 
 .panel-body {
   background-color: var(--color-bg-body);
+  flex-grow: 1;
 }
 /* 2.1) Panel << */
 
@@ -1016,7 +1022,9 @@ input[type="range"]::-ms-fill-upper {
 }
 
 .resizers{
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   border: 1px dashed var(--color-blue-light);
