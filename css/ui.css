@@ -163,6 +163,7 @@ body {
     - 1.3) dropdown
     - 1.4) slider
     - 1.5) double slider
+    - 1.6) progress bar
  */
 
  /* 1.1) Button >> */
@@ -745,6 +746,13 @@ input[type="range"]::-ms-fill-upper {
   cursor: pointer;
   background-color: rgb(106, 116, 133);
 }
+/*
+.item-picker .search-items .search-item.already-there {
+  opacity: 0.3;
+  font-style: italic;
+  cursor: not-allowed;
+}
+*/
 
 .item-picker .search-items .search-item div, span {
   pointer-events: none;
@@ -995,6 +1003,9 @@ input[type="range"]::-ms-fill-upper {
   this includes:
     - 3.1) resizers
     - 3.2) mover
+    - 3.3) context-menu
+    - 3.4) fixed
+    - 3.5) modal
  */
 
 /* 3.1) resizers >> */
@@ -1062,7 +1073,10 @@ input[type="range"]::-ms-fill-upper {
 }
 /* 3.1) resizers << */
 
-/* 3.4) context-menu >> */
+/* 3.2) mover >> */
+/* 3.2) mover << */
+
+/* 3.3) context-menu >> */
 .context-menu {
   position: absolute;
   top: 0;
@@ -1098,15 +1112,16 @@ input[type="range"]::-ms-fill-upper {
   border-bottom: 1px solid var(--color-txt-label);
 }
 
-/* 3.4) context-menu << */
+/* 3.3) context-menu << */
 
-/* 3.5) fixed >> */
+/* 3.4) fixed >> */
 .fixed {
   padding: 6px;
   border: 1px solid var(--color-bg-button);
   background-color: var(--color-bg-head);
   color: var(--color-txt-bright);
 }
+/* 3.4) fixed  << */
 
 /* 3.5) modal >> */
 .modal {
