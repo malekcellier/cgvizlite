@@ -160,29 +160,66 @@
         otherDemoItem({widget: 'IconsShowCase', name: '!icons'});
 
         // 3.1) resizable window
-        // 3.1.1) empty div
-        let s_resizable = UI.el({type: 'div', classes: ['demo-item', 'other'], innerText: 'resizable'}); 
+        // 3.1.1) empty div with resizers on bottom right corner and around
+        let s_resizable = UI.el({type: 'div', classes: ['demo-item', 'other'], innerText: 'resizable simple'}); 
         menu.appendChild(s_resizable);
         s_resizable.onclick = (evt) => {
             evt.target.classList.toggle('clicked');                       
-            //toggleComponent('Resizer', {id: 'resizer-demo', parent: 'demo-components'});
-            //UI.Resizer({id: 'resizer-demo', parent: 'demo-components'});
-            
-            let element = components.querySelector('#resizable-demo');
+            let element = components.querySelector('#demo-resizable');
             if (element === null) {
-                let div = UI.el({type: 'div', id: 'resizable-demo'});
-                div.classList.add('resizable');
-                div.style.position = 'relative';
-                div.style.width = '200px';
-                div.style.height = '100px';
-                div.style['background-color'] = '#204080C0';
+                let div = UI.Box({id: 'demo-resizable', classes: ['resizable']});
                 components.appendChild(div);
-                UI.makeResizableDiv(div.id);
+                UI.makeResizableDiv(div.id, 'simple');
             } else {
                 components.removeChild(element);
             }
         }
-        // 3.1.2) Panel
+        // 3.1.2) empty div with resizers on all corners
+        let s_resizable_corners = UI.el({type: 'div', classes: ['demo-item', 'other'], innerText: 'resizable corners'}); 
+        menu.appendChild(s_resizable_corners);
+        s_resizable_corners.onclick = (evt) => {
+            evt.target.classList.toggle('clicked');                       
+            let element = components.querySelector('#demo-resizable_corners');
+            if (element === null) {
+                let div = UI.Box({id: 'demo-resizable_corners', classes: ['resizable']});
+                div.style.position = 'absolute';
+                components.appendChild(div);
+                UI.makeResizableDiv(div.id, 'corners');
+            } else {
+                components.removeChild(element);
+            }
+        }
+        // 3.1.3) empty div with resizers on all middles
+        let s_resizable_middles = UI.el({type: 'div', classes: ['demo-item', 'other'], innerText: 'resizable middles'}); 
+        menu.appendChild(s_resizable_middles);
+        s_resizable_middles.onclick = (evt) => {
+            evt.target.classList.toggle('clicked');                       
+            let element = components.querySelector('#demo-resizable_middles');
+            if (element === null) {
+                let div = UI.Box({id: 'demo-resizable_middles', classes: ['resizable']});
+                div.style.position = 'absolute';
+                components.appendChild(div);
+                UI.makeResizableDiv(div.id, 'middles');
+            } else {
+                components.removeChild(element);
+            }
+        }
+        // 3.1.4) empty div with resizers on all points
+        let s_resizable_all = UI.el({type: 'div', classes: ['demo-item', 'other'], innerText: 'resizable all'}); 
+        menu.appendChild(s_resizable_all);
+        s_resizable_all.onclick = (evt) => {
+            evt.target.classList.toggle('clicked');                       
+            let element = components.querySelector('#demo-resizable_all');
+            if (element === null) {
+                let div = UI.Box({id: 'demo-resizable_all', classes: ['resizable']});
+                div.style.position = 'absolute';
+                components.appendChild(div);
+                UI.makeResizableDiv(div.id, 'all');
+            } else {
+                components.removeChild(element);
+            }
+        }
+        // 3.1.5) Panel
         let s_resizable_panel = UI.el({type: 'div', classes: ['demo-item', 'other'], innerText: 'resizable panel'});
         menu.appendChild(s_resizable_panel);
         s_resizable_panel.onclick = (evt) => {

@@ -50,6 +50,7 @@ UI.el = function (opts) {
     opts.id = opts.id || '';
     opts.classes = opts.classes || [];
     opts.innerText = opts.innerText || '';
+    opts.style = opts.style || {};
 
     // Create the html dom element
     let el = document.createElement(opts.type);
@@ -69,10 +70,36 @@ UI.el = function (opts) {
         el.innerText = opts.innerText;
     }
 
+    // style is json: {'background-color': value, 'position': 'absolute'}
+    if (opts.style) {
+        let keys = Object.keys(opts.style);
+        let vals = Object.values(opts.style);
+        for (let i=0; i<keys.length; i++) {
+            el.style[keys[i]] = vals[i];
+        }
+    }
+
     return el;
 }
 
 // BASIC ELEMENTS
+UI.Box = function (opts) {
+    /**
+     * Creates a simple styled div
+     */
+    opts = opts || {};
+    if (!opts.style) {
+        opts.style = {};
+        opts.style['position'] = 'relative';
+        opts.style['width'] = '200px';
+        opts.style['height'] = '100px';
+        opts.style['background-color'] = '#204080C0';
+    }
+    let div = UI.el(opts);
+
+    return div;
+};
+
 UI.Button = function (opts) {
     /**
      * Creates a button with a svg before
@@ -1682,150 +1709,18 @@ UI.FileReader = function (evt) {
 
 
 // OTHER
-UI.Resizer = function (opts) {
-    /**
-     * Creates Resizers structure and adds it to existing div
-     * makes it possible to resize any div
-     * 
-     * opts: 
-     *  - id, string. Id of the target div
-     * 
-     */
-    // Default values
-    opts = opts || {};
-    opts.pos = opts.pos || 'one'; // can be 'one' for bottom-right, 'middles', 'corners', 'all'
-
-    let target = document.querySelector(`#${opts.id}`);
-    if (target === null) {
-        let demo_components = document.querySelector(`#${opts.parent}`);
-        target = UI.el({type: 'div', id: 'resizer-demo'});
-        target.style['width'] = '200px';
-        target.style['height'] = '100px';
-        target.style['background-color'] = 'white';
-        demo_components.appendChild(target);
-    }
-
-    target.classList.toggle('resizable');
-
-    let resizer = UI.el({type: 'div', classes: ['resizers']});
-    target.appendChild(resizer);
-
-    if (opts.pos === 'one') {
-        resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'bottom-right']}));
-    } else {
-        if (opts.pos === 'all' || opts.pos === 'middles') {
-            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'top-middle']}));
-            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'bottom-middle']}));
-            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'left-middle']}));
-            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'right-middle']}));
-        }
-        if (opts.pos === 'all' || opts.pos === 'corners') {
-            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'top-left']}));
-            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'top-right']}));
-            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'bottom-left']}));
-            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'bottom-right']}));
-        }
-    }
-
-
-    let min_width = 100;
-    let min_height = 50;
-
-    makeResizable(`#${opts.id}`);
-
-    function makeResizable(id) {
-        const element = document.querySelector(id);
-        const resizers = document.querySelectorAll(id + ' .resizer')
-        const minimum_size = 20;
-        let original_width = 0;
-        let original_height = 0;
-        let original_x = 0;
-        let original_y = 0;
-        let original_mouse_x = 0;
-        let original_mouse_y = 0;
-        for (let i = 0;i < resizers.length; i++) {
-            const currentResizer = resizers[i];
-            currentResizer.addEventListener('mousedown', function(evt) {
-                evt.preventDefault()
-                original_width = parseFloat(getComputedStyle(element, null).getPropertyValue('width').replace('px', ''));
-                original_height = parseFloat(getComputedStyle(element, null).getPropertyValue('height').replace('px', ''));
-                original_x = element.getBoundingClientRect().left;
-                original_y = element.getBoundingClientRect().top;
-                original_mouse_x = evt.pageX;
-                original_mouse_y = evt.pageY;
-                window.addEventListener('mousemove', resize);
-                window.addEventListener('mouseup', stopResize);
-            });
-        }
-
-        function resize(evt) {
-            let currentResizer = evt.target;
-            if (currentResizer.classList.contains('resizer')) {
-                let width;
-                let height;
-                if (currentResizer.classList.contains('bottom-right')) {
-                    width = original_width + (evt.pageX - original_mouse_x);
-                    height = original_height + (evt.pageY - original_mouse_y);
-                    if (width > minimum_size) {
-                        element.style.width = width + 'px';
-                    }
-                    if (height > minimum_size) {
-                        element.style.height = height + 'px';
-                    }
-                }
-                else if (currentResizer.classList.contains('bottom-left')) {
-                    height = original_height + (evt.pageY - original_mouse_y);
-                    width = original_width - (evt.pageX - original_mouse_x);
-                    if (height > minimum_size) {
-                        element.style.height = height + 'px';
-                    }
-                    if (width > minimum_size) {
-                        element.style.width = width + 'px';
-                        element.style.left = original_x + (evt.pageX - original_mouse_x) + 'px';
-                    }
-                }
-                else if (currentResizer.classList.contains('top-right')) {
-                    width = original_width + (evt.pageX - original_mouse_x);
-                    height = original_height - (evt.pageY - original_mouse_y);
-                    if (width > minimum_size) {
-                        element.style.width = width + 'px';
-                    }
-                    if (height > minimum_size) {
-                        element.style.height = height + 'px';
-                        element.style.top = original_y + (evt.pageY - original_mouse_y) + 'px';
-                    }
-                }
-                else {
-                    width = original_width - (evt.pageX - original_mouse_x);
-                    height = original_height - (evt.pageY - original_mouse_y);
-                    if (width > minimum_size) {
-                        element.style.width = width + 'px';
-                        element.style.left = original_x + (evt.pageX - original_mouse_x) + 'px';
-                    }
-                    if (height > minimum_size) {
-                        element.style.height = height + 'px';
-                        element.style.top = original_y + (evt.pageY - original_mouse_y) + 'px';
-                    }
-                }
-            }
-        }
-
-        function stopResize() {
-            window.removeEventListener('mousemove', resize);
-        }
-    }
-
-};
-
-UI.makeResizableDiv = function(div) {
+UI.makeResizableDiv = function(div, mode) {
     /**
      * Make a div resizable
-     */
+     * 
+     * NOTE: to use, make sure the target div has position: relative (absolute if total mobility is needed)
+     * 
+     */    
     // get the element
     const element = document.querySelector('#' + div);
     element.classList.add('resizable');
     // add the resizers to it
-    element.appendChild(createResizers());
+    element.appendChild(createResizers(mode));
     const resizers = document.querySelectorAll('#' + div + ' .resizer')
     // definitions
     const minimum_size = 20;
@@ -2023,8 +1918,10 @@ UI.ContextMenu = {
     /**
      * Intercepts the right-click and provides options
      * 
+     * To use, just call the UI.ContextMenu.toggle() function
+     * 
      * TODO: since this is a single event for the entire page,
-     * we can add special cases and use different action depending on the evt.target
+     * we can add special cases and use different actions depending on the evt.target
      * for ex:
      *  - a right click on an item could give extra options
      * 
