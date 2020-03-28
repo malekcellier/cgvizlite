@@ -8,102 +8,10 @@
     <link rel='shortcut icon' type='image/x-icon' href='misc/favicon_white.ico' />
     <link  type="text/css" href="vendors/kepler.css" rel="stylesheet"> 
     <link  type="text/css" href="css/ui.css" rel="stylesheet"> 
+    <link  type="text/css" href="demo.css" rel="stylesheet"> 
     <link  type="text/css" href="css/info.css" rel="stylesheet"> 
     <script type='text/javascript' src='vendors/chroma.min.js'></script>
-    <script type='module' src='./libs/ui.js'></script>
-    <style>
-        body, div {
-            box-sizing: border-box;
-        }
-
-        #demo-head {
-            display: flex;
-            flex-direction: column;
-        }
-
-        #demo-title, #demo-subtitle {
-            background-color: var(--color-bg-head);
-            font-size: 24px;
-            color: var(--color-txt-label);
-            /*border: 1px solid var(--color-txt-label);*/
-            margin: 12px 12px 0 12px;
-            text-align: center;
-        }
-
-        #demo-subtitle {
-            font-size: 10px;
-            font-weight: 200;
-            margin-top: 0;
-        }
-
-        #demo-content {
-            display: flex;
-            flex-direction: row;
-            height: 100%;
-            width: 95%;
-            /*padding: 12px*/
-        }
-
-        #demo-menu {
-            display: flex;
-            flex-direction: column;
-            height: 80%;
-            padding: 12px;
-            flex-grow: 0;
-        }
-        
-        #demo-components {
-            margin: 12px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #demo-components > div{
-            margin-bottom: 10px;
-        }
-
-        .demo-category {
-            border: 1px solid var(--color-bg-head);
-            border-left: 4px solid var(--color-purple);
-            background-color: var(--color-bg-head);
-            color: rgb(255, 255, 255);
-            margin-bottom: 10px;
-            padding: 5px 5px 5px 15px;
-        }
-
-        .demo-category:hover {
-            cursor: pointer;
-            background-color: var(--color-txt-link);
-        }
-
-        .demo-item {
-            border: 1px solid grey;
-            color: rgb(180, 180, 180);
-            margin-bottom: 10px;
-            padding: 5px 5px 5px 15px;
-            text-transform: capitalize;
-            display: none;
-        }
-        .demo-item:hover {
-            color: rgb(255, 255, 255);
-            cursor: pointer;
-        }
-
-        .demo-item.clicked {
-            color: black;
-            background-color: rgb(144, 152, 167);
-        }
-
-        /*
-        .demo-item.simple.hidden,
-        .demo-item.complex.hidden,
-        .demo-item.other.hidden 
-        */
-        .visible {
-            display: block;
-        }
-
-    </style>      
+    <script type='module' src='./libs/ui.js'></script>    
 </head>
 <body>
     <script type='module'>
