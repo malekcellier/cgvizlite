@@ -69,6 +69,12 @@ UI.Button = function (opts) {
     opts.label = opts.label || 'Button';
     opts.icon = opts.icon || '';
     opts.classes = opts.classes || [];
+    if (!opts.embed) {
+        opts.embed = false;
+    }
+    if (opts.embed) {
+        opts.classes.push('container');
+    }
 
     let btn = UI.el({type: 'div', id: opts.id, classes: ['button', ...opts.classes]});
     if (opts.icon !== '') {
@@ -94,12 +100,19 @@ UI.CheckBox = function (opts) {
     // Default values
     opts = opts || {};
     opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
     opts.label = opts.label || 'checkbox';
     opts.state = opts.state || 'off'; // switches are turned off by default    
     if (opts.square === undefined) {
         opts.square = true;
     }
     opts.tip_text = opts.tip_text || opts.state;
+    if (!opts.embed) {
+        opts.embed = false;
+    }
+    if (opts.embed) {
+        opts.classes.push('container');
+    }
     
     let checkbox = UI.el({type: 'div', id: opts.id, classes: ['checkbox', ...opts.classes]});
 
@@ -138,10 +151,17 @@ UI.DropDown = function (opts) {
     // Default values    
     opts = opts || {};
     opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
     opts.label = opts.label || 'Label';
     opts.items = opts.items || ['item 1', 'item 2', 'item 3', 'item 4', 'item 5'];
     opts.selected_index = opts.selected_index || 0; // how to keep track of the actual element?
-
+    if (!opts.embed) {
+        opts.embed = false;
+    }
+    if (opts.embed) {
+        opts.classes.push('container');
+    }
+    
     let div = UI.el({type: 'div', id: opts.id, classes: ['dropdown', ...opts.classes]});
     //div.setAttribute('index', opts.selected_index);
 
@@ -215,10 +235,17 @@ UI.Slider = function (opts) {
     // Default values
     opts = opts || {};
     opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
     opts.label = opts.label || 'slider';
     opts.min = opts.min || 0;
     opts.max = opts.max || 100;
     opts.value = opts.value || 75;
+    if (!opts.embed) {
+        opts.embed = false;
+    }
+    if (opts.embed) {
+        opts.classes.push('container');
+    }
 
     let div = UI.el({type: 'div', id: opts.id, classes: ['slider', ...opts.classes]});
     /*
@@ -289,11 +316,18 @@ UI.DoubleSlider = function (opts) {
     // Default values
     opts = opts || {};
     opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
     opts.label = opts.label || 'filter';
     opts.min = opts.min || 0;
     opts.inter_min = opts.inter_min || opts.min;
     opts.max = opts.max || 100;
     opts.inter_max = opts.inter_max || opts.max;
+    if (!opts.embed) {
+        opts.embed = false;
+    }
+    if (opts.embed) {
+        opts.classes.push('container');
+    }
 
     // Container is the div
     let div = UI.el({type: 'div', id: opts.id, classes: ['double-slider', ...opts.classes]});
