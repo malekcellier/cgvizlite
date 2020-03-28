@@ -198,7 +198,7 @@ body {
 }
 /* 1.1) Button << */
 
-/* 1.2) Checkbox << */
+/* 1.2) Checkbox >> */
 /* common to .slider, .double-slider*/
 .checkbox {
   background-color: var(--color-bg-head-darker);
@@ -219,9 +219,9 @@ body {
   text-transform: capitalize;
 }
 */
-/* 1.2) Checkbox >> */
+/* 1.2) Checkbox << */
 
-/* 1.3) Dropdown << */
+/* 1.3) Dropdown >> */
 .dropdown {
   box-sizing: border-box;
   max-width: 200px;
@@ -309,9 +309,9 @@ body {
   background-color: var(--color-txt-sublabel);
   transition: all 0.4s ease 0s;
 }
-/* 1.3) Dropdown >> */
+/* 1.3) Dropdown << */
 
-/* 1.4) Slider << */
+/* 1.4) Slider >> */
 /* common to .checkbox, .double-slider*/
 .slider {
   background-color: var(--color-bg-head-darker);
@@ -420,10 +420,9 @@ input[type="range"]::-ms-fill-upper {
   padding: 0 12px 0 12px;
   padding: 0;
 }
+/* 1.4) Slider << */
 
-/* 1.4) Slider >> */
-
-/* 1.5) Double Slider << */
+/* 1.5) Double Slider >> */
 /* common to .checkbox, .slider*/
 .double-slider {
   background-color: var(--color-bg-head-darker);
@@ -462,13 +461,15 @@ input[type="range"]::-ms-fill-upper {
   flex-direction: row;
   justify-content: space-between;
 }
-/* 1.5) Double Slider >> */
+/* 1.5) Double Slider << */
 
-/* 1.6) progress bar << */
+/* 1.6) progress bar >> */
 .progress-bar {
   background-color: var(--color-bg-head-darker);
   /*height: 6px;*/
-  border: 1px solid var(--color-bg-button);
+  /*border: 1px solid var(--color-bg-button);*/
+  padding: calc(var(--padding)*0.5);
+  padding-top: 0;
 }
 
 .progress-bar .head {
@@ -487,8 +488,22 @@ input[type="range"]::-ms-fill-upper {
   width: 60%;
   background-color: var(--color-txt-link);
 }
+/* 1.6) progress bar << */
 
-/* 1.6) progress bar >> */
+/* 1.7) progress bar group >> */
+.progress-bar-group {
+  min-width: 150px;
+  border: 1px solid var(--color-bg-button);
+}
+.progress-bar-group .progress-bar.global {
+  border: 1px solid var(--color-bg-body);
+  padding-bottom: var(--padding);
+}
+.progress-bar-group .progress-bar.global .pbar-item {
+  background-color: var(--color-purple);
+}
+
+/* 1.7) progress bar group << */
 
 /** 1) SIMPLE WIDGETS << */
 
@@ -504,15 +519,176 @@ input[type="range"]::-ms-fill-upper {
 /** 2) COMPLEX WIDGETS << */
 
 /* 2.1) Panel >> */
+.panel {
+  position: relative; /*absolute;*/
+  top: 0px;
+  left: 0px;
+  width: 200px;
+  padding: 0px;
+}
+
+  .panel-head {
+    background-color: var(--color-bg-head);
+    flex-wrap: wrap; /* to make sure the .controls.before stays at 0 when empty*/
+    align-items: center;
+  }
+
+    .panel-head .description {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      padding-left: calc(var(--padding)*0.75);
+    }
+
+    .panel-head .controls {
+      display: flex;
+      flex-direction: row;
+    }
+
+.controls.before {
+  /*flex-basis: 100%; /* to make sure the .controls.before stays at 0 when empty*/
+}
+
+.title {
+  font-size: 14px;
+  color: var(--color-txt-label);
+}
+
+.description .title:hover {
+  font-weight: 900;
+  color: var(--color-txt-bright);
+  cursor: pointer;
+}
+
+.subtitle {
+  font-size: 10px;
+  color: var(--color-txt-sublabel);
+}
+
+.panel-body {
+  background-color: var(--color-bg-body);
+}
 /* 2.1) Panel << */
 
 /* 2.2) Colorbar >> */
+.panel.colorbar .panel-head {
+  color: var(--color-txt);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.colorbar-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  /*padding: 4px;*/
+}
+
+.colorbar-item svg {
+  pointer-events: none;
+  /*padding-top: 6px;*/
+}
+
+.colorbar-item-svg {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+}
+
+.colorbar-item-desc {
+  color: var(--color-txt-colormap);
+  font-size: 11px;
+  font-weight: 900;
+  /*height: 15px;*/
+  padding-left: 10px;
+  /*padding-top: 4px;*/
+  /*line-height: 12px;*/
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: row;
+  align-items: end;
+}
+
+.colorbar-settings .panel-head{
+  background-color: var(--color-bg-body);
+}
+
+.colorbar-settings .panel-body{
+  background-color: var(--color-bg-head-darker);
+}
 /* 2.2) Colorbar << */
 
 /* 2.3) Colormap >> */
+.color-palette {
+  /*padding: 0px 8px;*/
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.colormap {
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  border: 1px solid transparent;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.colormap div[class*='info-'] {
+  display: block;
+}
+
+.colormap:hover {
+  background-color: var(--color-bg-head);
+  cursor: pointer;
+}
+
+.colormap.selected {
+  border-color: white;
+}
+
+.colormap-inner {
+  height: 10px;
+  border-radius: 2px;
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  justify-content: space-between;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.colormap-inner.reverse {
+  transform: scale(-1, 1);
+}
+
+.colormap-item {
+  flex-grow: 1;
+  pointer-events: none;  
+}
+
+.category .title {
+  border-bottom: 1px solid var(--color-txt-sublabel);
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+}
 /* 2.3) Colormap << */
 
 /* 2.4) Heatmap >> */
+.heatmap-row {
+  display: flex;
+  flex-direction: row;
+  width: 500px;
+  /*border: 1px solid steelblue;*/
+}
+
+.heatmap-item {
+  height: 12px;
+}
 /* 2.4) Heatmap << */
 
 /* 2.5) Tooltip >> */
@@ -567,7 +743,6 @@ input[type="range"]::-ms-fill-upper {
   font-weight: 500;
   color: var(--color-txt);
 }
-
 /* 2.5) Tooltip << */
 
 /* 2.6) Item Grouper >> */
@@ -650,7 +825,6 @@ input[type="range"]::-ms-fill-upper {
   display: flex;
 }
 /* 2.6) Item Grouper << */
-
 
 /* 2.7) Item picker >> */
 .item-picker {
@@ -753,7 +927,6 @@ input[type="range"]::-ms-fill-upper {
   cursor: not-allowed;
 }
 */
-
 .item-picker .search-items .search-item div, span {
   pointer-events: none;
 }
@@ -815,12 +988,10 @@ input[type="range"]::-ms-fill-upper {
   color: rgb(var(--raw-box-violet));
 }
 
-
 .item-picker .search-items .search-item span {
   color: rgb(240, 240, 240);
   padding-left: calc(var(--padding)*0.5);
 }
-
 /* 2.7) Item picker << */
 
 /* 2.8) Item griper >> */
@@ -828,175 +999,6 @@ input[type="range"]::-ms-fill-upper {
 
 }
 /* 2.8) Item griper << */
-
-/* Panel >> */
-.panel {
-  position: relative; /*absolute;*/
-  top: 0px;
-  left: 0px;
-  width: 200px;
-  padding: 0px;
-}
-
-  .panel-head {
-    background-color: var(--color-bg-head);
-    flex-wrap: wrap; /* to make sure the .controls.before stays at 0 when empty*/
-    align-items: center;
-  }
-
-    .panel-head .description {
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-      padding-left: calc(var(--padding)*0.75);
-    }
-
-    .panel-head .controls {
-      display: flex;
-      flex-direction: row;
-    }
-
-.controls.before {
-  /*flex-basis: 100%; /* to make sure the .controls.before stays at 0 when empty*/
-}
-
-.title {
-  font-size: 14px;
-  color: var(--color-txt-label);
-}
-
-.description .title:hover {
-  font-weight: 900;
-  color: var(--color-txt-bright);
-  cursor: pointer;
-}
-
-.subtitle {
-  font-size: 10px;
-  color: var(--color-txt-sublabel);
-}
-
-.panel-body {
-  background-color: var(--color-bg-body);
-}
-/* Panel << */ 
-
-.panel.colorbar .panel-head {
-  color: var(--color-txt);
-  font-size: 13px;
-  font-weight: 900;
-}
-
-.colorbar-item {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  /*padding: 4px;*/
-}
-
-.colorbar-item svg {
-  pointer-events: none;
-  /*padding-top: 6px;*/
-}
-
-.colorbar-item-svg {
-  display: flex;
-  flex-direction: column;
-  align-items: end;
-}
-
-.colorbar-item-desc {
-  color: var(--color-txt-colormap);
-  font-size: 11px;
-  font-weight: 900;
-  /*height: 15px;*/
-  padding-left: 10px;
-  /*padding-top: 4px;*/
-  /*line-height: 12px;*/
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  display: flex;
-  flex-direction: row;
-  align-items: end;
-}
-
-.colorbar-settings .panel-head{
-  background-color: var(--color-bg-body);
-}
-
-.colorbar-settings .panel-body{
-  background-color: var(--color-bg-head-darker);
-}
-
-.heatmap-row {
-  display: flex;
-  flex-direction: row;
-  width: 500px;
-  /*border: 1px solid steelblue;*/
-}
-
-.heatmap-item {
-  height: 12px;
-}
-
-
-.color-palette {
-  /*padding: 0px 8px;*/
-  max-height: 350px;
-  overflow-y: auto;
-}
-
-.colormap {
-  box-sizing: border-box;
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  border: 1px solid transparent;
-  padding: 4px;
-  border-radius: 4px;
-}
-
-.colormap div[class*='info-'] {
-  display: block;
-}
-
-.colormap:hover {
-  background-color: var(--color-bg-head);
-  cursor: pointer;
-}
-
-.colormap.selected {
-  border-color: white;
-}
-
-.colormap-inner {
-  height: 10px;
-  border-radius: 2px;
-  display: flex;
-  flex-direction: row;
-  flex-grow: 1;
-  justify-content: space-between;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.colormap-inner.reverse {
-  transform: scale(-1, 1);
-}
-
-.colormap-item {
-  flex-grow: 1;
-  pointer-events: none;  
-}
-
-.category .title {
-  border-bottom: 1px solid var(--color-txt-sublabel);
-  margin-bottom: 10px;
-  padding-bottom: 5px;
-}
-
 
 
 /** 3) OTHERS >>
@@ -1111,7 +1113,6 @@ input[type="range"]::-ms-fill-upper {
   padding: 6px 12px;
   border-bottom: 1px solid var(--color-txt-label);
 }
-
 /* 3.3) context-menu << */
 
 /* 3.4) fixed >> */
@@ -1143,5 +1144,4 @@ input[type="range"]::-ms-fill-upper {
   height: 700px;
   box-shadow: 0 5px 8px 0 rgba(0,0,0,0.2), 0 7px 20px 0 rgba(0,0,0,0.2);
 }
-
 /* 3.5) modal << */

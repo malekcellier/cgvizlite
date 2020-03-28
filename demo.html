@@ -58,6 +58,9 @@
         
         // 1.6) Progressbar
         simpleDemoItem({widget: 'ProgressBar', args: {label: 'some kpi', value: 56, embed: true}});
+        
+        // 1.7) Progressbar group
+        simpleDemoItem({widget: 'ProgressBarGroup'});
 
 
         /* 2) COMPLEX WIDGETS */
@@ -105,7 +108,7 @@
         args = {title: 'Something [#]', category: 'singlehue', scheme: 'Purples', n_colors: 4, min: 0, max: 100, reverse: false};
         complexDemoItem({widget: 'DiscreteColorBar', args: args, name: 'ex2'});
         // 2.3.2) Example 3
-        args = {title: 'Anythin [dB]', category: 'qualitative', scheme: 'Set1', n_colors: 5, min: -140, max: -70, reverse: true};
+        args = {title: 'Anything [dB]', category: 'qualitative', scheme: 'Set1', n_colors: 5, min: -140, max: -70, reverse: true};
         complexDemoItem({widget: 'DiscreteColorBar', args: args, name: 'ex3'});
         
         // 2.3bis) heatmap example (to go along one of the examples above...or both!!)
@@ -211,7 +214,7 @@
         // 3.5) Modal
         otherDemoItem({widget: 'Modal'});        
 
-        
+
         /* Helper functions*/
         function simpleDemoItem(opts) {
             demoItem(opts.widget, opts.args, 'simple', opts.name);

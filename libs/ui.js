@@ -28,30 +28,48 @@ UI.State = {
      */
 };
 
-// Widgets factory
-UI.Widget = function(name, opts) {
+UI.el = function (opts) {
     /**
-     * Wraps the construction of the elements:
-     *  - adds padding to the element
-     * 
-     *  name: widget name in small caps
-     *  opts: arguments for the element
-     * 
-     * TODO: replace with an option in opts... duh!
+     * Creates a dom element with options
+     * Convenience function to create a dom element
+     * opts is a json object that should contain the following:
+     *  - type: string, standard dom element name (div, span, h1, p)
+     *  - id: string, id in the html/css sense
+     *  - classes: array of strings, class name in the html/css sense
      */
+    // Default values handling
+    // Allow to pass a string for the type, no more
+    if (typeof opts === 'string') {
+        //let type = opts;
+        //opts = {type: type};
+        opts = {type: opts}; // same as the 2 lines above?
+    } else {
+        opts = opts || {};
+    }
+    opts.type = opts.type || 'div';
+    opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
+    opts.innerText = opts.innerText || '';
 
-    let elements = {
-        dropdown: 'DropDown',
-        slider: 'Slider',
-        doubleslider: 'DoubleSlider',
-        checkbox: 'CheckBox',
-        tooltip: 'Tooltip'
-    };
+    // Create the html dom element
+    let el = document.createElement(opts.type);
+    // Allocate an id only if not the empty string
+    if (opts.id !== '') {
+        el.id = opts.id;
+    }
+    // Populate the classList of the dom element only if the list is not empty
+    if (opts.classes.length > 0) {
+        for (let i=0; i<opts.classes.length; i++) {
+            el.classList.add(opts.classes[i]);
+        }
+    }
 
-    let widget = UI[elements[name.toLowerCase()]](opts);
-    widget.classList.add('container');
+    // In case innerText is defined
+    if (opts.innerText !== '') {
+        el.innerText = opts.innerText;
+    }
 
-    return widget;
+    return el;
 }
 
 // BASIC ELEMENTS
@@ -439,7 +457,9 @@ UI.ProgressBar = function (opts) {
     opts.label = opts.label || 'progressbar';
     opts.min = opts.min || 0;
     opts.max = opts.max || 100;
-    opts.value = opts.value || 75;
+    if (opts.value === undefined || opts.value === null) {
+        opts.value = 75;
+    }
     if (!opts.embed) {
         opts.embed = false;
     }
@@ -480,11 +500,22 @@ UI.ProgressBarGroup = function (opts) {
     opts = opts || {};
     opts.id = opts.id || '';
     opts.classes = opts.classes || [];
+    opts.label = opts.label || 'Total progress';
+    opts.items = opts.items || ['item 1', 'item 2', 'item 3', 'item 4', 'item 5', 'item 6'];
 
     let div = UI.el({type: 'div', id: opts.id, classes: ['progress-bar-group', ...opts.classes]});
 
     // The global progress
+    let global = UI.ProgressBar({label: opts.label, value: 55});
+    div.appendChild(global);
+    global.classList.add('global');
 
+    // The individual elements
+    for (let i=0; i<opts.items.length; i++) {
+        let pb = UI.ProgressBar({label: opts.items[i], value: 10*(i+1)});
+        div.appendChild(pb);
+        pb.querySelector('.pbar-item').id = 'pbar_' + opts.items[i];
+    }
 
     return div;
 };
@@ -549,7 +580,9 @@ UI.Panel = function (opts) {
     desc.appendChild(title);
     title.innerText = opts.title;
     title.onclick = (evt) => {
-        evt.target.parentElement.parentElement.nextElementSibling.classList.toggle('hidden');
+        if (evt.target.classList.contains('title')) {
+            evt.target.parentElement.parentElement.nextElementSibling.classList.toggle('hidden');
+        }
     };
     // 1.1.2) the sublabel is OPTIONAL
     if (opts.subtitle !== '' || opts.subtitle) {
@@ -703,9 +736,12 @@ UI.DiscreteColorBar = function (opts) {
         colors = chroma.scale(opts.scheme).domain([min - delta, max + delta]).classes(opts.n_colors);
         values = [opts.min, ...values, opts.max];
     }
+    
     if (opts.reverse === true) {
-        values = chroma.limits([max, min], 'e', opts.n_colors);
-    }
+        //values = chroma.limits([max, min], 'e', opts.n_colors);
+        // BUG: the domain has no effect when combined with classes...
+        colors = chroma.scale(opts.scheme).domain([max, min]).classes(opts.n_colors);
+    }    
     // normalize text values
     let text_values = [];
     let max_length = 0;
@@ -721,17 +757,24 @@ UI.DiscreteColorBar = function (opts) {
         if (text_value.length < max_length) {
             text_value = '&nbsp;'.repeat(max_length-text_value.length) + text_value;
         }
+    } 
+    // HACK: cross values if reversed
+    let delta_i = 0;
+    if (opts.reverse) {
+        values.reverse();
+        delta_i +=1;
     }
-
+    console.log('text values: ', text_values)
     for (let i=0; i<opts.n_colors; i++) {
         // A row container for both the svg and the description
         let container = UI.el({type: 'div', classes: ['colorbar-item', `_${i}`]});
         body.appendChild(container);
 
         // 1) svg
-        let span_svg = _el({type: 'span', classes: ['colorbar-item-svg']})
+        let span_svg = UI.el({type: 'span', classes: ['colorbar-item-svg']})
         container.appendChild(span_svg);
-        let svg = SvgIcon._color_box(colors(values[i]).rgb());
+        let svg = SvgIcon._color_box(colors(values[i+delta_i]).rgb());
+        console.log('value: ', values[i+delta_i])
         span_svg.appendChild(svg);
         
         // 2) description
@@ -1468,11 +1511,16 @@ UI.ItemGriper = function (opts) {
                     break;
                 }
             }
+            /*
+            THe idea is interesting but then it requires double sync with a listener in the list
+            each time an item is removed, then the class should be toggled  
+            evt.target.classList.toggle('already-there');
+            */
             if (!alreadyThere) {
                 // create new item
                 let item = newItem(name)
                 // check here whether it is already in the content
-                content.appendChild(item);
+                content.appendChild(item);                
             }
         }
     };
@@ -1494,17 +1542,144 @@ UI.ItemGriper = function (opts) {
     return div;    
 };
 
-UI.FileReader = function (opts) {
+UI.FileHandler = {
     /**
      * Creates a file reader based on promises
+     * 
+     * The FileHandler:
+     *  - handles all files in a directory
+     *  - needs the reference to the div that has the progress bars
+     *  - uses Promises to keep track of loaded files
+     * 
      */
+    data: {
+        button_id: 'filehandler-button',
+        progress_id: 'filehandler-progress',
+    },
+    dom: function (opts) {
+        /**
+         * creates the dom elements: the +button & the progress bars
+         * for each file to load, a new li is added form the reader
+         */
+
+        let div = UI.el({type: 'div'});
+
+        // Save the reference in data
+        //UI.FileHandler.data[] = div;
+        
+        return div
+    },
+    load: function () {
+
+    },
+    reader: function (file, el_id) {
+        /**
+         * file: from inputs
+         * el_id: span id
+         */
+        // Create new file reader
+        let reader = new FileReader();
+        reader.loadAsText(file);
+        // Create new dom element based on the filename
+        let el = UI.el({type: 'span'});
+
+        reader.onprogress = function (evt) {
+            if (evt.lengthComputable) {
+                console.log('report progress to right dom element');
+                document.querySelector();
+            }
+        };
+        
+        reader.onload = function (evt) {
+            /**
+             * IN case everything went smoothly,
+             */
+
+        };
+        
+        reader.onerror = function (error) {
+            /**
+             * In case something went wrong, the error event helps us figuring out what.
+             */
+            switch (error.code) {
+                case error.ENCODING_ERR:
+                    console.error("Encoding error!");
+                    break;    
+                case error.NOT_FOUND_ERR:
+                    console.error("File not found!");
+                    break;    
+                case error.NOT_READABLE_ERR:
+                    console.error("File could not be read!");
+                    break;    
+                case error.SECURITY_ERR:
+                    console.error("Security issue with file!");
+                    break;    
+                default:
+                    console.error("I have no idea what's wrong!");                
+            }
+        };       
+        
+    },
+    start: function () {
+
+    }
+
 };
 
-UI.ProgressBar = function (opts) {
+UI.DirectoryReader = function (opts) {
     /**
-     * Creates a progress bar (set?)
+     * Provides an interface to choose and read the content of a directory
+     * once read, the files are presented as progressbars
      */
+
+    let div = UI.el({type: 'div', id: opts.id, classes: ['directory', ...opts.classes]});
+
+    return div;
 };
+
+// FileReader and Promise
+UI.FileReader = function (evt) {
+    let file = evt.target.files[0];
+    let el = document.querySelector('.progress-bar');
+    let promise = pFileReader(file, el);
+    promise.then((result) => {console.log(result);}).catch((error) => {console.log(error)});
+
+    function pFileReader(file, el) {
+        /**
+         * 
+         * Returns a promise for the loading of the file
+         * 
+         * file: json or obj or mtl file
+         * el: reference to the specific div with class progress-bar
+         */
+        return new Promise((resolve, reject) => {
+            let reader = new FileReader();
+            // The onload should also result in the increment of the global progress
+            reader.onload((evt) => {
+                resolve(JSON.parse(evt.target.result));
+            });
+            reader.onerror((error) => {
+                reject(error);
+            });
+            reader.onprogress((evt) => {
+                if (evt.lengthComputable) {
+                    let pcentage = Math.round(evt.loaded/evt.total*100*10)/10; // *10/10 means 1 decimal after ,
+                    // Update the dom with the progress
+                    el.querySelector('.label.value').innerText = pcentage;
+                    el.querySelector('.pbar-item').style.width = `${pcentage}`;
+                }
+            });
+            reader.readAsText(file);
+        }
+
+        )
+    }
+
+    function handleFileType(name, result) {
+        console.log(`File handler. File: ${fname} gave result: ${result}`);
+    }
+}
+
 
 // OTHER
 UI.Resizer = function (opts) {
@@ -1921,6 +2096,7 @@ UI.Modal = function (opts) {
     // Create a dummy div in case nothing is passed
     if (!opts.div) {
         opts.div = UI.Panel();
+        opts.div.querySelector('.panel-body').style.height = 'calc(100% - 48px)';
     }
 
     let modal = UI.el({type: 'div', id: opts.id, classes: ['modal', ...opts.classes]});
@@ -1931,7 +2107,9 @@ UI.Modal = function (opts) {
     modal.addEventListener('click', handleClickOnModal, false);
 
     function handleClickOnModal (evt) {
-        if (!evt.target.classList.contains('modal-content')) {
+        // Remove the element only if modal-content is not part of the ancestors :-)
+        if (!evt.target.closest('.modal-content')) {
+            console.log('not modal-content');
             evt.target.removeEventListener('click', handleClickOnModal);
             evt.target.parentElement.removeChild(evt.target);
         }
