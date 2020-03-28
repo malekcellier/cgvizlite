@@ -11,7 +11,7 @@ Html menu items and widgets
 
 */
 
-import {_el, range, extendFunction} from './utils.js';
+import {range, extendFunction} from './utils.js';
 import {SvgIcon} from './SvgIcon.js';
 
 
@@ -70,11 +70,11 @@ UI.Button = function (opts) {
     opts.icon = opts.icon || '';
     opts.classes = opts.classes || [];
 
-    let btn = _el({type: 'div', id: opts.id, classes: ['button', ...opts.classes]});
+    let btn = UI.el({type: 'div', id: opts.id, classes: ['button', ...opts.classes]});
     if (opts.icon !== '') {
         btn.appendChild(SvgIcon.new({icon: opts.icon}));
     }
-    let txt = _el({type: 'p', classes: ['button-text'], innerText: opts.label});
+    let txt = UI.el({type: 'p', classes: ['button-text'], innerText: opts.label});
     btn.appendChild(txt);
 
     return btn;
@@ -101,11 +101,11 @@ UI.CheckBox = function (opts) {
     }
     opts.tip_text = opts.tip_text || opts.state;
     
-    let checkbox = _el({type: 'div', id: opts.id, classes: ['checkbox']});
+    let checkbox = UI.el({type: 'div', id: opts.id, classes: ['checkbox', ...opts.classes]});
 
     // The label
-    //let label = _el({type: 'div', classes: ['label']});
-    let label = _el({type: 'div', classes: ['t_label']});
+    //let label = UI.el({type: 'div', classes: ['label']});
+    let label = UI.el({type: 'div', classes: ['t_label']});
     checkbox.appendChild(label);
     label.innerText = opts.label;
     
@@ -142,21 +142,20 @@ UI.DropDown = function (opts) {
     opts.items = opts.items || ['item 1', 'item 2', 'item 3', 'item 4', 'item 5'];
     opts.selected_index = opts.selected_index || 0; // how to keep track of the actual element?
 
-    
-    let div = _el({type: 'div', id: opts.id, classes: ['dropdown']});
+    let div = UI.el({type: 'div', id: opts.id, classes: ['dropdown', ...opts.classes]});
     //div.setAttribute('index', opts.selected_index);
 
     // 1) label
-    //let label = _el({type: 'div', classes: ['dropdown-label']});
-    let label = _el({type: 'div', classes: ['t_label']});
+    //let label = UI.el({type: 'div', classes: ['dropdown-label']});
+    let label = UI.el({type: 'div', classes: ['t_label']});
     div.appendChild(label);
     label.innerText = opts.label;
 
     // 2) data
-    let data = _el({type: 'div', classes: ['dropdown-data']});
+    let data = UI.el({type: 'div', classes: ['dropdown-data']});
     div.appendChild(data);
     // 2.1) current selection
-    let selected = _el({type: 'div', classes: ['dropdown-selected']});
+    let selected = UI.el({type: 'div', classes: ['dropdown-selected']});
     data.appendChild(selected);
     // default element
     selected.innerText = opts.items[opts.selected_index];
@@ -178,7 +177,7 @@ UI.DropDown = function (opts) {
         }
     };
     // 2.2) items
-    let items = _el({type: 'div', classes: ['dropdown-items', 'hidden']});
+    let items = UI.el({type: 'div', classes: ['dropdown-items', 'hidden']});
     data.appendChild(items);
     // event for the selection of the items
     items.onclick = (evt) => {
@@ -191,7 +190,7 @@ UI.DropDown = function (opts) {
     };
     // 2.2.1) add all item
     for (let i=0; i<opts.items.length; i++) {
-        let item = _el({type: 'div', classes: ['dropdown-item']});
+        let item = UI.el({type: 'div', classes: ['dropdown-item']});
         item.innerText = opts.items[i];
         items.appendChild(item);
     }
@@ -221,7 +220,7 @@ UI.Slider = function (opts) {
     opts.max = opts.max || 100;
     opts.value = opts.value || 75;
 
-    let div = _el({type: 'div', id: opts.id, classes: ['slider']});
+    let div = UI.el({type: 'div', id: opts.id, classes: ['slider', ...opts.classes]});
     /*
     div.setAttribute('min', opts.min);
     div.setAttribute('max', opts.min);
@@ -229,21 +228,21 @@ UI.Slider = function (opts) {
     */
 
     // 1) First row: label and current value
-    let row_1 = _el({type: 'div', classes: ['top']});
+    let row_1 = UI.el({type: 'div', classes: ['top']});
     div.appendChild(row_1);
     // 1.1) Label
-    let label = _el({type: 'div', classes: ['label']});
+    let label = UI.el({type: 'div', classes: ['label']});
     row_1.appendChild(label);
     label.innerText = opts.label;
     // 1.2) value
-    let value = _el({type: 'div', classes: ['label']});
+    let value = UI.el({type: 'div', classes: ['label']});
     row_1.appendChild(value);
     value.innerText = opts.value;
     
     // Second row: slider widget
-    let row_2 = _el({type: 'div', classes: ['bottom']});
+    let row_2 = UI.el({type: 'div', classes: ['bottom']});
     div.appendChild(row_2);
-    let nput = _el('input');
+    let nput = UI.el('input');
     row_2.appendChild(nput);
     nput.type = 'range';
     nput.min = opts.min;
@@ -297,32 +296,32 @@ UI.DoubleSlider = function (opts) {
     opts.inter_max = opts.inter_max || opts.max;
 
     // Container is the div
-    let div = _el({type: 'div', id: opts.id, classes: ['double-slider']});
+    let div = UI.el({type: 'div', id: opts.id, classes: ['double-slider', ...opts.classes]});
 
     // 1) 1st row: label
-    let row_1 = _el({type: 'div', classes: ['top']});
+    let row_1 = UI.el({type: 'div', classes: ['top']});
     div.appendChild(row_1);
     // 1.1) Label
-    let label = _el({type: 'div', classes: ['label']});
+    let label = UI.el({type: 'div', classes: ['label']});
     row_1.appendChild(label);
     label.innerText = opts.label;
 
     // 2) 2nd row: min value (fixed), slider,  inter_min value (dyn)
-    let row_2 = _el({type: 'div', classes: ['middle']});
+    let row_2 = UI.el({type: 'div', classes: ['middle']});
     div.appendChild(row_2);
     // 2.1) min & inter_min values
-    let values = _el({type: 'div', classes: ['labels']});
+    let values = UI.el({type: 'div', classes: ['labels']});
     row_2.appendChild(values);    
     // 2.1.1)
-    let min_value = _el({type: 'div', classes: ['label']});
+    let min_value = UI.el({type: 'div', classes: ['label']});
     values.appendChild(min_value);
     min_value.innerText = opts.min;
     // 2.1.2) inter_min Value
-    let inter_min_value = _el({type: 'div', classes: ['label', 'dyn']});
+    let inter_min_value = UI.el({type: 'div', classes: ['label', 'dyn']});
     values.appendChild(inter_min_value);
     inter_min_value.innerText = opts.inter_min;
     // 2.2) slider
-    let nput_min = _el('input');
+    let nput_min = UI.el('input');
     row_2.appendChild(nput_min);
     nput_min.type = 'range';
     nput_min.min = opts.min;
@@ -345,21 +344,21 @@ UI.DoubleSlider = function (opts) {
     }
 
     // 3) 3rd row: inter_max value (dyn), slider,  max value (fixed)
-    let row_3 = _el({type: 'div', classes: ['bottom']});
+    let row_3 = UI.el({type: 'div', classes: ['bottom']});
     div.appendChild(row_3);
     // 3.1) min & inter_min values
-    let values_max = _el({type: 'div', classes: ['labels']});
+    let values_max = UI.el({type: 'div', classes: ['labels']});
     row_3.appendChild(values_max);    
     // 3.1.2) inter_max Value
-    let inter_max_value = _el({type: 'div', classes: ['label', 'dyn']});
+    let inter_max_value = UI.el({type: 'div', classes: ['label', 'dyn']});
     values_max.appendChild(inter_max_value);
     inter_max_value.innerText = opts.inter_max;
     // 3.1.1)
-    let max_value = _el({type: 'div', classes: ['label']});
+    let max_value = UI.el({type: 'div', classes: ['label']});
     values_max.appendChild(max_value);
     max_value.innerText = opts.max;
     // 3.2) slider
-    let nput_max = _el('input');
+    let nput_max = UI.el('input');
     row_3.appendChild(nput_max);
     nput_max.type = 'range';
     nput_max.min = opts.min;
@@ -427,7 +426,7 @@ UI.Panel = function (opts) {
     opts.closable = opts.closable || false;
 
     // The Panel is a div
-    let panel = _el({type: 'div', id: opts.id, classes: ['panel']});
+    let panel = UI.el({type: 'div', id: opts.id, classes: ['panel']});
 
     // Classes array is OPTIONAL
     if (opts.classes.length > 0) {
@@ -437,21 +436,21 @@ UI.Panel = function (opts) {
     }
 
     // 1) The head
-    let head = _el({type: 'div', classes: ['container', 'panel-head']});
+    let head = UI.el({type: 'div', classes: ['container', 'panel-head']});
     panel.appendChild(head);
     // Styling
     head.style.display = 'flex';
     head.style['justify-content'] = 'space-between';
 
     // 1.0) the controls (on the left hand side)
-    let controls_before = _el({type: 'div', classes: ['controls', 'before']});
+    let controls_before = UI.el({type: 'div', classes: ['controls', 'before']});
     head.appendChild(controls_before);
 
     // 1.1) the description
-    let desc = _el({type: 'div', classes: ['description']});
+    let desc = UI.el({type: 'div', classes: ['description']});
     head.appendChild(desc);
     // 1.1.1) the title
-    let title = _el({type: 'div', classes: ['title']});
+    let title = UI.el({type: 'div', classes: ['title']});
     desc.appendChild(title);
     title.innerText = opts.title;
     title.onclick = (evt) => {
@@ -459,13 +458,13 @@ UI.Panel = function (opts) {
     };
     // 1.1.2) the sublabel is OPTIONAL
     if (opts.subtitle !== '' || opts.subtitle) {
-        let subtitle = _el({type: 'div', classes: ['subtitle']});
+        let subtitle = UI.el({type: 'div', classes: ['subtitle']});
         subtitle.innerText = opts.subtitle;
         desc.appendChild(subtitle);
     }
 
     // 1.2) the controls (on the right hand side)
-    let controls = _el({type: 'div', classes: ['controls', 'after']});
+    let controls = UI.el({type: 'div', classes: ['controls', 'after']});
     head.appendChild(controls);    
     // 1.2.1) the close button is OPTIONAL
     if (opts.closable === true) {
@@ -480,7 +479,7 @@ UI.Panel = function (opts) {
     }
     
     // 2) The body
-    let body = _el({type: 'div', classes: ['container', 'panel-body']});
+    let body = UI.el({type: 'div', classes: ['container', 'panel-body']});
     panel.appendChild(body);
 
     return panel;
@@ -631,7 +630,7 @@ UI.DiscreteColorBar = function (opts) {
 
     for (let i=0; i<opts.n_colors; i++) {
         // A row container for both the svg and the description
-        let container = _el({type: 'div', classes: ['colorbar-item', `_${i}`]});
+        let container = UI.el({type: 'div', classes: ['colorbar-item', `_${i}`]});
         body.appendChild(container);
 
         // 1) svg
@@ -641,19 +640,19 @@ UI.DiscreteColorBar = function (opts) {
         span_svg.appendChild(svg);
         
         // 2) description
-        let desc = _el({type: 'span', classes: ['colorbar-item-desc']});
+        let desc = UI.el({type: 'span', classes: ['colorbar-item-desc']});
         container.appendChild(desc);
         // TODO: the first from value and the last to values are always the actual min/max
         // when changing the min/max through the double slider, the first and last color will cover wider range (it becomes heterogeneous)
         //desc.innerText = `${values[i].toFixed(opts.precision)} to ${values[i+1].toFixed(opts.precision)}`;
         desc.innerText = `${text_values[i]} to ${text_values[i+1]}`;
         /*
-        desc.appendChild(_el({type: 'span', innerText: `${values[i].toFixed(opts.precision)} ` }));
-        let to = _el({type: 'span', innerText: 'to' });
+        desc.appendChild(UI.el({type: 'span', innerText: `${values[i].toFixed(opts.precision)} ` }));
+        let to = UI.el({type: 'span', innerText: 'to' });
         to.style['padding-left'] = '0.5em';
         to.style['padding-right'] = '0.5em';
         desc.appendChild(to);
-        desc.appendChild(_el({type: 'span', innerText: ` ${values[i+1].toFixed(opts.precision)}` }));
+        desc.appendChild(UI.el({type: 'span', innerText: ` ${values[i+1].toFixed(opts.precision)}` }));
         */
     }
 
@@ -695,10 +694,10 @@ UI.DiscreteColorbarSettings = function (opts) {
     let body = div.querySelector('.panel-body');    
 
     // 1) Range related settings
-    let range_settings = _el({type: 'div', classes: ['category']});
+    let range_settings = UI.el({type: 'div', classes: ['category']});
     body.appendChild(range_settings);
     // 1.1) Title
-    let range_title = _el({type: 'div', classes: ['title']});
+    let range_title = UI.el({type: 'div', classes: ['title']});
     range_settings.appendChild(range_title);
     range_title.innerText = 'Range';
     // 1.2) min, max: double-slider
@@ -741,11 +740,11 @@ UI.DiscreteColorbarSettings = function (opts) {
     );
     
     // 2) Color related settings
-    let color_settings = _el({type: 'div', classes: ['category']});
+    let color_settings = UI.el({type: 'div', classes: ['category']});
     body.appendChild(color_settings);
 
     // 2.1) Title
-    let color_title = _el({type: 'div', classes: ['title']});
+    let color_title = UI.el({type: 'div', classes: ['title']});
     color_settings.appendChild(color_title);
     color_title.innerText = 'Color';
 
@@ -838,7 +837,7 @@ UI.ColorPalette = function (opts) {
         opts.scheme_index = 0;
     } 
 
-    let palette = _el({type: 'div', id: opts.id, classes: ['color-palette']});
+    let palette = UI.el({type: 'div', id: opts.id, classes: ['color-palette']});
     palette.onclick = (evt) => {
         /**
          * The click is handlede at the level of the colormap
@@ -874,7 +873,7 @@ UI.ColorPalette = function (opts) {
     for (let i=0; i<schemes.length; i++) {
         let scheme = schemes[i];
         // The colormap
-        let clrmap = _el({type: 'div', classes: ['colormap', 'info-colormap']});
+        let clrmap = UI.el({type: 'div', classes: ['colormap', 'info-colormap']});
         palette.appendChild(clrmap);
         clrmap.setAttribute('info-text', scheme);
         if (i>=schemes.length-2) { // that's a fix for the y-overflow
@@ -887,7 +886,7 @@ UI.ColorPalette = function (opts) {
         };
         
         // Inner-container needed for the flex to work
-        let clrmap_inner = _el({type: 'div', classes: ['colormap-inner']});
+        let clrmap_inner = UI.el({type: 'div', classes: ['colormap-inner']});
         clrmap.appendChild(clrmap_inner);
         if (opts.reverse === true) {
             clrmap_inner.classList.add('reverse');
@@ -897,7 +896,7 @@ UI.ColorPalette = function (opts) {
         // All the colors
         let colors = chroma.scale(scheme).classes(n_colors);
         for (let j=0; j<n_colors; j++) {
-            let clrel = _el({type: 'div', classes: ['colormap-item']});
+            let clrel = UI.el({type: 'div', classes: ['colormap-item']});
             clrel.style['background-color'] = colors(j/(n_colors-1));
             clrmap_inner.appendChild(clrel);
         }
@@ -1039,12 +1038,12 @@ UI.Heatmap = function (opts) {
     body.style['flex-direction'] = 'column';
 
     for (let i=0; i<opts.n_rows; i++) {
-        let row = _el({type: 'div', classes: ['heatmap-row']});
+        let row = UI.el({type: 'div', classes: ['heatmap-row']});
         body.appendChild(row);
         let data = [];
         body.appendChild(row);
         for (let j=0; j<opts.n_cols; j++) {
-            let col = _el({type: 'div', classes: ['heatmap-item']});
+            let col = UI.el({type: 'div', classes: ['heatmap-item']});
             row.appendChild(col);
             let value = getData(opts.mode, i, j);
             let rgb = colors(value).rgb();
@@ -1090,28 +1089,28 @@ UI.Tooltip = function (opts) {
     opts.label = opts.label || 'some scenario';
     opts.items = opts.items || {'item 1': 123, 'item 2': 'abc', 'something': 0.198, 'anything': 'O_O', 'something else': 3.141592};
 
-    let tooltip = _el({type: 'div', id: opts.id, classes: ['tooltip']});
+    let tooltip = UI.el({type: 'div', id: opts.id, classes: ['tooltip']});
     
     // The head has a layers icon and the name of the scenario
-    let head = _el({type: 'div', classes: ['head']});
+    let head = UI.el({type: 'div', classes: ['head']});
     tooltip.appendChild(head);
     head.appendChild(SvgIcon.new({icon: 'layers'}));
-    head.appendChild(_el({type: 'div', classes: ['label'], innerText: opts.label}));
+    head.appendChild(UI.el({type: 'div', classes: ['label'], innerText: opts.label}));
 
     // The body has a table with the key/values
-    let body = _el({type: 'div', classes: ['body']});
+    let body = UI.el({type: 'div', classes: ['body']});
     tooltip.appendChild(body);
     // The table that contains the items
-    let table = _el({type: 'table', classes: ['table']});
+    let table = UI.el({type: 'table', classes: ['table']});
     body.appendChild(table);
-    let tbody = _el({type: 'tbody', classes: ['tbody']});
+    let tbody = UI.el({type: 'tbody', classes: ['tbody']});
     table.appendChild(tbody);
     let keys = Object.keys(opts.items);
     for (let i=0; i<keys.length; i++) {
-        let row = _el({type: 'tr'});
+        let row = UI.el({type: 'tr'});
         tbody.appendChild(row);
-        row.appendChild(_el({type: 'td', innerText: keys[i]}));
-        row.appendChild(_el({type: 'td', classes: ['value'], innerText: opts.items[keys[i]]}));
+        row.appendChild(UI.el({type: 'td', innerText: keys[i]}));
+        row.appendChild(UI.el({type: 'td', classes: ['value'], innerText: opts.items[keys[i]]}));
     }
 
     return tooltip; 
@@ -1136,9 +1135,9 @@ UI.ItemGrouper = function (opts) {
         opts.selected = ['item 1', 'item 2', 'item 3', 'item 4', 'item 5', 'item 6', 'item 7'];
     }
 
-    let div = _el({type: 'div', id: opts.id, classes: ['item-grouper']});
+    let div = UI.el({type: 'div', id: opts.id, classes: ['item-grouper']});
     // content
-    let content = _el({type: 'div', classes: ['content']});
+    let content = UI.el({type: 'div', classes: ['content']});
     div.appendChild(content);
     // items TODO: it does not make sense to populate this element
     if (opts.selected.length > 0) {
@@ -1148,8 +1147,8 @@ UI.ItemGrouper = function (opts) {
     }
 
     function addItem(name) {
-        let item = _el({type: 'div', classes: ['item']});
-        let span = _el({type: 'span', innerText: name});
+        let item = UI.el({type: 'div', classes: ['item']});
+        let span = UI.el({type: 'span', innerText: name});
         item.appendChild(span);
         let svg = SvgIcon.new({icon: 'close'})
         item.appendChild(svg);
@@ -1227,13 +1226,13 @@ UI.ItemPicker = function (opts) {
     }
     opts.filtered_items = opts.filtered_items || fake_items;
 
-    let div = _el({type: 'div', id: opts.id, classes: ['item-picker', ...opts.classes]});
+    let div = UI.el({type: 'div', id: opts.id, classes: ['item-picker', ...opts.classes]});
 
     // The search bar is made of an input field and a search icon
-    let bar = _el({type: 'div', classes: ['search-bar']});
+    let bar = UI.el({type: 'div', classes: ['search-bar']});
     div.appendChild(bar);
     // input field
-    let input = _el('input');    
+    let input = UI.el('input');    
     bar.appendChild(input);
     input.type = 'text';
     input.placeholder = 'Search...';
@@ -1275,7 +1274,7 @@ UI.ItemPicker = function (opts) {
     }
 
     // The list of items
-    let items = _el({type: 'div', classes: ['search-items', 'hidden']});
+    let items = UI.el({type: 'div', classes: ['search-items', 'hidden']});
     div.appendChild(items);
     populateSearchItems(div, opts.items);
 
@@ -1291,16 +1290,16 @@ UI.ItemPicker = function (opts) {
         for (let i=0; i<inputs.length;i++) {
             let key = inputs[i];
             let val = list_items[key];
-            let item = _el({type: 'div', classes: ['search-item']})
+            let item = UI.el({type: 'div', classes: ['search-item']})
             items.appendChild(item);
             // Each item has a (not unique) category icon (float, int, string or kpi type)
-            let cat = _el({type: 'div', classes: ['category']});
+            let cat = UI.el({type: 'div', classes: ['category']});
             item.appendChild(cat);
-            let el = _el({type: 'div', classes: ['element'], innerText: val});
+            let el = UI.el({type: 'div', classes: ['element'], innerText: val});
             cat.appendChild(el);
             el.classList.add(mapping[val]);
             // and a span for the actual name
-            let span = _el({type: 'span', innerText: key});
+            let span = UI.el({type: 'span', innerText: key});
             item.appendChild(span);
         }
     }
@@ -1347,7 +1346,7 @@ UI.ItemGriper = function (opts) {
         opts.fake = false;
     }
 
-    let div = _el({type: 'div', id: opts.id, classes: ['item-picker', ...opts.classes]});
+    let div = UI.el({type: 'div', id: opts.id, classes: ['item-picker', ...opts.classes]});
 
     // the output of the selection
     let output = UI.ItemGrouper();
@@ -1384,8 +1383,8 @@ UI.ItemGriper = function (opts) {
     };
 
     function newItem(name) {
-        let item = _el({type: 'div', classes: ['item']});
-        let span = _el({type: 'span', innerText: name});
+        let item = UI.el({type: 'div', classes: ['item']});
+        let span = UI.el({type: 'span', innerText: name});
         item.appendChild(span);
         let svg = SvgIcon.new({icon: 'close'})
         item.appendChild(svg);
@@ -1429,7 +1428,7 @@ UI.Resizer = function (opts) {
     let target = document.querySelector(`#${opts.id}`);
     if (target === null) {
         let demo_components = document.querySelector(`#${opts.parent}`);
-        target = _el({type: 'div', id: 'resizer-demo'});
+        target = UI.el({type: 'div', id: 'resizer-demo'});
         target.style['width'] = '200px';
         target.style['height'] = '100px';
         target.style['background-color'] = 'white';
@@ -1438,23 +1437,23 @@ UI.Resizer = function (opts) {
 
     target.classList.toggle('resizable');
 
-    let resizer = _el({type: 'div', classes: ['resizers']});
+    let resizer = UI.el({type: 'div', classes: ['resizers']});
     target.appendChild(resizer);
 
     if (opts.pos === 'one') {
-        resizer.appendChild(_el({type: 'div', classes: ['resizer', 'bottom-right']}));
+        resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'bottom-right']}));
     } else {
         if (opts.pos === 'all' || opts.pos === 'middles') {
-            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'top-middle']}));
-            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'bottom-middle']}));
-            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'left-middle']}));
-            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'right-middle']}));
+            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'top-middle']}));
+            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'bottom-middle']}));
+            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'left-middle']}));
+            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'right-middle']}));
         }
         if (opts.pos === 'all' || opts.pos === 'corners') {
-            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'top-left']}));
-            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'top-right']}));
-            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'bottom-left']}));
-            resizer.appendChild(_el({type: 'div', classes: ['resizer', 'bottom-right']}));
+            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'top-left']}));
+            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'top-right']}));
+            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'bottom-left']}));
+            resizer.appendChild(UI.el({type: 'div', classes: ['resizer', 'bottom-right']}));
         }
     }
 
@@ -1727,7 +1726,7 @@ UI.IconsShowCase = function (opts) {
      */
     opts = opts || {};
     opts.id = opts.id || 'icon-demo';
-    let div = _el({type: 'div', id: opts.id, classes: ['icons', 'container']});
+    let div = UI.el({type: 'div', id: opts.id, classes: ['icons', 'container']});
     div.style.display = 'flex';
     div.style['flex-direction'] = 'row';
     div.style['flex-wrap'] = 'wrap';
@@ -1783,7 +1782,7 @@ UI.ContextMenu = {
             document.body.removeChild(cmenu);
         }
         // recreate the context-menu
-        cmenu = _el({type: 'div', id: 'context-menu', classes: ['context-menu']});
+        cmenu = UI.el({type: 'div', id: 'context-menu', classes: ['context-menu']});
         document.body.appendChild(cmenu);
         let oHeight = document.querySelector('#context-menu').offsetHeight;
         let oWidth = document.querySelector('#context-menu').offsetWidth;
@@ -1795,13 +1794,13 @@ UI.ContextMenu = {
         //cmenu.style.left = `${evt.clientX}px`;
         //cmenu.style.top = `${evt.clientY}px`;
         // Add items to the menu
-        let head = _el({type: 'div', classes: ['cm-head'], innerText: 'Context menu'});
+        let head = UI.el({type: 'div', classes: ['cm-head'], innerText: 'Context menu'});
         cmenu.appendChild(head);
-        let body = _el({type: 'div', classes: ['cm-body']});
+        let body = UI.el({type: 'div', classes: ['cm-body']});
         cmenu.appendChild(body);
-        body.appendChild(_el({type: 'div', classes: ['cm-divider']}));
-        body.appendChild(_el({type: 'div', classes: ['cm-item'], innerText: `x: ${evt.clientX}`}));
-        body.appendChild(_el({type: 'div', classes: ['cm-item'], innerText: `y: ${evt.clientY}`}));
+        body.appendChild(UI.el({type: 'div', classes: ['cm-divider']}));
+        body.appendChild(UI.el({type: 'div', classes: ['cm-item'], innerText: `x: ${evt.clientX}`}));
+        body.appendChild(UI.el({type: 'div', classes: ['cm-item'], innerText: `y: ${evt.clientY}`}));
     },
 
     click: function (evt) {
@@ -1837,7 +1836,7 @@ UI.Fixed = function (opts) {
     opts.top = opts.top || '0px';
     opts.left = opts.left || '50%';
 
-    let div = _el({type: 'div', id: opts.id, classes: ['fixed', ...opts.classes], innerText: opts.title});
+    let div = UI.el({type: 'div', id: opts.id, classes: ['fixed', ...opts.classes], innerText: opts.title});
     div.style.position = 'fixed';
     div.style.top = opts.top;
     div.style.left = opts.left;
@@ -1867,30 +1866,30 @@ UI.Demo = function () {
      *  - Switch (square)
      *  - ColorPicker
      */
-    let demo_container = _el({type: 'div', id: 'demo-container'});
+    let demo_container = UI.el({type: 'div', id: 'demo-container'});
     
     // 1) the demo head has the title and subtitle
-    let demo_head = _el({type: 'div', id: 'demo-head'});
+    let demo_head = UI.el({type: 'div', id: 'demo-head'});
     demo_container.appendChild(demo_head);
-    let demo_title = _el({type: 'div', id: 'demo-title'});
+    let demo_title = UI.el({type: 'div', id: 'demo-title'});
     demo_head.appendChild(demo_title);
     demo_title.innerText = 'Custom ui components demo';
-    let demo_subtitle = _el({type: 'div', id: 'demo-subtitle'});
+    let demo_subtitle = UI.el({type: 'div', id: 'demo-subtitle'});
     demo_head.appendChild(demo_subtitle);
     demo_subtitle.innerText = 'by Malek Cellier';
 
     // 2) The demo content has the menu and the components
-    let demo_content = _el({type: 'div', id: 'demo-content'});
+    let demo_content = UI.el({type: 'div', id: 'demo-content'});
     demo_container.appendChild(demo_content);
 
-    let menu = _el({type: 'div', id: 'demo-menu'});
+    let menu = UI.el({type: 'div', id: 'demo-menu'});
     demo_content.appendChild(menu);
 
-    let components = _el({type: 'div', id: 'demo-components'});
+    let components = UI.el({type: 'div', id: 'demo-components'});
     demo_content.appendChild(components);
     
     return demo_container;
 }
 
 
-export {UI, _el};
+export {UI};

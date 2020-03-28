@@ -220,47 +220,6 @@ function makeResizableDiv(div) {
 
   }
 
-function _el(opts) {
-    /**
-     * Convenience function to create a dom element
-     * opts is a json object that should contain the following:
-     *  - type: string, standard dom element name (div, span, h1, p)
-     *  - id: string, id in the html/css sense
-     *  - classes: array of strings, class name in the html/css sense
-    */
-    // Default values handling
-    // Allow to pass a string for the type, no more
-    if (typeof opts === 'string') {
-        //let type = opts;
-        //opts = {type: type};
-        opts = {type: opts}; // same as the 2 lines above?
-    } else {
-        opts = opts || {};
-    }
-    opts.type = opts.type || 'div';
-    opts.id = opts.id || '';
-    opts.classes = opts.classes || [];
-    opts.innerText = opts.innerText || '';
 
-    // Create the html dom element
-    let el = document.createElement(opts.type);
-    // Allocate an id only if not the empty string
-    if (opts.id !== '') {
-        el.id = opts.id;
-    }
-    // Populate the classList of the dom element only if the list is not empty
-    if (opts.classes.length > 0) {
-        for (let i=0; i<opts.classes.length; i++) {
-            el.classList.add(opts.classes[i]);
-        }
-    }
 
-    // In case innerText is defined
-    if (opts.innerText !== '') {
-        el.innerText = opts.innerText;
-    }
-
-    return el;
-}
-
-export {_el, randInt, extendFunction, range, randRGB, percentToHex};
+export {randInt, extendFunction, range, randRGB, percentToHex};
