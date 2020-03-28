@@ -267,7 +267,7 @@ Scene organization and Naming convention:
 2020-03-26
 ----------
 - [ ] Headers definition for cgviz
-- [ ] padding and embedded componenents: consider adding a parameter in opts like opts.embedded that toggles the padding 
+- [X] padding and embedded components: consider adding a parameter in opts like opts.embedded that toggles the padding 
 - [X] Component: simple context menu
 - [ ] consider using mutation observer to sync the innerText for ex (see solution used in DropDown implementation)
 - [ ] review all components and homogenize the code, check the labels, check the way other items are accessed
@@ -278,5 +278,20 @@ Scene organization and Naming convention:
     plus extra functions for the common operations.
 - [X] make the categories in the demo clickable=> collapse examples. Since now there are quite numerous.
 - [ ] try resizable with an invisible border around the window
-- [ ] Component: modal
+- [X] Component: modal
 - [X] Component: fixed
+- [X] remove the Wigdet and replace with 'embded' option in opts
+- [X] component DiscreteColorbar: fix reverse
+- [ ] component DiscreteColorbar: add option to reverse the list of values
+- [ ] component DiscreteColorbar: add option for cotinuous colormap =>colorbar becomes continuous too
+- [X] component: progressbar
+- [ ] component: proxy for value/component syncing. to hold the states of all components
+        ech time a change is made to the state json, then the corresponding modules should be updated
+- [ ] component: svg-based heatmap
+
+2020-03-27
+----------
+- [ ] use the encapsulation paradigm for all complex components like DiscreteColorBar, ItemGriper (as done with FileHandler, ContextMenu, Modal)
+- [X] component: progressbar
+- [ ] component: progressbar group
+- [ ] create simple svg heatmap in order to demonstrate the DCB settings
