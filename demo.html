@@ -241,6 +241,16 @@
              *  - if not specified, the label 
             */
             args = args || {};            
+            let postfix = '';
+            if (name) {
+                let name_ = name;
+                if (name_.startsWith('!')) {
+                    name_ = name_.split('!')[1];
+                }
+                postfix += '_' + name.replace(/ /g, '-');
+            }
+            args.id = args.id || 'demo-' + widget.toLowerCase() + postfix;
+            
             if (!name) {
                 name = widget; // + ' ' + args.label;
             } else {
@@ -251,8 +261,6 @@
                     name = widget + ' ' + name;
                 }
             }
-            
-            args.id = args.id || 'demo-' + widget.toLowerCase() + '_' + name.replace(/ /g, '-');
 
             let item_switch = UI.el({type: 'div', classes: ['demo-item', category], innerText: name});            
             menu.appendChild(item_switch);
