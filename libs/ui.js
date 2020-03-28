@@ -1871,6 +1871,52 @@ UI.makeResizableDiv = function(div, mode) {
 
   }
 
+UI.makeMovableDiv = function(div_id) {
+    /**
+     * Makes a div movable with the mouse
+     */
+    // get the element
+    let element = document.querySelector('#' + div_id);
+    element.classList.add('movable');
+    // add the mover to it
+    let mover = UI.el({type: 'div', classes: ['mover']});
+    element.appendChild(mover);
+    mover.addEventListener('mousedown', handleMovableMouseDown);
+
+    function handleMovableMouseDown(evt) {
+        let prevX = evt.clientX;
+        let prevY = evt.clientY;
+        
+        if (evt.target.classList.contains('mover')) {
+            evt.preventDefault();
+
+            window.addEventListener('mousemove', handleMovableMouseMove);
+            window.addEventListener('mouseup', handleMovableMouseUp);
+        }
+        function handleMovableMouseMove(evt) {
+            if (evt.target.classList.contains('mover')) {
+                let newX = prevX - evt.clientX;
+                let newY = prevY - evt.clientY;
+        
+                let rect = element.getBoundingClientRect();
+        
+                element.style.left = rect.left - newX + 'px';
+                element.style.top = rect.top - newY + 'px';
+        
+                prevX = evt.clientX;
+                prevY = evt.clientY;
+            }
+        }
+        
+        function handleMovableMouseUp(evt) {
+            window.removeEventListener('mousemove', handleMovableMouseMove);
+            window.removeEventListener('mouseup', handleMovableMouseUp);
+        }
+    }
+
+
+};
+
 UI.ColorDefinitions = {
     brewer: function() {
         let brewer = {

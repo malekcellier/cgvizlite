@@ -253,7 +253,7 @@ Scene organization and Naming convention:
 
 2020-03-25
 ----------
-- [ ] makeResizable: does not work with Panel. it doesn't seem to get the right parent size
+- [X] makeResizable: does not work with Panel. it doesn't seem to get the right parent size
 - [ ] loading a scenario with 5000+ povs makes the qcmTrace display impossibly slow. Maybe process the eye-toggle in a different way.
         i.e. when toggled one by one, keep the same strategy but when all are wanted at the same time, then used a merge geometry or a buffer geometry like we did in the heatmap.
 - [ ] image comparer for the KPIs heatmap: https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_image_compare THis can also be used to understand how to create own slider...
@@ -293,5 +293,14 @@ Scene organization and Naming convention:
 ----------
 - [ ] use the encapsulation paradigm for all complex components like DiscreteColorBar, ItemGriper (as done with FileHandler, ContextMenu, Modal)
 - [X] component: progressbar
-- [ ] component: progressbar group
+- [X] component: progressbar group
 - [ ] create simple svg heatmap in order to demonstrate the DCB settings
+
+2020-03-28
+----------
+- [X] move demo.html style to demo.css
+- [X] refactor demo.html js to provide simpler API to add items to the demo
+- [X] modal with click outside to remove it from dom
+- [X] bug fix: resizable not targeting right part of the element
+- [X] component: movable
+- [ ] rewrite resizable to make it the same as movable?

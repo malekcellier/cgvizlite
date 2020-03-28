@@ -235,10 +235,36 @@
         let s_movable = UI.el({type: 'div', classes: ['demo-item', 'other'], innerText: 'movable'}); 
         menu.appendChild(s_movable);
         s_movable.onclick = (evt) => {
-            alert(`${evt.target.innerText}: not implemented yet`);
-        }
+            evt.target.classList.toggle('clicked');                       
+            let element = components.querySelector('#demo-movable');
+            if (element === null) {
+                let div = UI.Box({id: 'demo-movable', classes: ['movable']});
+                div.style.position = 'absolute';
+                components.appendChild(div);
+                UI.makeMovableDiv(div.id);
+            } else {
+                components.removeChild(element);
+            }
+        }        
 
-        // 3.3) Context menu
+        // 3.3) Movable and resizable
+        let s_removable = UI.el({type: 'div', classes: ['demo-item', 'other'], innerText: 'removable'}); 
+        menu.appendChild(s_removable);
+        s_removable.onclick = (evt) => {
+            evt.target.classList.toggle('clicked');                       
+            let element = components.querySelector('#demo-removable');
+            if (element === null) {
+                let div = UI.Box({id: 'demo-removable', classes: ['movable']});
+                div.style.position = 'absolute';
+                components.appendChild(div);
+                UI.makeMovableDiv(div.id);
+                UI.makeResizableDiv(div.id, 'all');
+            } else {
+                components.removeChild(element);
+            }
+        }  
+
+        // 3.4) Context menu
         let s_context = UI.el({type: 'div', classes: ['demo-item', 'other'], innerText: 'context menu'}); 
         menu.appendChild(s_context);
         s_context.onclick = (evt) => {
