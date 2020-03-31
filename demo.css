@@ -31,6 +31,7 @@ body, div {
 }
 
 #demo-menu {
+    font-family: Consolas;
     display: flex;
     flex-direction: column;
     height: 80%;
