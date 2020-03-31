@@ -547,6 +547,33 @@ UI.ProgressBarGroup = function (opts) {
     return div;
 };
 
+UI.Description = function (opts) {
+    /**
+     * Creates a description with a title and subtitle
+     */
+    // Handle defaults
+    opts = opts || {};
+    opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
+    opts.title = opts.title || 'Panel Title';
+    opts.subtitle = opts.subtitle || '';    
+    
+    let desc = UI.el({type: 'div', id: opts.id, classes: ['description', ...opts.classes]});
+    // 1) The title
+    let title = UI.el({type: 'div', classes: ['title']});
+    desc.appendChild(title);
+    title.innerText = opts.title;
+
+    // 2) The subtitle is OPTIONAL
+    if (opts.subtitle !== '' || opts.subtitle) {
+        let subtitle = UI.el({type: 'div', classes: ['subtitle']});
+        subtitle.innerText = opts.subtitle;
+        desc.appendChild(subtitle);
+    }
+
+    return desc;
+};
+
 // COMPLEX ELEMENTS
 UI.Panel = function (opts) {
     /**
@@ -600,23 +627,13 @@ UI.Panel = function (opts) {
     head.appendChild(controls_before);
 
     // 1.1) the description
-    let desc = UI.el({type: 'div', classes: ['description']});
+    let desc = UI.Description({title: opts.title, subtitle: opts.subtitle});
     head.appendChild(desc);
-    // 1.1.1) the title
-    let title = UI.el({type: 'div', classes: ['title']});
-    desc.appendChild(title);
-    title.innerText = opts.title;
-    title.onclick = (evt) => {
+    desc.querySelector('.title').onclick = (evt) => {
         if (evt.target.classList.contains('title')) {
             evt.target.parentElement.parentElement.nextElementSibling.classList.toggle('hidden');
         }
     };
-    // 1.1.2) the sublabel is OPTIONAL
-    if (opts.subtitle !== '' || opts.subtitle) {
-        let subtitle = UI.el({type: 'div', classes: ['subtitle']});
-        subtitle.innerText = opts.subtitle;
-        desc.appendChild(subtitle);
-    }
 
     // 1.2) the controls (on the right hand side)
     let controls = UI.el({type: 'div', classes: ['controls', 'after']});
