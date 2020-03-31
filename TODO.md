@@ -304,3 +304,23 @@ Scene organization and Naming convention:
 - [X] bug fix: resizable not targeting right part of the element
 - [X] component: movable
 - [ ] rewrite resizable to make it the same as movable?
+- [ ] component: tab module
+- [ ] legend filtering: click on svg w/ color to toggle that color
+
+2020-03-30
+----------
+- [ ] LOW: add a resize icon in the header of a panel in order to toggle resizable,movable
+- [ ] LOW: make borders flash and show the resizbale controls in case the resizabel has been choosen
+- [ ] BUG: heatmap does not resize correctly and is greyed out. maybe due to z-index?
+- [ ] component: finish FileHandler (DirectoryReader + FileReader + ProgressBarGroup)
+- [ ] FEATURE: create svg based heatmap
+- [ ] include ff-clan-web-pro font in demo
+- [ ] BUG: resizable should probe the container min-width/height
+- [ ] FEATURE: title/subtitle component. 
+- [ ] tooltip following mouse
+- [ ] item picker + tooltip (with fake values)
+- [ ] rename poorly chosen class names for label value, label description
+- [ ] clean input in case operation is cancelled (either by clicking x or outisde the area)
+- [ ] when all files are loaded successfully => alert
+- [ ] change the color to red for files with problems
+- [ ] for each successful file, change the italic to normal font
