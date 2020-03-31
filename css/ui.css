@@ -67,7 +67,7 @@ body {
     background: var(--color-bg-darker);  
     padding: 0;
     margin: 0;
-    font-family: Consolas, 'Maven Pro', Consolas, Roboto, serif;
+    font-family: ff-clan-web-pro, Consolas, 'Maven Pro', Consolas, Roboto, serif;
     font-weight: 400;    
     font-size: 0.875em;    
     line-height: 1.71429;    
@@ -83,10 +83,11 @@ body {
   - (padded) container: div with padding, the parent of each standalone widget
 */
 
-/* Global >> */
+/*#region Global*/
 .container {
   padding: var(--padding) !important;
   min-width: 150px;
+  background-color: var(--color-bg-head-darker);
 }
 
 .outer-container {
@@ -108,7 +109,7 @@ body {
   /* for debugging purposes*/
   border: 1px white solid !important;
 }
-/* Global << */
+/*#endregion Global*/
 
 /* Text >> */
 .t_title {
@@ -156,17 +157,21 @@ body {
 }
 /* svg icon << */
 
+/*#region SIMPLE WIDGETS*/
+
 /** 1) SIMPLE WIDGETS >>
   this includes:
     - 1.1) button
     - 1.2) checkbox
     - 1.3) dropdown
     - 1.4) slider
-    - 1.5) double slider
-    - 1.6) progress bar
+    - 1.5) doubleslider
+    - 1.6) ProgressBar
+    - 1.7) ProgressBarGroup
+    - 1.8) Description
  */
 
- /* 1.1) Button >> */
+/*#region 1.1) button */
 .button {
   width: 115px;    
   background-color: var(--color-green-bright);
@@ -185,6 +190,16 @@ body {
   pointer-events: all;    
 }
 
+.button p {
+  pointer-events: none;
+}
+
+.button.disabled {
+  cursor: not-allowed;
+  background-color: var(--color-txt-colormap);
+  font-style: italic;
+}
+
 .button.cancel {
   background-color: var(--color-orange);
 }
@@ -196,10 +211,10 @@ body {
 .button .svg-icon {
   padding-right: 8px; /* to make sure the icon is separated from the paragraph*/
 }
-/* 1.1) Button << */
+/*#endregion 1.1) button */
 
-/* 1.2) Checkbox >> */
-/* common to .slider, .double-slider*/
+/*#region 1.2) checkbox */
+    /* common to .slider, .double-slider*/
 .checkbox {
   background-color: var(--color-bg-head-darker);
   max-width: 200px;
@@ -212,16 +227,17 @@ body {
 .checkbox .svg-icon.clicked svg{  
   color: var(--color-box-green);
 }
-/*
-.checkbox .label, .checkbox .svg-icon {
-  /*padding: 12px;*//*
-  padding-bottom: 12px;
-  text-transform: capitalize;
-}
-*/
-/* 1.2) Checkbox << */
+  /*
+  .checkbox .label, .checkbox .svg-icon {
+    /*padding: 12px;*//*
+    padding-bottom: 12px;
+    text-transform: capitalize;
+  }
+  */
 
-/* 1.3) Dropdown >> */
+/*endregion 1.2) checkbox */
+
+/*#region 1.3) dropdown */
 .dropdown {
   box-sizing: border-box;
   max-width: 200px;
@@ -309,9 +325,9 @@ body {
   background-color: var(--color-txt-sublabel);
   transition: all 0.4s ease 0s;
 }
-/* 1.3) Dropdown << */
+/*#endregion 1.3) dropdown */
 
-/* 1.4) Slider >> */
+/*#region 1.4) slider */
 /* common to .checkbox, .double-slider*/
 .slider {
   background-color: var(--color-bg-head-darker);
@@ -395,7 +411,7 @@ input[type="range"]::-ms-fill-upper {
   background-color: var(--color-txt-sublabel);
 }
 
-.label {
+.label, .value {
   color: var(--color-txt-sublabel);
   font-size: 11px;
   font-weight: 400;
@@ -420,9 +436,9 @@ input[type="range"]::-ms-fill-upper {
   padding: 0 12px 0 12px;
   padding: 0;
 }
-/* 1.4) Slider << */
+/*#endregion 1.4) slider */
 
-/* 1.5) Double Slider >> */
+/*#region 1.5) double-slider */
 /* common to .checkbox, .slider*/
 .double-slider {
   background-color: var(--color-bg-head-darker);
@@ -461,49 +477,70 @@ input[type="range"]::-ms-fill-upper {
   flex-direction: row;
   justify-content: space-between;
 }
-/* 1.5) Double Slider << */
+/*#endregion 1.5) double-slider */
 
-/* 1.6) progress bar >> */
+/*#region 1.6) progress-bar */
 .progress-bar {
-  background-color: var(--color-bg-head-darker);
+  font-family: consolas;
+  font-weight: 500;
+  /*background-color: var(--color-bg-head-darker);*/
+  /*max-width: 400px;*/
   /*height: 6px;*/
   /*border: 1px solid var(--color-bg-button);*/
-  padding: calc(var(--padding)*0.5);
+  /*padding: calc(var(--padding)*0.5);*/
   padding-top: 0;
 }
 
-.progress-bar .head {
+.progress-bar > .head {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  padding: calc(var(--padding)*0.5);
 }
-
-.progress-bar .body {
+.progress-bar > .head {
+  text-transform: none;
+  font-style: italic;
+}
+.progress-bar > .head.dark .text.label, .text.value{
+  text-transform: none;
+  font-style: normal;
+  color: var(--color-bg-head);
+}
+.progress-bar > .body {
   height: 6px;
-  border: 1px solid transparent;
+  /*border: 1px solid transparent;*/
+  background-color: var(--color-txt-colormap);
 }
 
 .progress-bar .pbar-item {
-  height: 6px;
+  height: 100%;
   width: 60%;
-  background-color: var(--color-txt-link);
+  background-color: var(--color-blue-light);
 }
-/* 1.6) progress bar << */
+/*#endregion 1.6) progress-bar */
 
-/* 1.7) progress bar group >> */
+/*#region 1.7) progress-bar-group */
 .progress-bar-group {
   min-width: 150px;
-  background-color: var(--color-bg-head-darker);  
-  padding: var(--padding);
-}
-.progress-bar-group .progress-bar.global {
-  border: 1px solid var(--color-bg-button);
+  /*max-width: 400px;*/
+  /*background-color: var(--color-bg-head-darker);  */
   padding-bottom: var(--padding);
 }
-.progress-bar-group .progress-bar.global .pbar-item {
-  background-color: var(--color-purple);
+.progress-bar-group .progress-bar.global {
+  /*border: 1px solid var(--color-bg-button);*/
+  background-color: white;
+  padding-bottom: calc(2*var(--padding));
+  position: sticky;
+  top: 0;
+}
+.progress-bar-group .progress-bar.global .body {
   height: var(--padding);
 }
+.progress-bar-group .progress-bar.global .pbar-item {
+  background-color: var(--color-green-bright);
+  /*height: var(--padding);*/
+}
+/*#endregion 1.7) progress-bar-group */
 
 /*#region 1.8) description */
 .description {
@@ -521,10 +558,10 @@ input[type="range"]::-ms-fill-upper {
 }
 /*#endregion 1.8) description */
 
-/* 1.7) progress bar group << */
-
 /** 1) SIMPLE WIDGETS << */
+/*#endregion SIMPLE WIDGETS*/
 
+/*#region 2) COMPLEX WIDGETS */
 /** 2) COMPLEX WIDGETS >>
   this includes:
     - 2.1) panel
@@ -532,11 +569,15 @@ input[type="range"]::-ms-fill-upper {
     - 2.3) colormap
     - 2.4) heatmap
     - 2.5) tooltip
+    - 2.6) item grouper
+    - 2.7) item picker
+    - 2.8) item griper
+    - 2.9) directory handler
+    - 2.10 filereadermodule
  */
-
 /** 2) COMPLEX WIDGETS << */
 
-/* 2.1) Panel >> */
+/*#region 2.1) panel */
 .panel {
   position: relative; /*absolute;*/
   top: 0px;
@@ -550,7 +591,7 @@ input[type="range"]::-ms-fill-upper {
   .panel-head {
     background-color: var(--color-bg-head);
     flex-wrap: wrap; /* to make sure the .controls.before stays at 0 when empty*/
-    align-items: center;
+    align-items: flex-start;
   }
 
     .panel-head .description {
@@ -589,9 +630,9 @@ input[type="range"]::-ms-fill-upper {
   background-color: var(--color-bg-body);
   flex-grow: 1;
 }
-/* 2.1) Panel << */
+/*#endregion 2.1) panel */
 
-/* 2.2) Colorbar >> */
+/*#region 2.2) colorbar */
 .panel.colorbar .panel-head {
   color: var(--color-txt);
   font-size: 13px;
@@ -639,9 +680,9 @@ input[type="range"]::-ms-fill-upper {
 .colorbar-settings .panel-body{
   background-color: var(--color-bg-head-darker);
 }
-/* 2.2) Colorbar << */
+/*#endregion 2.2) colorbar */
 
-/* 2.3) Colormap >> */
+/*#region 2.3) colormap */
 .color-palette {
   /*padding: 0px 8px;*/
   max-height: 350px;
@@ -697,9 +738,9 @@ input[type="range"]::-ms-fill-upper {
   margin-bottom: 10px;
   padding-bottom: 5px;
 }
-/* 2.3) Colormap << */
+/*#endregion 2.3) colormap */
 
-/* 2.4) Heatmap >> */
+/*#region 2.4) heatmap */
 .heatmap-row {
   display: flex;
   flex-direction: row;
@@ -710,9 +751,9 @@ input[type="range"]::-ms-fill-upper {
 .heatmap-item {
   height: 12px;
 }
-/* 2.4) Heatmap << */
+/*#endregion 2.4) heatmap */
 
-/* 2.5) Tooltip >> */
+/*#region 2.5) tooltip */
 .tooltip {
   background-color: var(--color-bg-head-darker);  
   max-width: 500px;
@@ -764,9 +805,9 @@ input[type="range"]::-ms-fill-upper {
   font-weight: 500;
   color: var(--color-txt);
 }
-/* 2.5) Tooltip << */
+/*#endregion 2.5) tooltip */
 
-/* 2.6) Item Grouper >> */
+/*#region 2.6) item grouper */
 .item-grouper {
   background-color: var(--color-bg-head-darker);
   padding: var(--padding);
@@ -845,9 +886,9 @@ input[type="range"]::-ms-fill-upper {
   height: 10px;
   display: flex;
 }
-/* 2.6) Item Grouper << */
+/*#endregion 2.6) item-grouper */
 
-/* 2.7) Item picker >> */
+/*#region 2.7) item-picker */
 .item-picker {
   max-width: 200px;
   border: 0px none;
@@ -1013,25 +1054,79 @@ input[type="range"]::-ms-fill-upper {
   color: rgb(240, 240, 240);
   padding-left: calc(var(--padding)*0.5);
 }
-/* 2.7) Item picker << */
+/*#endregion 2.7) item-picker */
 
-/* 2.8) Item griper >> */
+/*#region 2.8) item-griper */
 .item-griper {
 
 }
-/* 2.8) Item griper << */
+/*#endregion 2.8) item-griper */
 
+/*#region 2.9) directory-handler */
+.directory-handler {
+  display: flex;
+  flex-direction: column;
+}
+.directory-handler > .head {
+  padding: 20px;
+}
+.directory-handler .head .title{
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 1.25px;
+  line-height: 170%;
+  color: #191919;
+  cursor: auto;
+}
+.directory-handler > .head .svg-icon{
+  float: right;
+}
+.directory-handler > .head .input{ 
+  height: 40px;
+  margin: 14px 0;
+}
+.directory-handler .head .input input{ 
+  background-color: #eee;
+  padding: var(--padding);
+}
+.directory-handler > .body {
+  flex-grow: 1;
+  overflow: auto;
+  margin: 0 20px;
+  padding: calc(var(--padding)*0.5);
+  padding-top:0 ;
+  border: 1px dotted #8888887a;
+  background-color: white; /*#29323c22;*/
+}
+.directory-handler > .foot {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 20px;
+}
 
+/*#endregion 2.9) directory-handler */
+
+/*#region 2.10) single-file-reader */
+.single-file-reader input{
+  padding: var(--padding) 0;
+  color: var(--color-txt-label);
+}
+/*#endregion 2.10) single-file-reader */
+
+/*#endregion 2) COMPLEX */
+
+/*#region 3) OTHERS*/
 /** 3) OTHERS >>
   this includes:
-    - 3.1) resizers
-    - 3.2) mover
-    - 3.3) context-menu
-    - 3.4) fixed
-    - 3.5) modal
+    - 3.1) Resizers
+    - 3.2) Mover
+    - 3.3) ContextMenu
+    - 3.4) Fixed
+    - 3.5) Modal    
  */
 
-/* 3.1) resizers >> */
+/*#region 3.1) resizers */
 .resizable:hover .resizers {
   display: block;
 }
@@ -1096,9 +1191,9 @@ input[type="range"]::-ms-fill-upper {
   top: calc(50% - 5px);
   cursor: ew-resize;
 }
-/* 3.1) resizers << */
+/*#endregion 3.1) resizers */
 
-/* 3.2) mover >> */
+/*#region 3.2) mover */
 .mover {
   position: absolute;
   top: 0;
@@ -1112,9 +1207,9 @@ input[type="range"]::-ms-fill-upper {
 .mover:hover {
   border: 2px solid grey;
 }
-/* 3.2) mover << */
+/*#endregion 3.2) mover */
 
-/* 3.3) context-menu >> */
+/*#region 3.3) context-menu */
 .context-menu {
   position: absolute;
   top: 0;
@@ -1149,18 +1244,18 @@ input[type="range"]::-ms-fill-upper {
   padding: 6px 12px;
   border-bottom: 1px solid var(--color-txt-label);
 }
-/* 3.3) context-menu << */
+/*#endregion 3.3) context-menu */
 
-/* 3.4) fixed >> */
+/*#region 3.4) fixed */
 .fixed {
   padding: 6px;
   border: 1px solid var(--color-bg-button);
   background-color: var(--color-bg-head);
   color: var(--color-txt-bright);
 }
-/* 3.4) fixed  << */
+/*#endregion 3.4) fixed */
 
-/* 3.5) modal >> */
+/*#region 3.5) modal */
 .modal {
   position: fixed; /* Stay in place */
   z-index: 20; /* Sit on top */
@@ -1180,4 +1275,6 @@ input[type="range"]::-ms-fill-upper {
   height: 700px;
   box-shadow: 0 5px 8px 0 rgba(0,0,0,0.2), 0 7px 20px 0 rgba(0,0,0,0.2);
 }
-/* 3.5) modal << */
+/*#endregion 3.5) modal */
+
+/*#endregion 3) OTHERS*/

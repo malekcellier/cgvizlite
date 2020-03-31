@@ -26,6 +26,7 @@ UI.State = {
      * Use the Proxy paradigm to sync the components with the controls
      * maybe the mutation observer too...
      */
+    files: null
 };
 
 UI.el = function (opts) {
@@ -485,7 +486,7 @@ UI.ProgressBar = function (opts) {
     opts.min = opts.min || 0;
     opts.max = opts.max || 100;
     if (opts.value === undefined || opts.value === null) {
-        opts.value = 75;
+        opts.value = 0;
     }
     if (!opts.embed) {
         opts.embed = false;
@@ -500,13 +501,13 @@ UI.ProgressBar = function (opts) {
     let head = UI.el({type: 'div', classes: ['head']});
     div.appendChild(head);
     // 1.1) description
-    let desc = UI.el({type: 'div', classes: ['label', 'description']});
+    let desc = UI.el({type: 'div', classes: ['text', 'label']});
     head.appendChild(desc);
     desc.innerText = opts.label;
     // 1.2) value
-    let value = UI.el({type: 'div', classes: ['label', 'value']});
+    let value = UI.el({type: 'div', classes: ['text', 'value']});
     head.appendChild(value);
-    value.innerText = opts.value;
+    value.innerText = `${opts.value}%`;
 
     // 2) Second row: progressbar
     let body = UI.el({type: 'div', classes: ['body']});
@@ -527,19 +528,25 @@ UI.ProgressBarGroup = function (opts) {
     opts = opts || {};
     opts.id = opts.id || '';
     opts.classes = opts.classes || [];
+    if (opts.embed) {
+        opts.classes.push('container');
+    }
     opts.label = opts.label || 'Total progress';
-    opts.items = opts.items || ['item 1', 'item 2', 'item 3', 'item 4', 'item 5', 'item 6'];
+    opts.items = opts.items || Array.from({length: 20}, (v, i) => `Item ${i}`);
+    let n_items = opts.items.length;
 
     let div = UI.el({type: 'div', id: opts.id, classes: ['progress-bar-group', ...opts.classes]});
 
     // The global progress
-    let global = UI.ProgressBar({label: opts.label, value: 55});
+    //let global = UI.ProgressBar({label: opts.label, value: 55}); // TODO: reset to 0
+    let global = UI.ProgressBar({label: opts.label, value: 0});
     div.appendChild(global);
     global.classList.add('global');
 
     // The individual elements
     for (let i=0; i<opts.items.length; i++) {
-        let pb = UI.ProgressBar({label: opts.items[i], value: 10*(i+1)});
+        //let pb = UI.ProgressBar({label: opts.items[i], value: 100*(i+1)/n_items}); // TODO: reset to 0
+        let pb = UI.ProgressBar({label: opts.items[i], value: 0});
         div.appendChild(pb);
         pb.querySelector('.pbar-item').id = 'pbar_' + opts.items[i];
     }
@@ -1670,60 +1677,234 @@ UI.FileHandler = {
 
 };
 
-UI.DirectoryReader = function (opts) {
+UI.DirectoryHandler = function (opts) {
     /**
      * Provides an interface to choose and read the content of a directory
      * once read, the files are presented as progressbars
+     * also, buttons allows to cancel/close the reader
+     * 
+     * In essence this is the modal from the previous version
+     * 
      */
 
-    let div = UI.el({type: 'div', id: opts.id, classes: ['directory', ...opts.classes]});
+    // Default handling
+    opts = opts || {};
+    if (!opts.id) {
+        opts.id = '';
+    }
+    opts.classes = opts.classes || [];
+
+    let div = UI.el({type: 'div', id: opts.id, classes: ['directory-handler', ...opts.classes]});
+
+    // The header contains the title, subtitle, close button & the directory chooser
+    let head = UI.el({type: 'div', classes: ['head']});
+    div.appendChild(head);
+    // close button
+    let icon = SvgIcon.new({icon: 'close'});
+    head.appendChild(icon);
+    icon.onclick = (evt) => {
+        let modal = evt.target.closest('.modal');
+        modal.parentElement.removeChild(modal);
+    };
+    // title and subtitle
+    let desc = UI.Description({title: 'Add Scenario', subtitle: 'select a directory below, then press the Upload button'});
+    head.appendChild(desc);
+    // input field for multiple files loading
+    let ndiv = UI.el({type: 'div', classes: ['input']});
+    head.appendChild(ndiv);
+    let input = UI.el({type: 'input'});
+    ndiv.appendChild(input);
+    input.setAttribute('type', 'file');
+    input.setAttribute('name', 'filelist');
+    input.setAttribute('webkitdirectory', '');
+    input.setAttribute('directory', '');
+    input.setAttribute('multiple', '');
+    input.addEventListener('change', showFilesAsProgressBars, false);
+
+    function showFilesAsProgressBars(evt) {
+        // Reference to the progress-bar-group
+        //let pbg = evt.target.closest('.directory-handler').querySelector('.progress-bar-group');
+        let items = [];
+        UI.State.files = evt.target.files;
+        for (let i=0; i<evt.target.files.length; i++) {
+            items.push(evt.target.files[i].name);
+        }
+        let body = evt.target.closest('.directory-handler').querySelector('.body');        
+        body.appendChild(UI.ProgressBarGroup({items: items}));
+    }
+    
+    // The body contains the progress bars
+    let body = UI.el({type: 'div', classes: ['body']});
+    div.appendChild(body);
+    //let pbg = UI.ProgressBarGroup();
+    //body.appendChild(pbg);
+    
+    // The footer contains the buttons
+    let foot = UI.el({type: 'div', classes: ['foot']});
+    div.appendChild(foot);
+    let cancel = UI.Button({label: 'cancel', classes: ['cancel']});
+    foot.appendChild(cancel);
+    let upload = UI.Button({label: 'upload'});
+    foot.appendChild(upload);
+    // Events
+    upload.addEventListener('click', uploadFiles, false);
+
+    function uploadFiles(evt) {
+        // deactivate button
+        evt.target.classList.add('disabled');
+        // prevent further upload
+        evt.target.removeEventListener('click', uploadFiles, false);
+
+        let pbs = evt.target.closest('.directory-handler').querySelectorAll('.progress-bar');
+        let promises = [];
+        for (let i=0; i<UI.State.files.length; i++) {
+            let p = UI._pFileReader(UI.State.files[i], pbs[i+1]);
+            promises.push(p);
+        }
+        let pbg = evt.target.closest('.directory-handler').querySelector('.global');
+        let allPromises = UI._allPromises(promises, (pcentage) => {
+            pbg.querySelector('.text.value').innerText = `${pcentage.toFixed(0)}%`;
+            pbg.querySelector('.pbar-item').style.width = `${pcentage}%`;
+        });
+        allPromises.then(console.log('Done')).catch(console.log);
+    }
+
+    return div;
+};
+
+
+UI.SingleFileReader = function (opts) {
+    /**
+     * Creates a div with a file reader and a progress bar
+     */
+    // Default handling
+    opts = opts || {};
+    opts.id = opts.id || '';
+    opts.classes = opts.classes || [];
+    if (!opts.embed) {
+        opts.embed = false;
+    }
+    if (opts.embed) {
+        opts.classes.push('container');
+    }
+
+    let div = UI.el({type: 'div', id: opts.id, classes: ['single-file-reader',...opts.classes]});
+    
+    let pb = UI.ProgressBar();
+    div.appendChild(pb);
+
+    let input = UI.el({type: 'input'});
+    div.appendChild(input);
+    input.setAttribute('type', 'file');
+    input.addEventListener('change', evt => {
+        for (let i=0; i<evt.target.files.length; i++) {
+            // The previous element is the progressbar in that case
+            let el = evt.target.previousElementSibling;
+            UI.FileReader(evt.target.files[i], el);
+        }
+    }, false);
 
     return div;
 };
 
 // FileReader and Promise
+/*
 UI.FileReader = function (evt) {
     let file = evt.target.files[0];
-    let el = document.querySelector('.progress-bar');
-    let promise = pFileReader(file, el);
-    promise.then((result) => {console.log(result);}).catch((error) => {console.log(error)});
-
-    function pFileReader(file, el) {
-        /**
-         * 
-         * Returns a promise for the loading of the file
-         * 
-         * file: json or obj or mtl file
-         * el: reference to the specific div with class progress-bar
-         */
-        return new Promise((resolve, reject) => {
-            let reader = new FileReader();
-            // The onload should also result in the increment of the global progress
-            reader.onload((evt) => {
-                resolve(JSON.parse(evt.target.result));
-            });
-            reader.onerror((error) => {
-                reject(error);
-            });
-            reader.onprogress((evt) => {
-                if (evt.lengthComputable) {
-                    let pcentage = Math.round(evt.loaded/evt.total*100*10)/10; // *10/10 means 1 decimal after ,
-                    // Update the dom with the progress
-                    el.querySelector('.label.value').innerText = pcentage;
-                    el.querySelector('.pbar-item').style.width = `${pcentage}`;
-                }
-            });
-            reader.readAsText(file);
-        }
-
-        )
-    }
+    //let el = document.querySelector('.progress-bar');
+    let el = evt.target.previousElementSibling;
+    el.querySelector('.head .text.label').innerText = file.name;
+    */
+UI.FileReader = function (file, el) {    
+    let promise = UI._pFileReader(file, el);
+    // TODO: collect promises a level higher
+    promise
+    .then((result) => {console.log(`Success: ${file.name}`);})
+    .catch((error) => {console.log(error)});
 
     function handleFileType(name, result) {
-        console.log(`File handler. File: ${fname} gave result: ${result}`);
+        console.log(`File handler. File: ${name} gave result: ${result}`);
     }
 }
 
+UI._pFileReader = function (file, el) {
+    /**
+     * 
+     * Returns a promise for the loading of the file
+     * 
+     * file: json or obj or mtl file
+     * el: reference to the specific div with class progress-bar
+     */
+    return new Promise((resolve, reject) => {
+        let reader = new FileReader();
+        // The onload should also result in the increment of the global progress
+        reader.onload = (evt) => {
+            // TODO: intercept file extension here
+            //resolve(JSON.parse(evt.target.result));
+            resolve(UI._fileTypeHandler(file, evt.target.result));
+            el.querySelector('.text.value').innerText = `${100}%`;
+            el.querySelector('.pbar-item').style.width = `${100}%`;
+            el.querySelector('.head').classList.add('dark');
+            console.info(`Uploaded file named: ${file.name}`);
+        };
+        reader.onerror = (error) => {
+            reject(error);
+        };
+        reader.onprogress = (evt) => {
+            if (evt.lengthComputable) {
+                let pcentage = Math.round(evt.loaded/evt.total*100*10)/10; // *10/10 means 1 decimal after ,
+                // Update the dom with the progress
+                el.querySelector('.text.value').innerText = `${pcentage.toFixed(0)}%`;
+                el.querySelector('.pbar-item').style.width = `${pcentage}%`;
+            }
+        };
+        reader.readAsText(file);
+    })
+};
+
+UI._fileTypeHandler = function (file, result) {
+    /**
+     * Adapts the processing to the file extension
+     */
+    let ext = file.name.split('.').pop();
+    let value = null;
+    switch (ext) {
+        case 'json':
+            //value = JSON.parse(result);
+            value = `That's a ${ext} file.`;
+            break;
+        case 'obj':
+            value = `That's a ${ext} file.`;
+            break;
+        case 'mtl':
+            value = `That's a ${ext} file.`;
+            break;
+        default:
+            console.log(`File extension ${ext} is not handled`);
+            break;
+    }
+
+    return value;
+
+};
+
+UI._allPromises = function (promises, progressUpdater) {
+    /**
+     * Resolves all promises using the promise.all and updates the main progresbar 
+     */
+    let index = 0;
+    progressUpdater(0);
+
+    for (const p of promises) {
+        p.then((result) => {
+            index++;
+            progressUpdater(index/promises.length*100);
+            console.info(result);
+        });
+    }
+
+    return Promise.all(promises);
+};
 
 // OTHER
 UI.makeResizableDiv = function(div, mode) {
@@ -1734,6 +1915,9 @@ UI.makeResizableDiv = function(div, mode) {
      * 
      */    
     // get the element
+    if (div === '') {
+        console.info('The item has no ID.');
+    }
     const element = document.querySelector('#' + div);
     element.classList.add('resizable');
     // add the resizers to it
@@ -1893,6 +2077,9 @@ UI.makeMovableDiv = function(div_id) {
      * Makes a div movable with the mouse
      */
     // get the element
+    if (div_id === '') {
+        console.info('The item has no ID.');
+    }
     let element = document.querySelector('#' + div_id);
     element.classList.add('movable');
     // add the mover to it
