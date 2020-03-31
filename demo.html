@@ -60,7 +60,7 @@
         simpleDemoItem({widget: 'ProgressBar', args: {label: 'some kpi', value: 56, embed: true}});
         
         // 1.7) Progressbar group
-        simpleDemoItem({widget: 'ProgressBarGroup'});
+        simpleDemoItem({widget: 'ProgressBarGroup', args: {embed: true}});
 
 
         /* 2) COMPLEX WIDGETS */
@@ -81,10 +81,7 @@
                 // Add data to the panel
                 let body = el_panel.querySelector('.panel-body');
                 for (let i=0; i<15; i++) {
-                    let div = UI.el({style: 'div'});
-                    div.innerText = `Some text ${i}`;
-                    div.classList.add('t_label');
-                    body.appendChild(div);
+                    body.appendChild(UI.el({type: 'div', innerText: `Some text ${i}`, classes: ['t_label']}));
                 }
                 components.appendChild(el_panel);
             } else {
@@ -98,7 +95,7 @@
         // 2.2.3) Left: 1 - Title: 0 - right: 1
         // 2.2.1) Left: 0 - Title: 0 - right: 0
         // 2.2.1) Left: 0 - Title: 0 - right: 0
-        complexDemoItem({widget: 'Header', args: {before: ['grab', 'eye_open'], after: ['settings', 'close']}});
+        complexDemoItem({widget: 'Header', args: {subtitle: 'sublabel', before: ['grab', 'eye_open'], after: ['settings', 'close']}});
         
         // 2.3) Colorbar
         // 2.3.1) Example 1
@@ -112,7 +109,7 @@
         complexDemoItem({widget: 'DiscreteColorBar', args: args, name: 'ex3'});
         
         // 2.3bis) heatmap example (to go along one of the examples above...or both!!)
-        complexDemoItem({widget: 'Heatmap', name: 'div'});
+        complexDemoItem({widget: 'Heatmap', name: 'div', args: {resizable: true, mode: 'all', movable: true}});
 
         let fake_items = {
             'item 1': 'int',
@@ -147,6 +144,9 @@
         
         // 2.7) tooltip: the one that shows detailed info about a hovered point
         complexDemoItem({widget: 'Tooltip', args: {}});
+
+        // 2.8) sinfle file reader
+        complexDemoItem({widget: 'SingleFileReader', args: {embed: true}});
 
 
         /* 3) OTHER */
@@ -278,6 +278,10 @@
         // 3.5) Modal
         otherDemoItem({widget: 'Modal'});        
 
+        // 3.6) Modal DirectoryHandler
+        let dh = UI.DirectoryHandler();
+        otherDemoItem({widget: 'Modal', args: {div: dh}, name: 'Modal DH'});
+
 
         /* Helper functions*/
         function simpleDemoItem(opts) {
@@ -311,7 +315,7 @@
                 if (name_.startsWith('!')) {
                     name_ = name_.split('!')[1];
                 }
-                postfix += '_' + name.replace(/ /g, '-');
+                postfix += '_' + name_.replace(/ /g, '-');
             }
             args.id = args.id || 'demo-' + widget.toLowerCase() + postfix;
             
@@ -345,6 +349,13 @@
             } else {
                 element = new UI[widget](args);
                 components.appendChild(element);
+                if (args.movable) {
+                    UI.makeMovableDiv(args.id);
+                    element.style.position = 'absolute';
+                }
+                if (args.resizable) {
+                    UI.makeResizableDiv(args.id, args.mode);
+                }
             }
         }
 
