@@ -312,9 +312,9 @@ Scene organization and Naming convention:
 - [ ] LOW: add a resize icon in the header of a panel in order to toggle resizable,movable
 - [ ] LOW: make borders flash and show the resizbale controls in case the resizabel has been choosen
 - [ ] BUG: heatmap does not resize correctly and is greyed out. maybe due to z-index?
-- [ ] component: finish FileHandler (DirectoryReader + FileReader + ProgressBarGroup)
+- [X] component: finish FileHandler (DirectoryReader + FileReader + ProgressBarGroup)
 - [ ] FEATURE: create svg based heatmap
-- [ ] include ff-clan-web-pro font in demo
+- [X] include ff-clan-web-pro font in demo
 - [ ] BUG: resizable should probe the container min-width/height
 - [ ] FEATURE: title/subtitle component. 
 - [ ] tooltip following mouse
@@ -324,3 +324,7 @@ Scene organization and Naming convention:
 - [ ] when all files are loaded successfully => alert
 - [ ] change the color to red for files with problems
 - [ ] for each successful file, change the italic to normal font
+
+2020-03-31
+-----------
+- [ ] DSC settings: add option to reverse the colorbar labels
