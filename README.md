@@ -1,5 +1,5 @@
 # cg-viz-lite
-Visualizer for Coffe Grinder
+Visualizer for QCM raytracer
 
 # Getting started
 
